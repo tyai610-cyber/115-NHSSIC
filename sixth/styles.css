@@ -120,3 +120,10 @@ body[data-mode="editor"] .admin-panel{border:2px solid #b6d2df;border-radius:12p
 /* 一站式資訊平台品牌長文字處理 */
 .brand-text strong{letter-spacing:.025em}
 @media(max-width:520px){.brand-text strong{font-size:15px;letter-spacing:0}}
+
+/* Highlight the selected location without changing its source coordinates. */
+.selected-cluster-pin{z-index:15!important;overflow:visible!important}
+.selected-cluster-pin::before{content:"";position:absolute;inset:-8px;border:3px solid #e44a24;border-radius:50%;animation:selected-pulse 2.4s ease-out infinite;pointer-events:none}
+.selected-pin-label{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);padding:6px 9px;border-radius:6px;background:#8d2719;color:#fff;font-size:12px;line-height:1.25;white-space:nowrap;box-shadow:0 2px 6px #0006}
+@keyframes selected-pulse{0%{transform:scale(.8);opacity:.85}100%{transform:scale(1.6);opacity:0}}
+@media(prefers-reduced-motion:reduce){.selected-cluster-pin::before{animation:none;opacity:.8}}

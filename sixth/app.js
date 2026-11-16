@@ -332,7 +332,21 @@
         btn.setAttribute('aria-label',`此處有 ${group.length} 個定位點，點選展開清單`);
         btn.dataset.cluster=String(group.length);
         btn.addEventListener('click',e=>{e.stopPropagation();openCluster(group,isService);});
-        elements.pinLayer.append(btn);continue;
+        elements.pinLayer.append(btn);
+        // The chosen point remains at its original coordinate even inside a cluster.
+        const selected=group.find(p=>isService?p.serviceId===currentService:p.programId===current);
+        if(selected){
+          const selectedId=isService?selected.serviceId:selected.programId;
+          const info=isService?serviceById(selectedId):byId(selectedId);
+          const marker=create('button','map-pin is-active selected-cluster-pin',selectedId);
+          marker.type='button';marker.style.left=`${selected.x}%`;marker.style.top=`${selected.y}%`;
+          marker.setAttribute('aria-label',`${selectedId} ${info?.name||''}，點選展開附近位置`);
+          marker.title=`${selectedId} ${info?.name||''}｜位置請依現場指示`;
+          const label=create('span','selected-pin-label',`${selectedId} ${info?.name||''}`);marker.append(label);
+          marker.addEventListener('click',e=>{e.stopPropagation();openCluster(group,isService);});
+          elements.pinLayer.append(marker);
+        }
+        continue;
       }
       const p=group[0],id=isService?p.serviceId:p.programId,datum=isService?serviceById(id):byId(id);
       if(!datum)continue;
