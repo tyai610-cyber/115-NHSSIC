@@ -190,7 +190,20 @@
   }
   function renderProgramList() {
     const q=elements.programSearch.value.trim().toLocaleLowerCase();
-    const filtered=forSite(site).filter(p=>!q||[p.id,p.name,p.theory,p.practical,p.registration,p.meeting,p.registrationTime,...p.aliases].join(' ').toLocaleLowerCase().includes(q));
+    const programs=forSite(site);
+    const shared=window.GK_SKILL_SEARCH, guide=window.GK_GUIDE_DATA;
+    let filtered=programs;
+    if(q && shared && guide){
+      const ids=new Set(programs.map(p=>p.id));
+      const ranked=shared.find(guide.skills.filter(p=>ids.has(p.id)),q);
+      const byProgramId=new Map(programs.map(p=>[p.id,p]));
+      filtered=ranked.map(result=>byProgramId.get(result.skill.id)).filter(Boolean);
+      // Keep existing searches for registration, practical venue and meeting text.
+      const included=new Set(filtered.map(p=>p.id));
+      filtered.push(...programs.filter(p=>!included.has(p.id)&&[p.id,p.name,p.theory,p.practical,p.registration,p.meeting,p.registrationTime,...(p.aliases||[])].join(' ').toLocaleLowerCase().includes(q)));
+    }else if(q){
+      filtered=programs.filter(p=>[p.id,p.name,p.theory,p.practical,p.registration,p.meeting,p.registrationTime,...(p.aliases||[])].join(' ').toLocaleLowerCase().includes(q));
+    }
     elements.siteProgramCount.textContent=`${filtered.length} / ${forSite(site).length} 項`;
     elements.programList.replaceChildren();
     if(!filtered.length) {elements.programList.append(create('p','list-empty','查無符合的職種；請嘗試其他名稱或編號。'));return;}
