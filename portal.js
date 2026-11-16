@@ -59,7 +59,7 @@ function initSkills(){
   <section class="ux-quick-info" aria-label="本職種報到與試場資訊"><div class="ux-quick-report"><small>11/24 報到時間（場地 Excel）</small><strong>${esc(s.registrationTime)}</strong><span>${esc(s.registrationPlace)}</span><div class="checkin-id-notice" role="note" aria-label="選手報到證件提醒"><span class="checkin-id-notice__icon" aria-hidden="true">▣</span><div class="checkin-id-notice__content"><strong>選手報到時請出示學生證或身分證</strong></div></div></div><div class="ux-quick-place"><p><b>學科位置</b><span>${esc(s.theory||'依職種公告')}</span></p><p><b>術科位置</b><span>${esc(s.practical||'依職種公告')}</span></p></div></section>
   ${skillExamSummary(s)}
   <div class="ux-primary-actions"><a href="individual.html?skill=${s.id}&focus=all" class="ux-primary-action">查看完整三日細項 →</a><a href="${venueLink}" class="ux-primary-action secondary">查看試場地圖 →</a>${s.venueId!=='nkh'?`<a href="${venueLink}" class="ux-primary-action secondary">入口至場館動畫（待核定） →</a>`:`<a href="sixth/traffic.html" class="ux-primary-action secondary">校園步行動畫（試作） →</a>`}</div>
-  <details class="ux-other-skill-info"><summary>其他資訊：領隊會議、進階定位與教室</summary><div class="ux-meeting"><b>領隊會議及賽後檢討</b><p>${esc(s.meeting||'依公告')}</p></div><div class="skill-detail-actions"><a href="agenda.html?day=24" class="secondary">大會活動日程 ↗</a><a href="sixth/index.html?program=${s.id}#explorer">第六輪進階互動定位 ↗</a>${/行政大樓/.test(s.theory)?`<a href="floor.html?skill=${s.id}" class="secondary">行政大樓教室格位 ↗</a>`:''}</div></details>
+  <details class="ux-other-skill-info"><summary>其他資訊：領隊會議、進階定位與教室</summary><div class="ux-meeting"><b>領隊會議及賽後檢討</b><p>${esc(s.meeting||'依公告')}</p></div><div class="skill-detail-actions"><a href="agenda.html?day=24" class="secondary">大會活動日程 ↗</a><a href="sixth/index.html?program=${s.id}#explorer">第六輪進階互動定位 ↗</a>${s.venueId==='nkh' && /行政大樓/.test(s.theory)?`<a href="floor.html?skill=${s.id}" class="secondary">北科附工行政大樓教室格位 ↗</a>`:''}</div></details>
   <p class="skill-footnote">報到及場地來源：${esc(s.source)}；學術科時間來源：115/11/15 各職種細項表。遇時間差異或路線未核定，請依正式公告與現場指揮。</p>`;
   queryUpdate('skill',id);
  };
@@ -68,6 +68,8 @@ function initSkills(){
 function initVenues(){
  let id=venues[qs.get('venue')]?qs.get('venue'):'nkh',type=0,zoom=1;
  const tabs=$('#venueTabs'),mapTypes=$('#mapTypes'),image=$('#venueMapImage'),viewport=$('#venueMapViewport');
+ image.addEventListener('error',()=>{$('#venueMapError').hidden=false});
+ image.addEventListener('load',()=>{$('#venueMapError').hidden=true});
  function draw(){
   const v=venues[id];if(!v)return;
   if(type>=v.maps.length)type=0;

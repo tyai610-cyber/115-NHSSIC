@@ -28,7 +28,7 @@ function render(){
  $('#indTheory').textContent=p.theory||'依公告';$('#indPractical').textContent=p.practical||'依公告';$('#indMeeting').textContent=p.meeting||'依公告';
  $('#indVenueLink').href='venues.html?venue='+encodeURIComponent(p.venueId);
  $('#indSixthLink').href='sixth/index.html?program='+p.id+'#studentTimeline';
- $('#indFloorLink').hidden=!/行政大樓/.test(p.theory||'');$('#indFloorLink').href='floor.html?skill='+p.id;
+ $('#indFloorLink').hidden=!(p.venueId==='nkh' && /行政大樓/.test(p.theory||''));$('#indFloorLink').href='floor.html?skill='+p.id;
  const issues=T.warnings?.[p.id]||[];
  $('#indWarnings').hidden=!issues.length;
  $('#indWarnings').innerHTML=issues.length?'<strong>需核定／重要提醒</strong><ul>'+issues.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'';
