@@ -1,0 +1,158 @@
+/* 115 工科賽一站式資訊平台 | 響應式介面：依視窗寬度自動切換桌機、平板與手機佈局。 */
+:root{--adaptive-navy:#13384b;--adaptive-teal:#08787c;--adaptive-gold:#d6b374}
+.adaptive-mobile-label,.adaptive-bottom-nav,.adaptive-scroll-hint,.adaptive-inline-tip{display:none}
+.adaptive-site a,.adaptive-site button,.adaptive-site select,.adaptive-site input{touch-action:manipulation}
+.adaptive-site :is(a,button,input,select,summary):focus-visible{outline:3px solid #e4a936;outline-offset:3px}
+.adaptive-site :is(.skill-layout,.venue-view,.transport-layout,.agenda-layout,.ind-grid,.individual-main,.map-frame,.venue-map-area){min-width:0}
+.adaptive-site :is(.ind-entry,.ind-key-line,.ux-day-card,.venue-map-area){overflow-wrap:anywhere}
+/* Desktop: full navigation, side-by-side research panels; no bottom bar. */
+@media(min-width:1101px){
+ .adaptive-site .entrance-grid{gap:16px}
+ .adaptive-site .skill-layout{grid-template-columns:minmax(280px,340px) minmax(0,1fr)}
+ .adaptive-site .skill-detail{min-width:0}
+ .adaptive-site .ux-three-days,.adaptive-site .ind-key-days{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .adaptive-site .venue-view{grid-template-columns:minmax(0,1fr) 285px}
+}
+/* Tablet: readable 2-column overview and stacked controls. */
+@media(min-width:768px) and (max-width:1100px){
+ .adaptive-site .portal-access .entrance-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .adaptive-site .ux-three-days,.adaptive-site .ind-key-days{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .adaptive-site .portal-hero-layout{min-height:0}
+ .adaptive-site .venue-program-panel #venuePrograms{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .adaptive-site .individual-toolbar{align-items:end}
+}
+/* Phone: task-first navigation, concise cards and 44px touch targets. */
+@media(max-width:767px){
+ html{scroll-padding-top:12px}
+ body.adaptive-site{padding-bottom:calc(78px + env(safe-area-inset-bottom,0px));overflow-x:clip}
+ .adaptive-site .site-top{position:relative}
+ .adaptive-site .top-inner{min-height:63px;gap:10px}
+ .adaptive-site .logo{min-width:0;gap:9px}
+ .adaptive-site .logo-copy{min-width:0}
+ .adaptive-site .logo-copy b{font-size:clamp(12px,3.6vw,15px);line-height:1.35;display:block}
+ .adaptive-site .logo-copy small{font-size:9px;letter-spacing:.3px}
+ .adaptive-site .mobile-menu{display:block;min-width:44px;min-height:44px}
+ .adaptive-site .mobile-nav.open{grid-template-columns:repeat(2,minmax(0,1fr));max-height:65vh;overflow:auto}
+ .adaptive-site .mobile-nav a{min-height:44px;display:flex;align-items:center}
+ .adaptive-site .page-hero-inner{min-height:0;padding-block:20px;gap:7px}
+ .adaptive-site .page-hero h1{font-size:clamp(24px,6.6vw,32px);margin:9px 0}
+ .adaptive-site .page-hero h1 span{display:block;margin:4px 0 0;font-size:.78em}
+ .adaptive-site .page-hero p{font-size:12px;line-height:1.55;margin-bottom:3px}
+ .adaptive-site .page-hero .hero-meta{margin-top:9px;gap:7px}
+ .adaptive-site .page-hero .hero-meta span{font-size:10px}
+ .adaptive-site .section-heading h2{font-size:21px}
+ .adaptive-site .portal-search-first{margin-top:10px}
+ .adaptive-site .portal-search-first .search-hero{border-radius:13px;padding:12px 14px}
+ .adaptive-site .portal-search-first .search-hero h2{font-size:18px}
+ .adaptive-site :is(input[type=search],select){font-size:16px}
+ .adaptive-site :is(.search-pane input,.skill-search input,#indSkillSearch,#indSkill,#indDay,#indFocus,.skill-venue-filter select){min-height:46px}
+ .adaptive-site .portal-access{margin-top:14px}
+ .adaptive-site .portal-access .portal-title h2{font-size:19px}
+ .adaptive-site .portal-access .portal-title p{font-size:11px}
+ .adaptive-site .portal-access .entrance-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:11px}
+ .adaptive-site .portal-access .entrance-card{display:flex;flex-direction:column;align-items:flex-start;gap:7px;padding:13px 12px;min-height:118px;border-radius:13px}
+ .adaptive-site .portal-access .entrance-icon{width:34px;height:34px;border-radius:9px;font-size:13px;flex:none}
+ .adaptive-site .portal-access .entrance-card h3{font-size:clamp(13px,3.8vw,16px);line-height:1.25;letter-spacing:0;margin:3px 0}
+ .adaptive-site .portal-access .entrance-body{min-width:0;width:100%}
+ .adaptive-site .portal-access .entrance-card .entrance-body>small,
+ .adaptive-site .portal-access .entrance-card .entrance-body>p,
+ .adaptive-site .portal-access .entrance-card .entrance-arrow{display:none}
+ .adaptive-site .adaptive-desktop-label{display:none}
+ .adaptive-site .adaptive-mobile-label{display:inline}
+ .adaptive-site .portal-event-after-entrances{margin-top:12px}
+ .adaptive-site .ux-notice-section{margin-top:21px}
+ .adaptive-site .ux-notice-head h2{font-size:19px}
+ .adaptive-site .ux-notice{grid-template-columns:72px minmax(0,1fr);gap:7px;padding:11px}
+ .adaptive-site .ux-notice strong{font-size:12px}
+ .adaptive-site .ux-notice p{font-size:11px}
+ .adaptive-site .ux-three-days,.adaptive-site .ind-key-days{grid-template-columns:1fr}
+ .adaptive-site .skill-layout{display:flex;flex-direction:column}
+ .adaptive-site .skill-detail{order:0;max-width:100%;padding:15px}
+ .adaptive-site .skill-list-panel{order:1;max-height:230px}
+ .adaptive-site .skill-info-grid{grid-template-columns:1fr}
+ .adaptive-site .ux-primary-actions{grid-template-columns:1fr}
+ .adaptive-site .individual-main{padding-top:13px}
+ .adaptive-site .individual-toolbar{padding:13px;display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-bottom:12px}
+ .adaptive-site .individual-toolbar>div{min-width:0!important;width:100%!important;flex:none!important}
+ .adaptive-site .ind-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+ .adaptive-site .ind-actions .ind-toggle-full{grid-column:1/-1}
+ .adaptive-site .ind-actions button{min-height:44px;font-size:12px}
+ .adaptive-site .adaptive-inline-tip{display:block;font-size:11px;line-height:1.6;color:#4f727e;margin:0 0 8px}
+ .adaptive-site .ind-grid{grid-template-columns:1fr}
+ .adaptive-site .ind-entry{grid-template-columns:1fr;padding-block:13px}
+ .adaptive-site .venue-view{grid-template-columns:1fr}
+ .adaptive-site .venue-tabs,.adaptive-site .transport-nav,.adaptive-site .map-type-tabs{
+   display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;
+   -webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;padding:3px 2px 10px;scrollbar-width:thin}
+ .adaptive-site .venue-tabs button{flex:0 0 auto;min-height:44px;scroll-snap-align:start}
+ .adaptive-site .transport-nav button{flex:0 0 96px;min-width:96px;min-height:75px;scroll-snap-align:start}
+ .adaptive-site .map-type-tabs button{flex:0 0 auto;min-height:44px;scroll-snap-align:start}
+ .adaptive-site .adaptive-scroll-hint{display:block;font-size:11px;color:#477584;margin:12px 0 0}
+ .adaptive-site .venue-map-area{padding:10px}
+ .adaptive-site .venue-map-header{gap:8px}
+ .adaptive-site .venue-map-header h2{font-size:18px}
+ .adaptive-site .venue-zoom button,.adaptive-site .map-tools button{min-height:44px;min-width:44px}
+ .adaptive-site .venue-route-panel{padding:12px}
+ .adaptive-site .venue-route-form{gap:8px}
+ .adaptive-site .venue-route-form label{flex:1 1 100%}
+ .adaptive-site .venue-route-form button{min-height:44px}
+ .adaptive-site .venue-program-panel #venuePrograms{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .adaptive-site .transport-layout,.adaptive-site .agenda-layout{grid-template-columns:1fr}
+ .adaptive-site .transport-motion-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .adaptive-site .transport-motion-actions button{min-height:44px}
+ .adaptive-site .stop-shortcuts{grid-template-columns:1fr}
+ .adaptive-site .day-tabs{display:flex;overflow-x:auto;gap:7px;scrollbar-width:thin}
+ .adaptive-site .day-tabs button{min-width:74px;min-height:44px;flex:1 0 auto}
+ .adaptive-site .floor-workspace{padding-top:13px}
+ .adaptive-site .floor-toolbar{padding:12px}
+ .adaptive-site .floor-toolbar select{font-size:16px;min-height:46px}
+ .adaptive-site .floor-actionlink{display:flex;justify-content:center;width:100%}
+ .adaptive-site .compact-primary-nav{display:none}
+ .adaptive-bottom-nav{position:fixed;z-index:90;inset:auto 0 0;background:rgba(255,255,255,.97);border-top:1px solid #cbdde0;box-shadow:0 -7px 25px #12334515;
+   display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding:6px 5px calc(7px + env(safe-area-inset-bottom,0px));gap:2px;backdrop-filter:blur(12px)}
+ .adaptive-bottom-nav a{min-height:51px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;text-decoration:none;color:#4f6f78;white-space:nowrap;font-weight:850;font-size:11px}
+ .adaptive-bottom-nav .adaptive-nav-icon{font-size:21px;font-weight:850;line-height:1.08}
+ .adaptive-bottom-nav a[aria-current=page]{background:#e5f4f1;color:#087477}
+ .adaptive-bottom-nav a:focus-visible{outline-offset:-2px}
+ .adaptive-site .site-foot{padding-bottom:24px}
+ /* The old detailed second navigation remains accessible through the header menu. */
+ .adaptive-site .intro-bar{padding:13px 15px 4px}
+ .adaptive-site .intro-bar h1{font-size:23px}
+ .adaptive-site .layout{padding:0 12px;gap:10px}
+ .adaptive-site .layout .controls{padding:14px}
+ .adaptive-site .layout .map-panel{min-width:0}
+ .adaptive-site .map-head{flex-wrap:wrap}
+ .adaptive-site .hero{min-height:0}
+ .adaptive-site .workspace{grid-template-columns:1fr}
+ .adaptive-site .header-inner{gap:9px}
+}
+@media(max-width:350px){
+ .adaptive-site .logo-copy small{display:none}
+ .adaptive-site .portal-access .entrance-card{padding:11px 10px;min-height:107px}
+ .adaptive-site .portal-access .entrance-card h3{font-size:13px}
+ .adaptive-bottom-nav a{font-size:10px}
+ .adaptive-bottom-nav .adaptive-nav-icon{font-size:19px}
+ .adaptive-site .ind-actions{grid-template-columns:1fr}
+ .adaptive-site .ind-actions .ind-toggle-full{grid-column:auto}
+}
+@media(prefers-reduced-motion:reduce){.adaptive-site *,.adaptive-site *:before,.adaptive-site *:after{scroll-behavior:auto!important}}
+@media print{body.adaptive-site{padding-bottom:0!important}.adaptive-bottom-nav{display:none!important}.adaptive-scroll-hint,.adaptive-inline-tip{display:none!important}.adaptive-mobile-label{display:none!important}.adaptive-desktop-label{display:inline!important}}
+
+/* On narrow tablets keep the mobile skill picker, but never squeeze the two filters outside the viewport. */
+@media(min-width:621px) and (max-width:850px){
+ .adaptive-site .skill-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+ .adaptive-site .skill-controls>div{width:100%;min-width:0;margin:0}
+ .adaptive-site .skill-controls .ux-mobile-skill-picker{grid-column:1/-1;flex:none}
+ .adaptive-site .skill-controls :is(input,select){width:100%;max-width:100%}
+}
+.adaptive-post-entrance-event{display:none!important}
+@media(max-width:767px){
+ .adaptive-site .portal-hero-layout>.portal-event-box{display:none!important}
+ .adaptive-site .adaptive-post-entrance-event{display:block!important;width:calc(100% - 30px);max-width:620px;margin:12px auto 0;padding:15px 16px;border-radius:14px}
+ .adaptive-site .adaptive-post-entrance-event .portal-event-times{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+ .adaptive-site .adaptive-post-entrance-event .portal-event-times>div{display:block;border-bottom:0;text-align:center;min-width:0}
+ .adaptive-site .adaptive-post-entrance-event .portal-event-times b{font-size:clamp(12px,3.4vw,16px);white-space:nowrap}
+ .adaptive-site .adaptive-post-entrance-event .portal-event-times small{font-size:10px}
+ .adaptive-site .adaptive-post-entrance-event h2{font-size:18px;margin:5px 0 10px}
+ .adaptive-site .adaptive-post-entrance-event h2 br{display:none}
+}

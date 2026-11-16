@@ -1,0 +1,12 @@
+/* 115.11.16 選手報到證件提醒｜僅新增提示，不變動原始日程或場地 */
+.checkin-id-notice{display:flex;align-items:center;gap:12px;background:#fff7e7;border:1px solid #e5c893;border-left:4px solid #ce9141;border-radius:12px;padding:12px 16px;color:#5f471b;line-height:1.5}
+.checkin-id-notice__icon{flex:none;display:grid;place-items:center;background:#f9e6c5;width:34px;height:34px;border-radius:10px;font-size:20px;color:#805817}
+.checkin-id-notice__content{min-width:0}.checkin-id-notice__content strong{font-weight:850;font-size:14px;display:block;color:#664718}.checkin-id-notice__content p{font-weight:700;font-size:13px;margin:3px 0 0;color:#715322}
+.checkin-id-home{margin-top:10px;margin-bottom:18px}
+.ux-quick-report .checkin-id-notice{margin-top:10px;padding:9px 10px;border-left-width:3px;gap:8px;align-items:start}
+.ux-quick-report .checkin-id-notice__icon{width:28px;height:28px;font-size:16px}
+.ux-quick-report .checkin-id-notice__content strong{font-size:12px;line-height:1.6}
+.ind-reg .checkin-id-notice{margin-top:10px;padding:10px 12px;gap:9px;background:#fff9eb;border-color:#e9d3a9;color:#664b20}
+.ind-reg .checkin-id-notice__content strong{font-size:13px}
+@media(max-width:620px){.checkin-id-home{margin-top:8px;margin-bottom:12px;padding:10px 12px}.checkin-id-home .checkin-id-notice__icon{width:30px;height:30px;font-size:17px}.checkin-id-notice__content strong{font-size:13px}.checkin-id-notice__content p{font-size:12px}}
+@media print{.checkin-id-notice{-webkit-print-color-adjust:exact;print-color-adjust:exact;break-inside:avoid}.checkin-id-home{display:none}}

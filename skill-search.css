@@ -1,0 +1,18 @@
+/* 115/11/15 模糊搜尋：首頁、職種查詢與個別日程共用 */
+.search-match-tag{display:inline-block;margin-left:8px;padding:2px 6px;border-radius:6px;background:#edf4f5;color:#1c7279;font-weight:700;font-size:10px;vertical-align:middle}
+.search-match-tag.approximate{background:#fff1d8;color:#856018}
+.search-hint{display:block;color:#527886;font-size:11px;line-height:1.6;margin-top:4px}
+#quickSkillResults a{display:flex;gap:5px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+#quickSkillResults a small{margin-left:auto}
+.skill-list button .search-match-tag{margin:4px 0 0}
+.ind-search-box{position:relative}
+.ind-search-box input{display:block;width:100%;height:45px;border:1px solid #9cbdc6;border-radius:10px;padding:9px 12px;background:white;color:#173f50;font:inherit;font-size:14px;outline-offset:3px}
+.ind-search-box input:focus{border-color:#087d83;box-shadow:0 0 0 3px rgba(17,135,141,.12)}
+.ind-search-results{position:absolute;left:0;right:0;z-index:30;top:74px;max-height:310px;overflow-y:auto;background:white;border:1px solid #bad5db;border-radius:9px;box-shadow:0 12px 28px #173f502c}
+.ind-search-results:empty{display:none}
+.ind-search-results button{display:flex;width:100%;background:white!important;color:#173f50!important;border:0!important;border-bottom:1px solid #e7eff1!important;border-radius:0!important;padding:10px 12px!important;align-items:center;justify-content:space-between;gap:7px;text-align:left;min-height:45px}
+.ind-search-results button:hover,.ind-search-results button:focus{background:#eaf7f4!important}
+.ind-search-results b{font-size:13px}.ind-search-results small{color:#537d83;font-size:10px}
+.ind-search-results p{padding:11px;font-size:12px;color:#856018;margin:0}
+.ind-search-box + label{margin-top:11px}
+@media(max-width:620px){#quickSkillResults a{padding:10px 12px}.ind-search-results{top:73px}}

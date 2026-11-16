@@ -1,0 +1,46 @@
+/* 115.11.15 UX 三項優先優化：先搜尋／一頁職種／細項按需展開／來源核對提醒 */
+.portal-search-first{margin:16px auto 0;position:relative;z-index:7}
+.portal-search-first .search-hero{padding:16px 22px;border-color:#bfdee0;box-shadow:0 8px 22px #173b4610;grid-template-columns:minmax(180px,1fr) minmax(260px,550px)}
+.portal-search-first .search-hero h2{font-size:21px;margin:2px 0}.portal-search-first .search-hero p{font-size:12px}
+.portal-search-first .search-result{top:71px;max-height:330px}
+.ux-notice-section{margin-top:30px}
+.ux-notice-head{display:flex;justify-content:space-between;align-items:start;gap:16px;margin:0 0 14px}
+.ux-notice-head h2{font-size:23px;margin:6px 0 7px;color:#183a4c}.ux-notice-head p{font-size:12px;line-height:1.8;color:#64818c;margin:0}
+.ux-version-tag{background:#e7f2f0;color:#176f72;padding:8px 11px;border-radius:30px;font-weight:750;font-size:11px;white-space:nowrap}
+.ux-notice-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.ux-notice{padding:14px;border:1px solid #e2eaed;border-radius:11px;background:white;display:grid;grid-template-columns:85px minmax(0,1fr);gap:9px;align-items:start}
+.ux-status{border-radius:6px;background:#e9f4f1;color:#126c69;font-weight:800;font-size:11px;padding:5px 6px;text-align:center}
+.ux-notice-pending .ux-status{background:#fff1da;color:#8d601b}
+.ux-notice strong{font-size:13px;color:#1f4555;line-height:1.5;display:block}.ux-notice p{color:#607f8d;line-height:1.7;font-size:11px;margin:4px 0 0}
+.ux-notice>a{grid-column:2;justify-self:start;color:#0d7175;font-weight:850;font-size:11px;text-decoration:underline}
+.ux-official-note{margin-top:10px;background:#f3f8fa;border-radius:9px;padding:12px 15px;color:#567782;font-size:12px}
+.ux-official-note summary{font-weight:800;cursor:pointer}.ux-official-note p{margin:7px 0 0;line-height:1.75}
+.ux-quick-info{display:grid;grid-template-columns:minmax(185px,1fr) minmax(0,1.4fr);gap:11px;margin:13px 0}
+.ux-quick-report{background:#e6f4ed;border:1px solid #c9e4d5;border-radius:11px;padding:13px;display:flex;flex-direction:column;gap:6px;white-space:pre-line}
+.ux-quick-report small{color:#417d68;font-size:11px}.ux-quick-report strong{color:#096f54;font-size:21px;font-variant-numeric:tabular-nums}.ux-quick-report span{font-size:12px;color:#386c5b;line-height:1.55}
+.ux-quick-place{border:1px solid #d4e4e8;background:#f4faf9;border-radius:11px;padding:12px;display:flex;flex-direction:column;justify-content:center;gap:9px}
+.ux-quick-place p{margin:0;display:flex;gap:12px;font-size:12px;line-height:1.6;white-space:pre-line}.ux-quick-place b{color:#187680;min-width:52px}.ux-quick-place span{color:#284c60}
+.ux-skill-summary{border:1px solid #dbe7eb;padding:16px 15px;border-radius:13px;background:white;margin:14px 0}
+.ux-skill-summary-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:11px}.ux-skill-summary-head h3{font-size:16px;color:#194659;margin:0}.ux-skill-summary-head>span{font-size:10px;color:#5e7c88}
+.ux-three-days{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.ux-day-card{border:1px solid #dfeced;border-radius:10px;min-width:0;padding:10px;background:#f8fbfb}.ux-day-card h4{font-size:12px;color:#136b74;margin:0 0 9px}
+.ux-day-card ul{list-style:none;padding:0;margin:0;display:grid;gap:10px}.ux-day-card li{display:flex;gap:6px;align-items:flex-start;min-width:0}.ux-day-card li div{min-width:0}.ux-day-card li b{font-size:12px;color:#204658;white-space:normal;overflow-wrap:anywhere}.ux-day-card li small{display:block;font-size:11px;color:#587984;line-height:1.45;overflow-wrap:anywhere}
+.ux-exam-kind{font-size:10px;background:#dde8fe;color:#3b5a95;padding:2px 5px;border-radius:4px;flex-shrink:0}.ux-exam-kind.practical{background:#dcf1e7;color:#176c58}.ux-day-card .ux-no-exam,.ux-day-card .ux-more-label{font-size:11px;color:#82979f;line-height:1.6}
+.ux-skill-alert{background:#fff5df;border:1px solid #ecd2a2;border-radius:9px;margin-top:11px;padding:11px 12px;color:#74521d}.ux-skill-alert strong{font-size:12px}.ux-skill-alert ul{padding-left:19px;margin:5px 0 0}.ux-skill-alert li{font-size:11px;line-height:1.7;margin:3px 0}
+.ux-extra-checkin{display:grid;gap:4px;margin-top:10px;border-left:3px solid #a5c2cb;padding:7px 10px;color:#4e707d;font-size:11px}.ux-extra-checkin a{color:#0e6e77;font-weight:800}
+.ux-summary-note{font-size:11px;color:#637e89;line-height:1.7;margin:11px 0 0}
+.ux-primary-actions{display:flex;flex-wrap:wrap;gap:8px;margin:13px 0}.ux-primary-action{background:#10757b;color:white;border-radius:9px;padding:11px 13px;text-decoration:none;font-size:12px;font-weight:850;line-height:1.55}.ux-primary-action.secondary{background:#e7f3f2;color:#17636b}
+.ux-other-skill-info{border:1px solid #d7e4e9;border-radius:10px;padding:12px 14px}.ux-other-skill-info summary{font-size:12px;font-weight:850;color:#216b77;cursor:pointer}.ux-meeting p{font-size:12px;white-space:pre-line;color:#627d88;line-height:1.7}.ux-meeting b{font-size:12px}
+.ind-key-summary{background:#f5faf9;border:1px solid #d7e8e5;border-radius:12px;padding:14px;margin:14px 0}.ind-key-head h3{font-size:16px;margin:0;color:#194e5d}.ind-key-head p{font-size:11px;color:#647f89;line-height:1.6;margin:4px 0 11px}
+.ind-key-days{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.ind-key-day{background:white;border:1px solid #dfe9eb;border-radius:10px;padding:10px;min-width:0}.ind-key-day>strong{font-size:12px;color:#15747d;display:block;margin-bottom:7px}.ind-key-day>p{font-size:11px;color:#748994;line-height:1.6}
+.ind-key-line{border-top:1px solid #eef2f4;padding-top:7px;margin-top:7px;display:flex;gap:6px}.ind-key-line>span{background:#e8f0f6;color:#27547d;font-size:10px;border-radius:5px;padding:2px 4px;height:fit-content;flex-shrink:0}.ind-key-line div{min-width:0}.ind-key-line b{font-size:12px;display:block;color:#173e53;overflow-wrap:anywhere}.ind-key-line small{font-size:11px;display:block;color:#637f8d;line-height:1.5}.ind-key-day>small{font-size:11px}
+.ind-toggle-full{background:#e2ecee!important;color:#155c6b!important;min-height:46px;white-space:normal}.ind-toggle-full[aria-pressed=true]{background:#0c6f73!important;color:#fff!important}
+.ind-extra-details{border:1px solid #dbe9ea;border-radius:9px;margin-top:8px;padding:8px 10px;background:#f6fafb}.ind-extra-details summary{cursor:pointer;font-size:12px;color:#136a77;font-weight:800}
+@media(max-width:1000px){.ux-three-days{grid-template-columns:1fr}.ind-key-days{grid-template-columns:1fr}}
+@media(max-width:720px){.portal-search-first{margin-top:10px}.portal-search-first .search-hero{display:block;padding:13px 15px}.portal-search-first .search-hero h2{font-size:18px}.portal-search-first .search-hero>div:first-child p{display:none}.portal-search-first .search-pane{margin-top:9px}.portal-search-first .search-result{top:64px}.ux-notice-head{display:block}.ux-version-tag{display:inline-block;margin-top:10px}.ux-notice-list{grid-template-columns:1fr}.ux-quick-info{grid-template-columns:1fr}.ux-primary-actions{display:grid;grid-template-columns:1fr}.ux-skill-summary-head{display:block}.ux-skill-summary-head>span{display:block;margin-top:4px}}
+@media print{.ux-notice-section{break-inside:avoid}.ind-toggle-full{display:none!important}.ux-skill-summary{break-inside:avoid}.ind-key-summary{break-inside:avoid}}
+
+.ux-mobile-skill-picker{display:none}
+.ux-mobile-skill-picker select{width:100%;height:47px;border:1px solid #c4dade;border-radius:9px;background:#f9fcfc;color:#194c60;padding:9px 11px;font-size:13px}
+@media(max-width:850px){.ux-mobile-skill-picker{display:block;flex:1 0 100%;margin-bottom:8px}.skill-layout{display:flex;flex-direction:column;gap:12px}.skill-detail{order:0;width:100%}.skill-list-panel{order:1;width:100%;max-height:240px}.skill-list-panel .skill-summary:before{content:'切換其他職種：';font-weight:750}}
+/* 手機首頁不留原本 480px 的空白主視覺，讓六入口更早出現。 */
+@media(max-width:620px){.portal-hero-layout{min-height:0!important;align-items:start!important}.portal-hero{min-height:0!important}}
