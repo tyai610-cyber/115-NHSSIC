@@ -127,3 +127,26 @@ body[data-mode="editor"] .admin-panel{border:2px solid #b6d2df;border-radius:12p
 .selected-pin-label{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);padding:6px 9px;border-radius:6px;background:#8d2719;color:#fff;font-size:12px;line-height:1.25;white-space:nowrap;box-shadow:0 2px 6px #0006}
 @keyframes selected-pulse{0%{transform:scale(.8);opacity:.85}100%{transform:scale(1.6);opacity:0}}
 @media(prefers-reduced-motion:reduce){.selected-cluster-pin::before{animation:none;opacity:.8}}
+
+/* 目的地卡片與已確認位置提示 */
+.destination-card{margin:0 0 12px;padding:14px 16px;border:1px solid #cbdde6;border-left:5px solid #d74a32;border-radius:11px;background:#fff;box-shadow:0 5px 16px #173b530b}
+.destination-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.destination-card-head>div{display:flex;flex-direction:column;min-width:0}
+.destination-card-head span{font-size:11px;color:#668091}
+.destination-card-head strong{font-size:16px;color:#183b51}
+.destination-card-head>a,.destination-floor-link{font-size:11px;color:#176c7a;font-weight:800;text-decoration:underline}
+.destination-tabs{display:flex;gap:7px;margin:10px 0 8px}
+.destination-tabs button{min-height:38px;border:1px solid #c6d9e0;border-radius:8px;background:#f6fafb;color:#365a6f;padding:7px 12px;font-size:12px;font-weight:800}
+.destination-tabs button[aria-pressed="true"]{background:#174d68;color:#fff;border-color:#174d68}
+.destination-place{margin:4px 0;color:#243f50;font-size:13px;font-weight:760;white-space:pre-line}
+.destination-status{margin:3px 0 0;color:#6b5941;font-size:11px;line-height:1.55}
+.destination-floor-link{display:inline-block;margin-top:6px}
+.map-pin:not(.is-active):not(.pin-cluster){opacity:.68;transition:opacity .18s ease}.map-pin:not(.is-active):not(.pin-cluster):hover,.map-pin:not(.is-active):not(.pin-cluster):focus-visible{opacity:1}
+.selected-target{z-index:14!important}
+.selected-target::before{content:"";position:absolute;inset:-9px;border:3px solid #f04c2b;border-radius:50%;animation:selected-pulse 2.5s ease-out infinite;pointer-events:none}
+.selected-cluster-pin::before{inset:-10px;border-color:#f04c2b}
+.selected-pin-label{width:max-content;max-width:min(58vw,360px);white-space:normal;text-align:center;overflow-wrap:anywhere;pointer-events:none}
+.selected-target.needs-review::before{display:none}
+@media(prefers-reduced-motion:reduce){.selected-target::before{animation:none;opacity:.85;inset:-8px}}
+.destination-floor-link[hidden]{display:none!important}
+@media(max-width:520px){.destination-card{padding:12px}.destination-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.destination-tabs button{padding:7px 4px;font-size:11px}.destination-card-head strong{font-size:15px}.selected-pin-label{max-width:44vw;font-size:10px;padding:5px 6px}}

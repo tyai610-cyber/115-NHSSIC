@@ -11,6 +11,26 @@
   };
   const dayList = T.days;
   const labels = {checkin:'報到／點名',theory:'學科',practical:'術科',review:'講評／檢討',prep:'賽前準備',break:'休息時間',meeting:'領隊會議',staff:'評審／評分',other:'其他活動'};
+  const primaryKinds = new Set(['checkin','theory','practical','prep']);
+  function shortEventTitle(e) {
+    const raw=String(e.title||'').replace(/\s+/g,' ').trim();
+    if(e.kind==='checkin') {
+      if(/抽籤/.test(raw)) return '選手報到與抽籤';
+      const slot=/(上午|下午)場次?/.exec(raw)?.[0];
+      return slot?`${slot}報到`:'報到／點名';
+    }
+    if(e.kind==='theory') return '學科測試';
+    if(e.kind==='practical') {
+      const heat=/(第[一二三四五六七八九十\d]+梯|第[一二三四五六七八九十\d]+站|術科[一二三四五六七八九十\d]+)/.exec(raw)?.[0];
+      return heat?`${heat}術科測試`:'術科測試';
+    }
+    if(e.kind==='prep') {
+      const slot=/(上午|下午)場/.exec(raw)?.[0];
+      if(slot&&/試車|校刀/.test(raw)) return `${slot}試車與校刀`;
+      return '賽前說明／分梯準備';
+    }
+    return raw.length>32?raw.slice(0,30).trimEnd()+'…':raw;
+  }
   const siteName = '北科附工';
   let chosen = '01', day='2026-11-24', floor='2F';
   const isoInfo={}; dayList.forEach(d=>isoInfo[d.iso]=d.label);
@@ -25,24 +45,13 @@
   }
   function navigateMap(purpose){
     const p=program();if(!p)return;
-    const map= purpose==='registration'?'map-01':purpose==='theory'?'map-02':'map-03';
-    const selected=(p.site===siteName?map:D.maps.find(m=>m.site===p.site)?.id);
-    const mapSelect=$('mapSelect');
-    if(selected && mapSelect && [...mapSelect.options].some(opt=>opt.value===selected)){
-      mapSelect.value=selected;
-      mapSelect.dispatchEvent(new Event('change',{bubbles:true}));
-    }
-    // map-01/map-02 currently have a profession index, NOT verified indoor pins
-    const msg=p.site===siteName && purpose!=='practical'
-      ? `已切換至${purpose==='registration'?'報到':'學科'}場域圖；圖面提供職種／教室索引，不代表已核定教室門口。`
-      : '已切換到對應場域圖；標點不代表實測入口，待核對標記仍保留。';
-    $('routeHint').textContent=msg;
-    $('mapViewport').scrollIntoView({behavior:'smooth',block:'center'});
+    if(window.GK_OPEN_DESTINATION)window.GK_OPEN_DESTINATION(purpose);
+    $('routeHint').textContent=`已切換至${purpose==='registration'?'報到地點':purpose==='theory'?'學科試場':'術科試場'}。地圖只高亮可確認的定位；未確認位置請依現場指示。`;
   }
   function updateQuickRoute(){
     const p=program();if(!p)return;
     const fields={quickRegistration:p.registration,quickTheory:p.theory,quickPractical:p.practical};
-    Object.entries(fields).forEach(([key,value])=>{$(key).textContent=(value||'原始表未填').replace(/\s+/g,' ').trim();});
+    Object.entries(fields).forEach(([key,value])=>{$(key).textContent=(value||'依職種公告').replace(/\s+/g,' ').trim();});
   }
   function renderDays(){
     const box=$('studentDayTabs');box.replaceChildren();
@@ -56,7 +65,7 @@
   }
   function studentEventsForDay(all=false){
     const events=schedule()?.events||[];
-    return events.filter(e=>(e.days||[e.date]).includes(day) && (all || e.audience==='students'));
+    return events.filter(e=>(e.days||[e.date]).includes(day) && (all || (e.audience==='students'&&primaryKinds.has(e.kind))));
   }
   function eventCard(e){
     const row=create('article',`timeline-event event-${e.kind}`);
@@ -64,10 +73,10 @@
     if(e.precision==='unspecified' || e.precision==='conditional') time.append(create('span','time-pending', e.precision==='conditional'?'依現場／條件確認':'未列開始時間'));
     const content=create('div','timeline-content');
     const title=create('div','timeline-title');title.append(create('span',`event-tag event-tag-${e.kind}`,labels[e.kind]||'活動'));
-    title.append(create('strong','',e.title));
+    title.append(create('strong','',shortEventTitle(e)));
     content.append(title);
     if(e.description){
-      const detail=create('details','event-more');detail.append(create('summary','','內容／原始備註'));
+      const detail=create('details','event-more');detail.append(create('summary','','查看完整說明'));
       detail.append(create('p','',e.description));
       content.append(detail);
     }
@@ -90,14 +99,14 @@
     notice.replaceChildren();
     if(attendance.length){
       notice.append(create('strong','',day==='2026-11-24'?'首日報到提醒':'當日再次報到／點名提醒'));
-      notice.append(create('span','',attendance.map(e=>`${e.time}｜${e.title}`).join('　；　')));
+      notice.append(create('span','',attendance.map(e=>`${e.time}｜${shortEventTitle(e)}`).join('　；　')));
     }
     const list=$('studentEvents');list.replaceChildren();
-    if(!selected.length)list.append(create('p','timeline-empty',hasStaff?'本日無額外列出的考生時段，可勾選「顯示其他會議／工作事件」查看相關事項。':'來源表在本日未列活動，並非代表無相關安排；請以正式日程為準。'));
+    if(!selected.length)list.append(create('p','timeline-empty',hasStaff?'本日無額外列出的考生時段，可勾選「顯示其他會議／工作事件」查看相關事項。':'本日未列出活動，並非代表沒有其他安排；請依正式日程為準。'));
     else selected.forEach(e=>list.append(eventCard(e)));
     const cautions=T.cautions[chosen]||[];
     const warn=$('scheduleCautions');warn.hidden=!cautions.length;warn.replaceChildren();
-    if(cautions.length){warn.append(create('strong','','需要核對的原始日程事項'));const ul=create('ul');cautions.forEach(c=>ul.append(create('li','',c)));warn.append(ul);}
+    if(cautions.length){warn.append(create('strong','','需留意的日程提醒'));const ul=create('ul');cautions.forEach(c=>ul.append(create('li','',c)));warn.append(ul);}
   }
   function renderFloor(){
     const p=program();if(!p)return;
@@ -165,7 +174,7 @@
     basics.forEach(t=>general.append(create('li','',t)));
     const notes=T.programNotes[chosen]||[];
     const el=$('programTips');el.hidden=!notes.length;el.replaceChildren();
-    if(notes.length){el.append(create('strong','','此職種來源日程另有提醒'));const ul=create('ul');notes.forEach(n=>ul.append(create('li','',n)));el.append(ul);}
+    if(notes.length){el.append(create('strong','','職種特別提醒'));const ul=create('ul');notes.forEach(n=>ul.append(create('li','',n)));el.append(ul);}
   }
   function render(){
     const dropdown=$('globalProgram');chosen=dropdown?.value||chosen;

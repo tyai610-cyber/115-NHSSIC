@@ -1,23 +1,99 @@
-<!DOCTYPE html>
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102a3d">
+  <meta name="description" content="115 工科賽職種報到、學術科時間、試場地圖、典禮及交通資訊。">
+  <title>115 工科賽一站式資訊平台</title>
+  <link rel="stylesheet" href="event-design.css">
+  <link rel="stylesheet" href="portal.css">
+  <link rel="stylesheet" href="ux-three.css">
+  <link rel="stylesheet" href="skill-search.css">
+  <link rel="stylesheet" href="adaptive-layout.css">
+  <link rel="stylesheet" href="checkin-id.css">
+  <link rel="stylesheet" href="home.css">
+  <script defer src="skill-guide-data.js"></script>
+  <script defer src="skill-search.js"></script>
+  <script defer src="individual-timeline-data.js"></script>
+  <script defer src="notice-data.js"></script>
+  <script defer src="portal.js"></script>
+</head>
+<body class="adaptive-site" data-page="home">
+  <header class="site-top">
+    <div class="top-inner">
+      <a class="logo" aria-label="115 工科賽一站式資訊平台首頁" href="index.html">
+        <span class="logo-mark"><span>115</span></span>
+        <span class="logo-copy"><b>115 工科賽一站式資訊平台</b></span>
+      </a>
+    </div>
+  </header>
+  <main>
+    <section class="wrap home-title">
+      <p class="section-label">115 學年度全國高級中等學校學生工業類技藝競賽</p>
+      <h1>工科賽一站式資訊平台</h1>
+    </section>
 
-<html lang="zh-Hant"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="#102a3d" name="theme-color"/><meta content="115 工科賽一站式資訊平台：29 職種、7 場域、活動日程、11/27 詳細頒獎典禮、交通停車及接駁資訊。" name="description"/><title>115 工科賽一站式資訊平台</title><link href="event-design.css" rel="stylesheet"/><link href="portal.css" rel="stylesheet"/><script defer="" src="event-data.js"></script><script defer="" src="skill-guide-data.js"></script><script defer="" src="skill-search.js"></script><script defer="" src="event-app.js"></script><script defer="" src="notice-data.js"></script><script defer="" src="portal.js"></script><link href="portal-integration.css" rel="stylesheet"/><link href="ux-three.css" rel="stylesheet"/><link href="skill-search.css" rel="stylesheet"/><link href="adaptive-layout.css" rel="stylesheet"/><link href="checkin-id.css" rel="stylesheet"/></head><body class="adaptive-site" data-page="home"><header class="site-top"><div class="top-inner"><a aria-label="115 工科賽一站式資訊平台首頁" class="logo" href="index.html"><span class="logo-mark"><span>115</span></span><span class="logo-copy"><b>工科賽一站式資訊平台</b><small>INDUSTRIAL SKILLS 2026</small></span></a><nav aria-label="網站主選單" class="top-nav"><a data-nav="home" href="index.html">六入口首頁</a><a data-nav="skills" href="skills.html">查職種</a><a data-nav="venues" href="venues.html">找場域</a><a data-nav="agenda" href="agenda.html">大會日程</a><a data-nav="ceremony" href="ceremony.html">典禮流程</a><a data-nav="transport" href="transport.html">交通停車</a><a href="sixth/index.html#explorer">進階互動地圖</a></nav><button aria-expanded="false" aria-label="顯示導覽選單" class="mobile-menu" id="menuButton" type="button">☰</button></div><div class="mobile-nav" id="mobileNav"><a href="index.html">六入口首頁</a><a href="skills.html">查職種</a><a href="venues.html">找場域</a><a href="agenda.html">大會日程</a><a href="ceremony.html">典禮流程</a><a href="transport.html">交通停車</a><a href="sixth/index.html#explorer">進階互動地圖</a></div></header>
-<main><section class="wrap portal-search portal-search-first"><div class="search-hero"><div><span class="section-label">SKILL QUICK LOOKUP</span><h2>已經知道自己的職種？</h2><p>可輸入編號、職種簡稱或近似名稱，立即顯示建議結果。</p></div><div class="search-pane"><label for="quickSkillSearch">快速搜尋</label><input autocomplete="off" id="quickSkillSearch" placeholder="例如：汽修、冷氣、機器人手臂、14 車床" type="search"/><div aria-live="polite" class="search-result" id="quickSkillResults"></div></div></div></section>
-<aside class="wrap checkin-id-notice checkin-id-home" role="note" aria-label="選手報到證件提醒"><span class="checkin-id-notice__icon" aria-hidden="true">▣</span><div class="checkin-id-notice__content"><strong>選手報到提醒</strong><p>選手報到時請出示學生證或身分證</p></div></aside>
-<section class="hero portal-hero"><div class="grain"></div><div class="wrap portal-hero-layout"><div><div class="eyebrow"><span class="eyebrow-dot"></span> 工科賽 · 依需求快速前往 <span class="mini-tag">11/24–11/27</span></div><h1>找到你的入口，<br/><em>直達需要的資訊。</em></h1><p>不用翻找整本大會手冊。直接點選下方入口，查看職種報到、七場域、大會行程、典禮詳細時間及交通停車。</p><div class="hero-actions"><a class="btn btn-main portal-mobile-entrances-link" href="#entrances">查看六個功能入口 <span>↓</span></a><a class="btn btn-main" href="skills.html">搜尋 29 職種 <span>↗</span></a><a class="btn btn-ghost" href="ceremony.html">11/27 頒獎典禮 <span>→</span></a></div></div><aside class="portal-event-box"><span class="portal-event-eyebrow">11 / 27 · 頒獎典禮</span><h2>詳細典禮時間<br/><em>優先顯示</em></h2><div class="portal-event-times"><div><small>選手暨師長報到</small><b>07:40–08:10</b></div><div><small>典禮開始</small><b>08:50</b></div><div><small>預定禮成</small><b>12:00</b></div></div><a href="ceremony.html">查看完整 22 項程序 <span>↗</span></a><small class="portal-source">依典禮詳表 p.122–123；大會概覽不同時間另存供核對。</small></aside></div></section>
-<section class="wrap portal-access" id="entrances"><div class="portal-title"><div><span class="section-label">SIX QUICK ENTRANCES</span><h2>六個入口，直接到目的地</h2><p>每一個入口都可以直接點選，不需要照順序操作。</p></div><span class="edition-stamp">職種時間 115.11.15 · 場地來源 115.11.12</span></div>
-<div class="entrance-grid">
-<a class="entrance-card accent-one" href="skills.html"><div class="entrance-icon">01</div><div class="entrance-body"><small>SKILLS &amp; CHECK-IN</small><h3><span class="adaptive-desktop-label">我要查職種／報到</span><span class="adaptive-mobile-label">查職種</span></h3><p>29 職種報到與學術科地點，並可深入查看各職種個別日程。</p></div><span class="entrance-arrow">↗</span></a>
-<a class="entrance-card accent-two" href="venues.html"><div class="entrance-icon">02</div><div class="entrance-body"><small>CAMPUS MAP</small><h3><span class="adaptive-desktop-label">我要找場域／試場圖</span><span class="adaptive-mobile-label">找場域</span></h3><p>七場域、十張原始校園導覽圖，另可查行政大樓互動樓層圖。</p></div><span class="entrance-arrow">↗</span></a>
-<a class="entrance-card accent-three" href="agenda.html"><div class="entrance-icon">03</div><div class="entrance-body"><small>MASTER PROGRAM</small><h3><span class="adaptive-desktop-label">我要看競賽日程</span><span class="adaptive-mobile-label">競賽日程</span></h3><p>11/24–27 四日時間軸、日期切換與七場域會議分流。</p></div><span class="entrance-arrow">↗</span></a>
-<a class="entrance-card accent-four" href="ceremony.html"><div class="entrance-icon">04</div><div class="entrance-body"><small>AWARDS CEREMONY</small><h3><span class="adaptive-desktop-label">我要參加頒獎典禮</span><span class="adaptive-mobile-label">頒獎典禮</span></h3><p>07:40 報到、08:50 開始，直接查看完整 22 項典禮流程。</p></div><span class="entrance-arrow">↗</span></a>
-<a class="entrance-card accent-five" href="transport.html?route=overview"><div class="entrance-icon">05</div><div class="entrance-body"><small>PARKING &amp; LOGISTICS</small><h3><span class="adaptive-desktop-label">我要開車／卸貨／停車</span><span class="adaptive-mobile-label">開車停車</span></h3><p>小客車、貴賓、貨車的官方入場與停車圖，依車種切換。</p></div><span class="entrance-arrow">↗</span></a>
-<a class="entrance-card accent-six" href="transport.html?route=coach-walk"><div class="entrance-icon">06</div><div class="entrance-body"><small>SHUTTLE &amp; WALKING</small><h3><span class="adaptive-desktop-label">我要搭遊覽車／步行入場</span><span class="adaptive-mobile-label">遊覽車步行</span></h3><p>大型遊覽車停靠、人車分流及下車後官方步行指引。</p></div><span class="entrance-arrow">↗</span></a>
-</div></section><aside class="portal-event-box portal-event-after-entrances adaptive-post-entrance-event"><span class="portal-event-eyebrow">11 / 27 · 頒獎典禮</span><h2>詳細典禮時間<br/><em>優先顯示</em></h2><div class="portal-event-times"><div><small>選手暨師長報到</small><b>07:40–08:10</b></div><div><small>典禮開始</small><b>08:50</b></div><div><small>預定禮成</small><b>12:00</b></div></div><a href="ceremony.html">查看完整 22 項程序 <span>↗</span></a><small class="portal-source">依典禮詳表 p.122–123；大會概覽不同時間另存供核對。</small></aside><section aria-labelledby="noticeTitle" class="wrap ux-notice-section" id="siteNotices">
-<div class="ux-notice-head"><div><span class="section-label">SOURCE REVIEW / INFORMATION CHECK</span><h2 id="noticeTitle">資料更新與待核對提醒</h2><p>此區為本站來源核對紀錄，<strong>不是主辦單位即時公告</strong>；正式時間、場地及管制仍以最新公告為準。</p></div><span class="ux-version-tag" id="noticeReviewDate">資料核對中</span></div>
-<div aria-live="polite" class="ux-notice-list" id="noticeList"></div>
-<details class="ux-official-note"><summary>如何判斷哪些資訊已正式核定？</summary><p>本站目前不會自動讀取主辦單位即時公告。各職種細項時間來自 115/11/15 表，場域與官方交通圖來自 115/11/12 來源；如有「待核對」字樣，請依職種負責人及主辦單位發布的最新通知為準。</p></details>
-</section>
-<section class="wrap integration-home-feature"><div><span class="section-label">ORIGINAL SIXTH-ROUND INTERACTIVE MAP</span><h2>第六輪進階導覽已正式接回</h2><p>保留 29 職種、同步新版 11/15 細項時程、行政大樓 15 教室、七場域互動定位；交通路線動畫仍屬未核定試作。</p></div><div class="portal-integration-actions"><a href="sixth/index.html#explorer">開啟完整互動地圖</a><a class="secondary" href="sixth/index.html#studentTimeline">三日考生時間軸</a><a class="secondary" href="sixth/traffic.html">避樹動畫（試作）</a></div></section><section class="wrap portal-deep"><div class="portal-title"><div><span class="section-label">ADVANCED GUIDE / MORE DETAILS</span><h2>進階查詢也在同一個網站</h2><p>六入口維持不變，深入查看職種個別日程及行政大樓教室配置。</p></div></div><div class="portal-deep-grid"><a href="individual.html"><span class="deep-icon">▦</span><div><small>11/24–26 · 29 職種</small><h3>各職種逐項三日行程</h3><p>以 11/15 職種細項表列出學科、術科及點名；含分梯、輪站、講評與待核定提示。</p></div><strong>↗</strong></a><a href="floor.html"><span class="deep-icon">⌗</span><div><small>行政大樓 · 15 間學科教室</small><h3>行政大樓 1F–3F 互動配置</h3><p>按樓層及職種高亮教室格位。定位依原圖，不自行推算室內進場動線。</p></div><strong>↗</strong></a></div></section>
-<section class="wrap portal-sourcebox"><div class="portal-source-icon">!</div><div><h2>資料版本與正式公告</h2><p>11/27 以詳細典禮程序為主；原大會概覽的不同時間保留對照。職種位置、交通路線及場地安排如有變更，應以主辦單位最新公告與現場指揮為準。交通圖以官方七張圖為準，不使用尚未核定的自動避樹路線取代。</p></div></section>
-<section class="wrap sources"><div class="sources-title"><span class="section-label">ORIGINAL DOCUMENTS</span><h2>原始來源及核對</h2></div><div class="sources-list"><a href="assets/source/agenda.pdf" rel="noopener" target="_blank"><span class="file-tag">PDF</span><span>大會活動日程</span><small>p.41–42</small><b>↗</b></a><a href="assets/source/ceremony.pdf" rel="noopener" target="_blank"><span class="file-tag">PDF</span><span>典禮詳細程序</span><small>p.122–123</small><b>↗</b></a><a href="assets/source/traffic.pdf" rel="noopener" target="_blank"><span class="file-tag">PDF</span><span>交通停車指引</span><small>p.130–136</small><b>↗</b></a></div></section>
-</main><footer class="site-foot"><div><strong>115 學年度全國高級中等學校學生工業類技藝競賽</strong><span>職種細項時間依 115.11.15；場域／交通圖依 115.11.12；11/27 典禮以詳細流程優先。</span></div><a href="index.html">返回六入口首頁 ↑</a></footer><nav aria-label="手機常用功能快速導覽" class="adaptive-bottom-nav"><a aria-current="page" href="index.html"><span aria-hidden="true" class="adaptive-nav-icon">⌂</span><span class="adaptive-nav-text">首頁</span></a><a href="skills.html"><span aria-hidden="true" class="adaptive-nav-icon">⌕</span><span class="adaptive-nav-text">職種</span></a><a href="venues.html"><span aria-hidden="true" class="adaptive-nav-icon">▣</span><span class="adaptive-nav-text">場域</span></a><a href="agenda.html"><span aria-hidden="true" class="adaptive-nav-icon">▤</span><span class="adaptive-nav-text">日程</span></a><a href="transport.html"><span aria-hidden="true" class="adaptive-nav-icon">↗</span><span class="adaptive-nav-text">交通</span></a></nav></body></html>
+    <section class="wrap portal-search portal-search-first" aria-label="職種搜尋">
+      <div class="search-hero">
+        <div>
+          <h2>查詢職種</h2>
+          <p>輸入職種名稱、簡稱或編號，選擇後查看報到、日程及場地。</p>
+        </div>
+        <div class="search-pane">
+          <label for="quickSkillSearch">搜尋職種</label>
+          <input id="quickSkillSearch" type="search" autocomplete="off" placeholder="例如：車床、汽修、機器手臂、14">
+          <div id="quickSkillResults" class="search-result" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="wrap checkin-id-notice checkin-id-home" role="note" aria-label="選手報到證件提醒">
+      <span class="checkin-id-notice__icon" aria-hidden="true">▣</span>
+      <div class="checkin-id-notice__content"><strong>選手報到時請出示學生證或身分證</strong></div>
+    </aside>
+
+    <section class="wrap portal-access" id="entrances" aria-labelledby="entrance-title">
+      <div class="portal-title"><div><h2 id="entrance-title">常用資訊</h2></div></div>
+      <div class="entrance-grid">
+        <a class="entrance-card accent-one" href="skills.html"><span class="entrance-icon">⌕</span><div class="entrance-body"><h3>職種查詢</h3><p>報到地點、考試時間與試場。</p></div><span class="entrance-arrow" aria-hidden="true">↗</span></a>
+        <a class="entrance-card accent-two" href="venues.html"><span class="entrance-icon">▣</span><div class="entrance-body"><h3>試場地圖</h3><p>七個競賽場域與館舍位置。</p></div><span class="entrance-arrow" aria-hidden="true">↗</span></a>
+        <a class="entrance-card accent-three" href="agenda.html"><span class="entrance-icon">▤</span><div class="entrance-body"><h3>競賽日程</h3><p>11/24–11/27 大會活動安排。</p></div><span class="entrance-arrow" aria-hidden="true">↗</span></a>
+        <a class="entrance-card accent-four" href="ceremony.html"><span class="entrance-icon">✦</span><div class="entrance-body"><h3>頒獎典禮</h3><p>報到時間、典禮程序與場地。</p></div><span class="entrance-arrow" aria-hidden="true">↗</span></a>
+        <a class="entrance-card accent-five" href="transport.html?route=overview"><span class="entrance-icon">↗</span><div class="entrance-body"><h3>交通與停車</h3><p>官方交通圖、停車及卸貨資訊。</p></div><span class="entrance-arrow" aria-hidden="true">↗</span></a>
+        <a class="entrance-card accent-six" href="transport.html?route=coach-walk"><span class="entrance-icon">↝</span><div class="entrance-body"><h3>步行與入場指引</h3><p>遊覽車停靠、人車分流與步行提醒。</p></div><span class="entrance-arrow" aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+
+    <section class="wrap ux-notice-section" id="siteNotices" aria-labelledby="noticeTitle">
+      <div class="ux-notice-head">
+        <div><h2 id="noticeTitle">重要時間與異動提醒</h2><p>來源時間有差異或尚未列出起訖時，請依各職種正式日程及主辦單位通知。</p></div>
+        <span class="ux-version-tag" id="noticeReviewDate">重要提醒</span>
+      </div>
+      <div class="ux-notice-list" id="noticeList" aria-live="polite"></div>
+    </section>
+
+    <section class="wrap home-supplement" aria-labelledby="supplement-title">
+      <h2 id="supplement-title">補充資料與官方文件</h2>
+      <div class="home-supplement-links">
+        <a href="individual.html">個別職種完整日程 ↗</a>
+        <a href="floor.html">北科附工行政大樓教室 ↗</a>
+        <a href="assets/source/agenda.pdf" target="_blank" rel="noopener">大會活動日程 PDF ↗</a>
+        <a href="assets/source/ceremony.pdf" target="_blank" rel="noopener">頒獎典禮程序 PDF ↗</a>
+        <a href="assets/source/traffic.pdf" target="_blank" rel="noopener">官方交通與停車圖 PDF ↗</a>
+      </div>
+    </section>
+  </main>
+  <footer class="site-foot">
+    <div><strong>115 學年度全國高級中等學校學生工業類技藝競賽</strong><span>時間、場地及交通管制如有異動，請以主辦單位最新公告與現場指示為準。</span></div>
+    <a href="index.html">回到首頁 ↑</a>
+  </footer>
+  <nav class="adaptive-bottom-nav" aria-label="常用功能">
+    <a aria-current="page" href="index.html"><span class="adaptive-nav-icon" aria-hidden="true">⌂</span><span class="adaptive-nav-text">首頁</span></a>
+    <a href="skills.html"><span class="adaptive-nav-icon" aria-hidden="true">⌕</span><span class="adaptive-nav-text">職種</span></a>
+    <a href="venues.html"><span class="adaptive-nav-icon" aria-hidden="true">▣</span><span class="adaptive-nav-text">場域</span></a>
+    <a href="agenda.html"><span class="adaptive-nav-icon" aria-hidden="true">▤</span><span class="adaptive-nav-text">日程</span></a>
+    <a href="transport.html"><span class="adaptive-nav-icon" aria-hidden="true">↗</span><span class="adaptive-nav-text">交通</span></a>
+  </nav>
+</body>
+</html>

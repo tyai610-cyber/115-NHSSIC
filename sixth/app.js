@@ -11,7 +11,7 @@
   const sites = DATA.sites;
   const STORAGE_KEY = 'gk115-map-corrections-v2';
   const PREVIOUS_STORAGE_KEY = 'gk115-map-corrections-v1';
-  let site = '北科附工', mapId = 'map-03', current = '01', currentService='01', zoom = 1, editMode = false, mapMode='focus';
+  let site = '北科附工', mapId = 'map-03', current = '01', currentService='01', currentDestination='practical', zoom = 1, editMode = false, mapMode='focus';
   let loadSequence=0;
   let currentPublicShareUrl='';
   let routeReady=false;
@@ -30,6 +30,7 @@
     mobileCard:$('mobileCard'),mobileCardTitle:$('mobileCardTitle'),mobileCardText:$('mobileCardText'),mobileCardLabel:$('mobileCardLabel'),pinIndex:$('pinIndex'),movePinMode:$('movePinMode'),addPinMode:$('addPinMode'),removePin:$('removePin'),
     venueGuideSummary:$('venueGuideSummary'),venueGuideBtn:$('venueGuideBtn'),venueGuideOriginal:$('venueGuideOriginal'),indoorDiagramStatus:$('indoorDiagramStatus'),indoorDiagramList:$('indoorDiagramList'),indoorDiagramPending:$('indoorDiagramPending'),
     shareUrlText:$('shareUrlText'),shareHelp:$('shareHelp'),copyProgramLink:$('copyProgramLink'),copyProgramSummary:$('copyProgramSummary'),
+    destinationSite:$('destinationSite'),destinationProgram:$('destinationProgram'),destinationPlace:$('destinationPlace'),destinationStatus:$('destinationStatus'),destinationFloorLink:$('destinationFloorLink'),destinationTabs:document.querySelector('.destination-tabs'),returnSkillDetails:$('returnSkillDetails'),
   };
   function toast(message) {
     elements.toast.textContent = message;
@@ -55,9 +56,17 @@
     if(!program)return null;
     return program.site==='北科附工'?'map-03':availableMaps(program.site)[0]?.id;
   }
+  function destinationMap(program,purpose){
+    if(!program)return null;
+    if(program.site==='北科附工')return ({registration:'map-01',theory:'map-02',practical:'map-03'})[purpose]||'map-03';
+    return availableMaps(program.site)[0]?.id||null;
+  }
+  function destinationLabel(purpose){return ({registration:'報到地點',theory:'學科試場',practical:'術科試場'})[purpose]||'術科試場';}
+  function destinationValue(program,purpose){return program?.[purpose]||'依職種公告';}
   function currentShareUrl(programId){
     const url=new URL(window.location.href);
     url.searchParams.set('program',programId);
+    url.searchParams.set('destination',currentDestination);
     url.searchParams.delete('service');
     url.hash='explorer';
     return url.href;
@@ -74,16 +83,15 @@
     const p=byId(current);
     if(!p || !elements.shareUrlText)return;
     const map=DATA.maps.find(m=>m.id===defaultProgramMap(p));
-    const locs=DATA.pins.filter(pin=>pin.programId===p.id);
-    const pending=locs.filter(pin=>pin.verification==='pending').length;
-    elements.venueGuideSummary.textContent=map?`${p.site}｜${map.title}；${locs.length} 處圖面定位${pending?`，其中 ${pending} 處待現場核對`:''}。並非精確出入口。`:'此職種沒有對應的場域導覽圖。';
+    const pending=DATA.pins.some(pin=>pin.programId===p.id&&pin.verification==='pending');
+    elements.venueGuideSummary.textContent=map?`${p.site}｜${map.title}；地圖位置僅供辨認館舍範圍${pending?'，部分位置待現場核對':''}，不代表實測入口。`:'此職種沒有對應的場域導覽圖。';
     elements.venueGuideBtn.disabled=!map;
     elements.venueGuideOriginal.hidden=!map;
     if(map)elements.venueGuideOriginal.href=map.original||map.preview;
     const rawDiagrams=DIAGRAMS[p.id];
     const possible=Array.isArray(rawDiagrams)?rawDiagrams:(rawDiagrams?[rawDiagrams]:[]);
     const validDiagrams=possible.filter(d=>d && typeof d.path==='string' && /^assets\/diagrams\/[\w\-.]+\.(png|jpg|jpeg|webp|svg|pdf)$/i.test(d.path));
-    elements.indoorDiagramStatus.textContent=validDiagrams.length?`此職種已連結 ${validDiagrams.length} 份獨立配置圖；請確認版本、崗位位置與可公開性。`:'來源僅有場域導覽圖，尚無此職種已上傳的獨立室內崗位配置圖。';
+    elements.indoorDiagramStatus.textContent=validDiagrams.length?'此職種有獨立配置圖，請依圖面標示及現場指示確認。':'目前沒有此職種的獨立室內崗位配置圖。';
     elements.indoorDiagramList.hidden=!validDiagrams.length;
     elements.indoorDiagramPending.hidden=!!validDiagrams.length;
     elements.indoorDiagramList.replaceChildren();
@@ -94,8 +102,8 @@
     const publicWeb=isPublicWebUrl();
     let unifiedUrl='';try{unifiedUrl=new URL('../individual.html?skill='+encodeURIComponent(p.id),window.location.href).href;}catch(err){/* 無網址的預覽環境不產生公開分享連結 */}
     currentPublicShareUrl=publicWeb?unifiedUrl:'';
-    elements.shareUrlText.textContent=publicWeb?currentPublicShareUrl:'本機／預覽模式：尚未取得可讓其他裝置連線的正式網址。';
-    elements.shareHelp.textContent=publicWeb?'可複製此職種的專屬網址分享給其他人；發布前請確認資料可對外公開。':'部署至 GitHub Pages 的 HTTPS 網址後，即可分享本職種的公開網址。';
+    elements.shareUrlText.textContent=publicWeb?currentPublicShareUrl:'請在正式網站開啟此頁後複製職種連結。';
+    elements.shareHelp.textContent=publicWeb?'複製連結後，開啟即可查看這個職種。':'請在正式網站開啟此頁後再複製職種連結。';
     elements.copyProgramLink.disabled=!publicWeb;
   }
   async function copyText(textValue){
@@ -106,11 +114,48 @@
     let copied=false;try{copied=document.execCommand('copy');}catch(err){}ta.remove();return copied;
   }
   function scrollToProgramLocation(){
-    const pin=shownPins().find(x=>x.programId===current);
-    if(!pin){elements.disciplineDetails.scrollIntoView({block:'start',behavior:'smooth'});toast('本圖暫無核定定位點，請參考文字資料');return;}
-    if(zoom<1.55)setZoom(1.55,false);
-    if(window.innerWidth<=820)elements.mapViewport.scrollIntoView({behavior:'smooth',block:'center'});
+    const pin=currentDestination==='practical'&&mapId===destinationMap(byId(current),currentDestination)?shownPins().find(x=>x.programId===current&&x.verification!=='pending'):null;
+    if(!pin){elements.mapViewport.scrollIntoView({block:'center',behavior:'smooth'});toast('本圖沒有可確認的精確定位，請依現場指示');return;}
+    if(zoom<1.4)setZoom(1.4,false);
+    elements.mapViewport.scrollIntoView({behavior:'smooth',block:'center'});
     setTimeout(locateSelected,260);
+  }
+
+  function renderDestinationCard(){
+    const p=byId(current);if(!p||!elements.destinationProgram)return;
+    elements.destinationSite.textContent=p.site;
+    elements.destinationProgram.textContent=`${p.id} ${p.name}`;
+    elements.destinationPlace.textContent=`${destinationLabel(currentDestination)}：${destinationValue(p,currentDestination)}`;
+    const expectedMap=destinationMap(p,currentDestination);
+    const mapPins=mapId===expectedMap?DATA.pins.filter(pin=>pin.mapId===mapId&&pin.programId===p.id):[];
+    const confirmed=mapPins.some(pin=>pin.verification!=='pending');
+    elements.destinationStatus.textContent=confirmed
+      ?'地圖標記依原圖位置對位，只供辨認館舍範圍，不代表實測入口。'
+      :mapPins.length?'此點位尚待現場核對，地圖不會以動態高亮標示；請依現場指示。':'本圖沒有可確認的精確定位；請依現場指示。';
+    const hasAdminRoom=p.site==='北科附工'&&currentDestination==='theory'&&/行政大樓/.test(p.theory||'');
+    elements.destinationFloorLink.hidden=!hasAdminRoom;
+    if(hasAdminRoom)elements.destinationFloorLink.href=`../floor.html?skill=${p.id}`;
+    if(elements.returnSkillDetails)elements.returnSkillDetails.href=`../skills.html?skill=${p.id}`;
+    elements.destinationTabs?.querySelectorAll('[data-purpose]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.purpose===currentDestination)));
+  }
+
+  function navigateDestination(purpose,{updateUrl=true,scroll=true}={}){
+    if(!['registration','theory','practical'].includes(purpose))return;
+    const p=byId(current);if(!p)return;
+    currentDestination=purpose;
+    const targetMap=destinationMap(p,purpose);if(!targetMap)return;
+    const hasConfirmed=DATA.pins.some(pin=>pin.mapId===targetMap&&pin.programId===p.id&&pin.verification!=='pending');
+    const changed=mapId!==targetMap;
+    mapId=targetMap;site=p.site;zoom=hasConfirmed?1.4:1;
+    closeCluster();hideMobileCard();
+    renderAll();
+    if(updateUrl)syncUrl(current);
+    if(scroll){
+      requestAnimationFrame(()=>{
+        elements.mapViewport.scrollIntoView({behavior:'smooth',block:'center'});
+        if(hasConfirmed)setTimeout(locateSelected,changed?320:180);
+      });
+    }
   }
 
   function selectedPins() {
@@ -161,14 +206,15 @@
     elements.programSearch.value='';
     const maps=availableMaps(site);
     mapId=site==='北科附工'?'map-03':maps[0].id;
-    current=forSite(site)[0]?.id||'';
+    current=forSite(site)[0]?.id||'';currentDestination='practical';
     zoom=1;
     hideMobileCard();closeCluster();renderAll();
     if(current)syncUrl(current);
   }
   function chooseProgram(id,{focus=true,preserveMap=false,updateUrl=true}={}) {
     const p=byId(id);if(!p)return;
-    const targetMap=defaultProgramMap(p);
+    if(!preserveMap)currentDestination='practical';
+    const targetMap=destinationMap(p,currentDestination);
     const shouldChange=site!==p.site || mapId==='map-00' || (!preserveMap && mapId!==targetMap);
     site=p.site;current=id;
     if(shouldChange){
@@ -218,7 +264,7 @@
   }
   function renderDetails(){
     const p=byId(current);if(!p)return;
-    elements.detailNumber.textContent=p.id;elements.detailTitle.textContent=p.name;elements.detailSite.textContent=`所屬場域：${p.site}　｜　資料來源：Excel 職種清冊`;
+    elements.detailNumber.textContent=p.id;elements.detailTitle.textContent=p.name;elements.detailSite.textContent=`所屬場域：${p.site}`;
     elements.detailRegistrationDate.textContent=p.registrationDateLabel||'待確認';
     elements.detailRegistrationTime.textContent=p.registrationTime||'待確認';
     const special=Boolean(p.registrationTime&&p.registrationTime!=='13:00–14:00');
@@ -227,8 +273,8 @@
     elements.registrationTasksBox.hidden=!p.registrationTasks?.length;
     elements.registrationTasksList.replaceChildren();
     for(const item of p.registrationTasks||[]) elements.registrationTasksList.append(create('li','',item));
-    elements.detailRegistration.textContent=p.registration||'原始 Excel 未填';elements.detailTheory.textContent=p.theory||'原始 Excel 未填';
-    elements.detailPractical.textContent=p.practical||'原始 Excel 未填';elements.detailMeeting.textContent=p.meeting||'原始 Excel 未填';
+    elements.detailRegistration.textContent=p.registration||'依職種公告';elements.detailTheory.textContent=p.theory||'依職種公告';
+    elements.detailPractical.textContent=p.practical||'依職種公告';elements.detailMeeting.textContent=p.meeting||'依職種公告';
     elements.detailNotes.hidden=!p.notes?.length;
     elements.detailNotes.textContent=(p.notes||[]).join(' ');
     elements.globalProgram.value=p.id;
@@ -239,11 +285,12 @@
     verify.replaceChildren();
     verify.className='verify-banner '+(uncertain.length||editedCount?'verify-pending':'verify-source');
     if(uncertain.length||editedCount){
-      verify.append(create('strong','',`⚠ 待現場核對：${uncertain.length} 處原圖估位${editedCount?`，另有 ${editedCount} 項本機校正草稿`:''}`),create('span','','圖面估位與本機人工調整皆非已核定的入口、樓層或動線；請依現場人員指示。')); 
+      verify.append(create('strong','','⚠ 此職種有定位待現場核對'),create('span','','未核對的點位不代表已確認館舍入口、樓層或動線；請依現場人員指示。'));
     }else{
-      verify.append(create('strong','','依原始圖面對位'),create('span','','圖面標點僅供辨識場地相對位置，不代表現場入口實測或已完成核定。'));
+      verify.append(create('strong','','依場域圖面標示'),create('span','','圖面標點僅供辨識場地相對位置，不代表現場入口實測。'));
     }
     renderProgramExtra();
+    renderDestinationCard();
     window.dispatchEvent(new CustomEvent('gk:programchange',{detail:{id:p.id}}));
   }
   function renderServices(){
@@ -334,15 +381,16 @@
         btn.addEventListener('click',e=>{e.stopPropagation();openCluster(group,isService);});
         elements.pinLayer.append(btn);
         // The chosen point remains at its original coordinate even inside a cluster.
-        const selected=group.find(p=>isService?p.serviceId===currentService:p.programId===current);
+        const selected=isService?group.find(p=>p.serviceId===currentService):currentDestination==='practical'&&mapId===destinationMap(byId(current),currentDestination)?group.find(p=>p.programId===current&&p.verification!=='pending'):null;
         if(selected){
           const selectedId=isService?selected.serviceId:selected.programId;
           const info=isService?serviceById(selectedId):byId(selectedId);
-          const marker=create('button','map-pin is-active selected-cluster-pin',selectedId);
+          const marker=create('button','map-pin is-active selected-target selected-cluster-pin',selectedId);
           marker.type='button';marker.style.left=`${selected.x}%`;marker.style.top=`${selected.y}%`;
           marker.setAttribute('aria-label',`${selectedId} ${info?.name||''}，點選展開附近位置`);
           marker.title=`${selectedId} ${info?.name||''}｜位置請依現場指示`;
-          const label=create('span','selected-pin-label',`${selectedId} ${info?.name||''}`);marker.append(label);
+          const skill=byId(selectedId),place=skill?destinationValue(skill,currentDestination):'';
+          const label=create('span','selected-pin-label',`${selectedId} ${info?.name||''}｜${place.replace(/\s+/g,' ').trim()}`);marker.append(label);
           marker.addEventListener('click',e=>{e.stopPropagation();openCluster(group,isService);});
           elements.pinLayer.append(marker);
         }
@@ -354,11 +402,17 @@
       const needsReview=isService?Boolean(datum.pending):(p.verification==='pending'||DATA.pins.some(x=>x.mapId===mapId&&x.programId===id&&x.verification==='pending'));
       const within=all.filter(q=>(isService?q.serviceId:q.programId)===id),index=within.indexOf(p);
       const editorTarget=editMode&&!isService&&active&&index===editIndex;
-      const btn=create('button',`map-pin ${active?'is-active':''} ${p.edited?'is-edited':''} ${needsReview?'needs-review':''} ${editorTarget?'is-editor-target':''}`,id);
+      const highlight=active&&!needsReview&&currentDestination==='practical'&&mapId===destinationMap(byId(id),currentDestination);
+      const btn=create('button',`map-pin ${highlight?'is-active selected-target':''} ${p.edited?'is-edited':''} ${needsReview?'needs-review':''} ${editorTarget?'is-editor-target':''}`,id);
       btn.type='button';btn.style.left=`${p.x}%`;btn.style.top=`${p.y}%`;
       if(isService)btn.dataset.service=id;else btn.dataset.program=id;
       btn.title=`${id} ${datum.name}${within.length>1?`（第 ${index+1} 處）`:''}｜${needsReview?'待核對：':''}${p.status||'圖面定位'}`;
       btn.setAttribute('aria-label',`${id} ${datum.name}${within.length>1?`第 ${index+1} 處`:''}，${needsReview?'待核對／待公告，':''}點選查看`);
+      if(highlight){
+        const place=destinationValue(datum,currentDestination);
+        const label=create('span','selected-pin-label',`${id} ${datum.name}｜${place.replace(/\s+/g,' ').trim()}`);
+        btn.append(label);
+      }
       btn.addEventListener('click',ev=>{
         ev.stopPropagation();closeCluster();
         if(isService) chooseService(id,{focus:false});
@@ -366,7 +420,7 @@
         else chooseProgram(id,{focus:false,preserveMap:true});
       });elements.pinLayer.append(btn);
     }
-    elements.pinCount.textContent=`原始／校正點 ${all.length} 處 · 畫面 ${groups.length} 組`;
+    elements.pinCount.textContent=`定位點 ${all.length} 處 · 分為 ${groups.length} 組`;
     if(isService){
       const selected=all.filter(x=>x.serviceId===currentService),svc=serviceById(currentService);
       if(svc?.pending)elements.mapStatus.textContent=`⚠ ${currentService} ${svc.name}：日期／場地尚待公告，請勿依候選資訊前往。`;
@@ -377,13 +431,13 @@
     }
     const selected=all.filter(x=>x.programId===current);
     elements.locateBtn.disabled=(!selected.length && !DATA.pins.some(x=>x.programId===current));
-    elements.locateBtn.textContent=selected.length?'⌖ 在地圖上定位':'⌖ 切換至職種術科圖定位';
+    elements.locateBtn.textContent=selected.some(p=>p.verification!=='pending')?'⌖ 在地圖上定位':'⌖ 查看職種位置資訊';
     if(selected.length){
       const pending=selected.filter(p=>p.verification==='pending'||DATA.pins.some(x=>x.mapId===mapId&&x.programId===current&&x.verification==='pending')).length;
       elements.mapStatus.textContent=pending?`⚠ ${current} ${byId(current)?.name||''}：${pending} 處定位待現場核對；點位僅作圖面參考。`:`${current} ${byId(current)?.name||''}（${selected.length} 處；密集點可展開群組）。`;
     }else if(mapId==='map-01'||mapId==='map-02'){
-      elements.mapStatus.textContent='這張圖尚未有經確認的職種標點座標；已提供下方互動教室索引，可點選職種查看 Excel 報到／學科資訊。';
-    }else elements.mapStatus.textContent=`本圖未提供 ${current} 的圖面熱點，請參考原始導覽圖。`;
+      elements.mapStatus.textContent='這張圖尚無確認的職種定位點；可使用下方索引查看報到或學科地點。';
+    }else elements.mapStatus.textContent=`本圖沒有 ${current} 的可確認定位，請參考場域地圖及現場指示。`;
   }
   function renderShortcuts(){
     const map=getMap(),isIndexed=mapId==='map-01'||mapId==='map-02';
@@ -391,7 +445,7 @@
     if(!isIndexed)return;
     const registration=mapId==='map-01';
     elements.mapShortcutHeading.textContent=registration?'報到圖互動索引｜點選職種查看報到／會議資訊':'學科圖互動索引｜點選職種查看學科教室';
-    elements.mapShortcutExplain.textContent='此索引直接使用 Excel 欄位；可切換資訊卡，但不假裝圖上已有核定座標。選職種後如需新增定位，請使用校正工具並另行核對。';
+    elements.mapShortcutExplain.textContent='點選職種可查看報到／學科地點；未確認的教室座標不會以定位點顯示。';
     elements.mapShortcutList.replaceChildren();
     for(const p of forSite(site)){
       const btn=create('button','shortcut-item');btn.type='button';btn.setAttribute('aria-pressed',String(p.id===current));
@@ -407,9 +461,9 @@
     if(!datum)return;
     elements.mobileCardTitle.textContent=`${datum.id}｜${datum.name}`;
     elements.mobileCardLabel.textContent=kind==='service'?'北科附工大會服務':'職種快速資訊';
-    const area=kind==='service'?datum.place:(mapId==='map-01'?datum.registration:mapId==='map-02'?datum.theory:datum.practical);
+    const area=kind==='service'?datum.place:destinationValue(datum,currentDestination);
     const note=kind==='service'&&datum.pending?'【待公告】':kind==='program'&&DATA.pins.some(x=>x.programId===datum.id&&x.verification==='pending')?'【部分點位待核對】':'';
-    elements.mobileCardText.textContent=kind==='service'?`${note}位置：${area||'未提供'}`:`${note}11/24 報到 ${datum.registrationTime||'待確認'}｜${(mapId==='map-01'?'報到':mapId==='map-02'?'學科':'術科')}：${area||'未提供'}`;
+    elements.mobileCardText.textContent=kind==='service'?`${note}位置：${area||'未提供'}`:`${note}${destinationLabel(currentDestination)}：${area||'未提供'}`;
     elements.mobileCard.hidden=false;
   }
   function renderEditorUI(){
@@ -433,7 +487,7 @@
     const map=getMap();if(!map)return;
     const focus=activeFocus(); updateModeButtons();
     elements.mapViewport.style.setProperty('--map-aspect',String(1/displayedAspect()));
-    elements.mapTitle.textContent=`${site}｜${map.title}`;elements.mapSubtitle.textContent=`${focus?'重點地圖（裁切檢視）':'完整圖面（保留原版面）'}｜來源：${map.sourceName}`;
+    elements.mapTitle.textContent=`${site}｜${map.title}`;elements.mapSubtitle.textContent=focus?'重點地圖':'完整圖面';
     elements.originalLink.href=map.original||map.preview;
     elements.downloadOriginal.hidden=!map.original; if(map.original){elements.downloadOriginal.href=map.original;elements.downloadOriginal.download=map.sourceName;}
     elements.originalLink.textContent=map.original?'開啟原始高解析圖 ↗':'開啟完整網頁版圖面 ↗';
@@ -457,7 +511,7 @@
     for(const n of venue?.mapNotes||[])elements.mapNotes.append(create('li','',n));
   }
   function renderAll() {
-    siteButtons();renderMapSelect();renderProgramList();renderDetails();renderNotes();renderMap();
+    siteButtons();renderMapSelect();renderProgramList();renderDetails();renderDestinationCard();renderNotes();renderMap();
   }
   function setZoom(value, focus=true){
     const old=zoom;zoom=Math.min(3.75,Math.max(1,Math.round(value*100)/100));
@@ -468,7 +522,7 @@
   }
   function locateSelected(){
     const targetServiceId=(mapId==='map-00'&&serviceById(currentService)?.referencePinServiceId)||currentService;
-    const pin=mapId==='map-00'?shownServicePins().find(x=>x.serviceId===targetServiceId):shownPins().find(x=>x.programId===current);
+    const pin=mapId==='map-00'?shownServicePins().find(x=>x.serviceId===targetServiceId):currentDestination==='practical'&&mapId===destinationMap(byId(current),currentDestination)?shownPins().find(x=>x.programId===current&&x.verification!=='pending'):null;
     if(!pin)return;
     const stage=elements.mapStage.getBoundingClientRect(),view=elements.mapViewport.getBoundingClientRect();
     const x=stage.left+stage.width*pin.x/100,y=stage.top+stage.height*pin.y/100;
@@ -516,14 +570,16 @@
     corrections=IS_EDITOR?readCorrections():{};
     const params=new URLSearchParams(location.search);
     const requested=params.get('program');
+    const requestedDestination=params.get('destination');
+    if(['registration','theory','practical'].includes(requestedDestination))currentDestination=requestedDestination;
     const venueNames={nkh:'北科附工',division:'桃竹苗分署',vanung:'萬能科大',nangang:'南港高工',sanchong:'三重商工',taishan:'泰山高中',xinxing:'新興高中'};
     const requestedVenue=venueNames[params.get('venue')];
     // 職種指定優先；單獨提供 venue 時直接載入該場域，而非假裝使用者已選擇首個職種。
     if(requested && byId(requested)){
-      current=requested;site=byId(requested).site;mapId=defaultProgramMap(byId(requested));
+      current=requested;site=byId(requested).site;mapId=destinationMap(byId(requested),currentDestination);
     }else if(requestedVenue && sites.some(x=>x.name===requestedVenue)){
-      site=requestedVenue;current=forSite(site)[0]?.id||'01';
-      mapId=site==='北科附工'?'map-03':availableMaps(site)[0]?.id||'map-03';
+      site=requestedVenue;current=forSite(site)[0]?.id||'01';currentDestination='practical';
+      mapId=destinationMap(byId(current),currentDestination)||'map-03';
     }
     globalSelect();renderAll();routeReady=true;
     if(requested && byId(requested) && !IS_EDITOR){
@@ -532,7 +588,7 @@
     elements.globalProgram.addEventListener('change',e=>{if(e.target.value)chooseProgram(e.target.value);});
     elements.venueGuideBtn.addEventListener('click',()=>chooseProgram(current,{focus:true,preserveMap:false,updateUrl:false}));
     elements.copyProgramLink.addEventListener('click',async()=>{
-      if(!currentPublicShareUrl){toast('請先部署至 GitHub Pages，才有可分享的網站網址');return;}
+      if(!currentPublicShareUrl){toast('請在正式網站開啟此頁後複製職種連結');return;}
       toast(await copyText(currentPublicShareUrl)?'已複製職種專屬網址':'複製失敗，請手動複製網址列');
     });
     elements.copyProgramSummary.addEventListener('click',async()=>{
@@ -543,7 +599,9 @@
 
     elements.programSearch.addEventListener('input',renderProgramList);
     $('clearSearch').addEventListener('click',()=>{elements.programSearch.value='';renderProgramList();});
-    elements.mapSelect.addEventListener('change',e=>{mapId=e.target.value;zoom=1;editIndex=0;renderMap();});
+    elements.mapSelect.addEventListener('change',e=>{mapId=e.target.value;zoom=1;editIndex=0;renderMap();renderDestinationCard();});
+    elements.destinationTabs?.addEventListener('click',e=>{const b=e.target.closest('[data-purpose]');if(b)navigateDestination(b.dataset.purpose);});
+    window.GK_OPEN_DESTINATION=purpose=>navigateDestination(purpose);
     elements.focusMode.addEventListener('click',()=>{if(mapMode==='focus')return;mapMode='focus';zoom=1;renderMap();elements.mapViewport.scrollTop=0;});
     elements.fullMode.addEventListener('click',()=>{if(mapMode==='full')return;mapMode='full';zoom=1;renderMap();elements.mapViewport.scrollTop=0;});
     $('zoomIn').addEventListener('click',()=>setZoom(zoom+.3));
@@ -576,7 +634,7 @@
       const rect=elements.disciplineDetails.getBoundingClientRect();
       if(rect.top < window.innerHeight*0.7) hideMobileCard();
     },{passive:true});
-    window.addEventListener('popstate',()=>{const id=new URLSearchParams(location.search).get('program');if(byId(id))chooseProgram(id,{focus:true,updateUrl:false});});
+    window.addEventListener('popstate',()=>{const params=new URLSearchParams(location.search),id=params.get('program'),purpose=params.get('destination');if(['registration','theory','practical'].includes(purpose))currentDestination=purpose;if(byId(id)){site=byId(id).site;mapId=destinationMap(byId(id),currentDestination);chooseProgram(id,{focus:true,preserveMap:true,updateUrl:false});}});
     if(IS_EDITOR){
     $('exportPins').addEventListener('click',exportCorrections);
     $('importPins').addEventListener('change',async ev=>{await importCorrections(ev.target.files?.[0]);ev.target.value='';});

@@ -1,4 +1,4 @@
-/* 北科附工樹木避讓動畫 v0.3：不宣稱已核定通行，路網碰撞只依圖面遮罩。 */
+/* 校園步行路線示意：非現場核定路線。 */
 (()=>{
 'use strict';
 const D=window.GK_ANY_DATA;if(!D)throw Error('未載入交通圖資料');
@@ -163,8 +163,8 @@ function render(updateUrl=true){
   $('#tripMeta').textContent=`${result.preferGate?'正門主通道優先（圓環外側）':'避樹示意'}｜${pts.length-1} 段｜避讓區 ${D.obstacles.length} 處`; 
  }
  document.querySelectorAll('#destinationShortcuts button[data-dest]').forEach(b=>{const active=b.dataset.dest===end.id;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
- $('#routeWarning').textContent=(vehicle?'⚠ 本次涉及車輛入口，避樹動畫絕非核定車行路線，請勿據此駕駛。 ':'⚠ 僅完成樹木與花圃圖面避讓；其他建築、施工與步道仍待現勘。 ')+(result.preferGate?'已優先使用正門中央通道（依圖面推估）；圓環狹窄路段採基本避讓設定。尚須現場核對。 ':'')+(D.disclaimers[mode]||'');
- $('#instructions').innerHTML=`<li>起點：「${esc(start.name)}」。</li><li>${result.error?esc(result.error):pts.length<2?'起終點共用圖面位置，請查看樓層資訊。':result.preferGate?'由正門優先沿中央主通道、圓環外側鋪面向北，不再繞向維也納森林外側小路。請依現場動線核對。':'沿青綠色動畫折線查看位置關係；路線已避開圖上的樹木遮罩，但不是已確認的可步行路徑。'}</li><li>目的地：「${esc(end.name)}」。正式行走請以現場指引為準。</li>`;
+ $('#routeWarning').textContent=(vehicle?'⚠ 本次涉及車輛入口，避樹動畫絕非核定車行路線，請勿據此駕駛。 ':'⚠ 本路線尚未核定；建築入口、施工限制與步道通行情況請依現場指示。 ')+(result.preferGate?'正門至行政大樓方向依圖面示意，請先確認現場開放狀況。 ':'')+(D.disclaimers[mode]||'');
+ $('#instructions').innerHTML=`<li>起點：「${esc(start.name)}」。</li><li>${result.error?esc(result.error):pts.length<2?'起終點共用圖面位置，請查看樓層資訊。':result.preferGate?'由正門優先沿中央主通道、圓環外側鋪面向北，不再繞向維也納森林外側小路。請依現場動線核對。':'查看圖面方向示意。步行路線尚未核定，請依現場指示。'}</li><li>目的地：「${esc(end.name)}」。正式行走請以現場指引為準。</li>`;
  if(!playing)$svg.pauseAnimations?.();else $svg.unpauseAnimations?.();
  if(updateUrl)syncUrl();
 }
