@@ -205,3 +205,11 @@ body[data-mode="editor"] .admin-panel{border:2px solid #b6d2df;border-radius:12p
  .map-pin.parking-marker.selected-target::before,
  .map-pin.unloading-marker.selected-target::before{animation:none!important;opacity:.9}
 }
+
+
+/* 公開介面預設先看職種與地圖；配置圖、下載及分享按需展開 */
+.program-extra-panel{border-top:1px solid #dce7ee;margin-top:13px}
+.program-extra-panel>summary{cursor:pointer;padding:14px 20px;font-weight:850;color:#245773;background:#f4f9fb}
+.program-extra-panel[open]>summary{background:#e8f3f7}
+.program-extra-panel .program-extra{margin:0;border-top:none}
+.program-extra-panel>summary:focus-visible{outline:3px solid #d89c41;outline-offset:2px}
