@@ -8,6 +8,14 @@
   if (!DATA || !Array.isArray(DATA.programs)) { document.body.textContent='導覽資料未載入，請確認 data.js 是否與 index.html 放在同一資料夾。'; return; }
   const $ = id => document.getElementById(id);
   const byId = id => DATA.programs.find(p => p.id === id);
+  // 已確認外場職種的館舍與報到時間，與「座標非實測入口」分開處理。
+  const isExteriorVenue = program => Boolean(program && program.site !== '北科附工');
+  const isExteriorMapReference = pin => Boolean(pin && pin.verification === 'pending' && isExteriorVenue(byId(pin.programId)));
+  const usableVenuePin = pin => Boolean(pin && (pin.verification !== 'pending' || isExteriorMapReference(pin)));
+  const locationPinStatus = pin => isExteriorMapReference(pin) ? '館舍位置示意（非實測入口）' : (pin?.status || '圖面定位');
+  const isParkingService = item => Boolean(item && ['17','20','23'].includes(item.id));
+  const isTruckService = item => Boolean(item && ['21','22'].includes(item.id));
+  const servicePinSymbol = item => isParkingService(item) ? 'P' : isTruckService(item) ? '卸' : item?.id || '';
   const sites = DATA.sites;
   const STORAGE_KEY = 'gk115-map-corrections-v2';
   const PREVIOUS_STORAGE_KEY = 'gk115-map-corrections-v1';
@@ -84,7 +92,9 @@
     if(!p || !elements.shareUrlText)return;
     const map=DATA.maps.find(m=>m.id===defaultProgramMap(p));
     const pending=DATA.pins.some(pin=>pin.programId===p.id&&pin.verification==='pending');
-    elements.venueGuideSummary.textContent=map?`${p.site}｜${map.title}；地圖位置僅供辨認館舍範圍${pending?'，部分位置待現場核對':''}，不代表實測入口。`:'此職種沒有對應的場域導覽圖。';
+    elements.venueGuideSummary.textContent=map
+      ?`${p.site}｜${map.title}；${pending&&isExteriorVenue(p)?'競賽館舍已確認，所示定位僅代表圖面館舍方向':pending?'部分位置仍須核對':'地圖位置依原圖對位'}，不代表實測入口。`
+      :'此職種沒有對應的場域導覽圖。';
     elements.venueGuideBtn.disabled=!map;
     elements.venueGuideOriginal.hidden=!map;
     if(map)elements.venueGuideOriginal.href=map.original||map.preview;
@@ -116,8 +126,8 @@
   const prefersReducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
   const mapScrollBehavior=()=>prefersReducedMotion.matches?'auto':'smooth';
   function scrollToProgramLocation(){
-    const pin=currentDestination==='practical'&&mapId===destinationMap(byId(current),currentDestination)?shownPins().find(x=>x.programId===current&&x.verification!=='pending'):null;
-    if(!pin){elements.mapViewport.scrollIntoView({block:'center',behavior:mapScrollBehavior()});toast('本圖沒有可確認的精確定位，請依現場指示');return;}
+    const pin=currentDestination==='practical'&&mapId===destinationMap(byId(current),currentDestination)?shownPins().find(x=>x.programId===current&&usableVenuePin(x)):null;
+    if(!pin){elements.mapViewport.scrollIntoView({block:'center',behavior:mapScrollBehavior()});toast('已顯示正式場館文字資訊；此目的地沒有可用的圖面標記，請依現場指示');return;}
     if(!elements.mapImage.complete||!elements.mapImage.naturalWidth){pendingFocus=true;return;}
     pendingFocus=false;
     if(zoom<1.4)setZoom(1.4,false);
@@ -133,9 +143,14 @@
     const expectedMap=destinationMap(p,currentDestination);
     const mapPins=mapId===expectedMap?DATA.pins.filter(pin=>pin.mapId===mapId&&pin.programId===p.id):[];
     const confirmed=mapPins.some(pin=>pin.verification!=='pending');
+    const externalReference=mapPins.some(isExteriorMapReference);
     elements.destinationStatus.textContent=confirmed
-      ?'地圖標記依原圖位置對位，只供辨認館舍範圍，不代表實測入口。'
-      :mapPins.length?'此點位尚待現場核對，地圖不會以動態高亮標示；請依現場指示。':'本圖沒有可確認的精確定位；請依現場指示。';
+      ?'圖面位置已對位，可使用呼吸燈辨認館舍範圍；標記不是實測入口。'
+      :externalReference&&currentDestination==='practical'
+      ?'本職種競賽館舍及報到時間已確定；橘色虛線呼吸燈標示導覽圖上的館舍方向，並非實測入口。'
+      :mapPins.length&&currentDestination==='practical'
+      ?'此圖面點位需再核對，請以文字所列正式場館及現場指示為準。'
+      :'此目的地已列出正式館舍資訊，圖面未提供精確定位點；請依館舍資訊及現場指示。';
     const hasAdminRoom=p.site==='北科附工'&&currentDestination==='theory'&&/行政大樓/.test(p.theory||'');
     elements.destinationFloorLink.hidden=!hasAdminRoom;
     if(hasAdminRoom)elements.destinationFloorLink.href=`../floor.html?skill=${p.id}`;
@@ -148,7 +163,7 @@
     const p=byId(current);if(!p)return;
     currentDestination=purpose;
     const targetMap=destinationMap(p,purpose);if(!targetMap)return;
-    const hasConfirmed=DATA.pins.some(pin=>pin.mapId===targetMap&&pin.programId===p.id&&pin.verification!=='pending');
+    const hasConfirmed=purpose==='practical'&&DATA.pins.some(pin=>pin.mapId===targetMap&&pin.programId===p.id&&usableVenuePin(pin));
     const changed=mapId!==targetMap;
     mapId=targetMap;site=p.site;zoom=hasConfirmed?1.4:1;
     closeCluster();hideMobileCard();
@@ -277,14 +292,17 @@
     elements.detailNotes.hidden=!p.notes?.length;
     elements.detailNotes.textContent=(p.notes||[]).join(' ');
     elements.globalProgram.value=p.id;
-    const uncertain=DATA.pins.filter(pin=>pin.programId===p.id&&pin.verification==='pending');
+    const uncertain=DATA.pins.filter(pin=>pin.programId===p.id&&pin.verification==='pending'&&!isExteriorMapReference(pin));
+    const outsideReference=DATA.pins.some(pin=>pin.programId===p.id&&isExteriorMapReference(pin));
     const changed=Object.entries(corrections).filter(([key])=>key.endsWith(`:${p.id}`));
     const editedCount=changed.reduce((n,[key,points])=>n+(Array.isArray(points)?Math.max(1,points.filter(point=>point.verification==='pending').length):1),0);
     const verify=elements.detailVerification;
     verify.replaceChildren();
     verify.className='verify-banner '+(uncertain.length||editedCount?'verify-pending':'verify-source');
     if(uncertain.length||editedCount){
-      verify.append(create('strong','','⚠ 此職種有定位待現場核對'),create('span','','未核對的點位不代表已確認館舍入口、樓層或動線；請依現場人員指示。'));
+      verify.append(create('strong','','⚠ 此職種有圖面定位需再核對'),create('span','','未核對的座標不代表已確認入口、樓層或動線；請依現場人員指示。'));
+    }else if(outsideReference){
+      verify.append(create('strong','','正式競賽館舍及報到時間已確認'),create('span','','選取職種後，橘色呼吸標記提示館舍方向；座標並非入口實測，請依現場指示通行。'));
     }else{
       verify.append(create('strong','','依場域圖面標示'),create('span','','圖面標點僅供辨識場地相對位置，不代表現場入口實測。'));
     }
