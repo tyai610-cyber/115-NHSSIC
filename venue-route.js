@@ -9,23 +9,29 @@
  const pxy=([x,y])=>[(x/.8+40),(y/.8+380)];
  const pathData=points=>points.map((p,i)=>{let [x,y]=pxy(p);return (i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)}).join(' ');
  let venue=null,skill=null,mode='arrow',playing=true,svg=null,stage=null,viewport=null;
+ const motionPreference=window.matchMedia('(prefers-reduced-motion: reduce)');
+ let motionOptIn=false,pendingMapFocus=null;
+ const scrollBehavior=()=>motionPreference.matches?'auto':'smooth';
  const panel=$('venueRoutePanel'),sel=$('venueRouteSkill'),btn=$('venueRoutePlayback'),modeSelect=$('venueRouteMarker'),label=$('venueRouteLabel'),info=$('venueRouteInfo'),hint=$('venueRouteWarning');
  if(!panel||!D)return;
  const picture=$('venueMapImage');viewport=$('venueMapViewport');
  stage=document.createElement('div');stage.id='venueMapStage';stage.className='venue-map-stage';picture.parentNode.insertBefore(stage,picture);stage.appendChild(picture);
  const overlay=svgEl('svg',{id:'venueRouteSvg',viewBox:'0 0 1695 2400',preserveAspectRatio:'xMidYMid meet',role:'img','aria-label':'從校門到場館的示意動畫路線'});stage.appendChild(overlay);svg=overlay;
  let lastRequested=new URLSearchParams(location.search).get('skill');
- function focusRoute(route){if(!route||!viewport)return;const ys=route.p.map(p=>pxy(p)[1]),first=Math.min(...ys),last=Math.max(...ys);requestAnimationFrame(()=>{let scale=stage.getBoundingClientRect().width/1695;const mid=(first+last)/2*scale;const target=Math.max(0,mid-viewport.clientHeight*.53);viewport.scrollTop=Math.min(target,Math.max(0,stage.scrollHeight-viewport.clientHeight));});}
- function focusDestination(route){if(!route||!viewport||!route.p?.length)return;
+ function focusDestination(route,{showMap=true}={}) {
+  if(!route?.p?.length||!viewport)return;
+  if(!picture.complete||!picture.naturalWidth){pendingMapFocus={venue,skill,showMap};return;}
+  pendingMapFocus=null;
   const end=pxy(route.p[route.p.length-1]);
   requestAnimationFrame(()=>{
+   if(showMap)viewport.scrollIntoView({block:'center',behavior:scrollBehavior()});
    const w=stage.getBoundingClientRect().width/1695;
-   const left=Math.max(0,Math.min(viewport.scrollWidth-viewport.clientWidth,end[0]*w-viewport.clientWidth*.52));
-   const top=Math.max(0,Math.min(viewport.scrollHeight-viewport.clientHeight,end[1]*w-viewport.clientHeight*.48));
-   viewport.scrollTo({left,top,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+   const left=Math.max(0,Math.min(Math.max(0,viewport.scrollWidth-viewport.clientWidth),end[0]*w-viewport.clientWidth*.5));
+   const top=Math.max(0,Math.min(Math.max(0,viewport.scrollHeight-viewport.clientHeight),end[1]*w-viewport.clientHeight*.5));
+   viewport.scrollTo({left,top,behavior:scrollBehavior()});
   });
  }
- function draw(){if(!R[venue]||!R[venue].routes[skill])return;
+ function draw({focus=true,showMap=true}={}){if(!R[venue]||!R[venue].routes[skill])return;
   let q=R[venue],r=q.routes[skill],d=pathData(r.p);svg.replaceChildren();
   const defs=svgEl('defs');const glow=svgEl('filter',{id:'vrGlow'});glow.append(svgEl('feGaussianBlur',{stdDeviation:'9'}));defs.append(glow);svg.append(defs);
   let shadow=svgEl('path',{d,stroke:'#072338','stroke-width':'21',opacity:'.72',fill:'none','stroke-linejoin':'round','stroke-linecap':'round'});
@@ -37,17 +43,35 @@
   targetHalo.append(svgEl('circle',{cx:tx,cy:ty,r:55,fill:'none',stroke:'#b91c1c','stroke-width':10,class:'venue-target-ring'}));
   targetHalo.append(svgEl('circle',{cx:tx,cy:ty,r:79,fill:'none',stroke:'#ffffff','stroke-width':7,opacity:'.9',class:'venue-target-ring venue-target-ring-delayed'}));
   svg.append(targetHalo);
+  const targetName=D.skills.find(s=>s.id===skill)?.name||'競賽場館';
+  const caption=`${skill} ${targetName}`;
+  const captionWidth=Math.min(650,Math.max(235,Array.from(caption).length*43+70));
+  const captionX=Math.max(24,Math.min(1695-captionWidth-24,tx-captionWidth*.5));
+  const captionY=ty>160?ty-156:ty+109;
+  const captionGroup=svgEl('g',{class:'venue-target-label','aria-hidden':'true'});
+  captionGroup.append(svgEl('rect',{x:captionX,y:captionY,width:captionWidth,height:64,rx:14,fill:'#7c2718',stroke:'#fff8eb','stroke-width':5}));
+  const captionText=svgEl('text',{x:captionX+captionWidth*.5,y:captionY+44,'text-anchor':'middle','font-size':40,'font-weight':900,fill:'#ffffff'});
+  captionText.textContent=caption;captionGroup.append(captionText);svg.append(captionGroup);
   if(mode!=='off'){
     let g=svgEl('g',{class:'venue-route-mover'});
     if(mode==='arrow') {g.append(svgEl('circle',{r:25,fill:'#fbbf24',stroke:'#10283a','stroke-width':7}));g.append(svgEl('path',{d:'M-12 -16 L16 0 L-12 16 Z',fill:'#10283a'}));}
     else {let bg=svgEl('circle',{r:30,fill:'#ffffff',opacity:'.92'});g.append(bg);g.append(svgEl('circle',{cx:0,cy:-16,r:8,fill:'#131920',stroke:'#fff','stroke-width':1}));g.append(svgEl('path',{d:'M0 -7 L1 10 M1 -1 L-15 7 M1 -1 L15 7 M1 10 L-12 23 M1 10 L14 24',stroke:'#131920','stroke-width':7,'stroke-linecap':'round',fill:'none'}));}
-    let motion=svgEl('animateMotion',{dur:Math.max(6,r.p.length*1.15)+'s',repeatCount:'indefinite',rotate:mode==='arrow'?'auto':'0',path:d});g.append(motion);svg.append(g);
+    if(!motionPreference.matches||motionOptIn){
+      const motion=svgEl('animateMotion',{dur:Math.max(6,r.p.length*1.15)+'s',repeatCount:'indefinite',rotate:mode==='arrow'?'auto':'0',path:d});
+      g.append(motion);
+    }else{
+      const [sx,sy]=pxy(r.p[0]);g.setAttribute('transform',`translate(${sx} ${sy})`);
+    }
+    svg.append(g);
   }
   const selectedName=D.skills.find(s=>s.id===skill)?.name||'競賽場館';
   label.textContent=`${skill} ${selectedName}｜${r.place}`;info.textContent=`入口：${q.entry}。 ${r.note}`;
-  hint.textContent=`${q.confidence}｜動畫僅供辨識館舍方向，不代表道路已核定、無障礙或實際可通行。`;btn.disabled=(mode==='off');
-  playing=true;btn.textContent='暫停動畫';try{svg.unpauseAnimations();svg.setCurrentTime(0);}catch(e){}
-  focusDestination(r);
+  hint.textContent=`${q.confidence}｜動畫僅供辨識館舍方向，不代表道路已核定、無障礙或實際可通行。`;
+  btn.disabled=(mode==='off');
+  playing=mode!=='off'&&(!motionPreference.matches||motionOptIn);
+  btn.textContent=playing?'暫停動畫':'播放動畫';
+  try{if(playing){svg.unpauseAnimations();svg.setCurrentTime(0);}else svg.pauseAnimations();}catch(e){}
+  if(focus)focusDestination(r,{showMap});
  }
  function render(venueId){venue=venueId;let q=R[venueId];panel.hidden=!q;if(!q){svg.replaceChildren();return;}
   let skills=D.skills.filter(s=>s.venueId===venueId&&q.routes[s.id]);if(!skills.length){panel.hidden=true;return;}
@@ -60,12 +84,31 @@
   draw();return true;
  }
  sel.addEventListener('change',()=>selectSkill(sel.value));
- modeSelect.addEventListener('change',()=>{mode=modeSelect.value;draw()});
- btn.addEventListener('click',()=>{if(mode==='off')return;try{if(playing)svg.pauseAnimations();else svg.unpauseAnimations();}catch(e){}playing=!playing;btn.textContent=playing?'暫停動畫':'繼續播放';});
- $('venueRouteReplay').addEventListener('click',()=>{try{svg.setCurrentTime(0);svg.unpauseAnimations()}catch(e){}playing=true;btn.textContent='暫停動畫';});
- $('venueRouteFocus').addEventListener('click',()=>{if(R[venue])focusRoute(R[venue].routes[skill])});
- // 較慢載入的地圖在顯示完成後再次聚焦，避免手機只停在圖面上緣。
- picture.addEventListener('load',()=>{const route=R[venue]?.routes?.[skill];if(route)focusDestination(route);});
+ modeSelect.addEventListener('change',()=>{mode=modeSelect.value;if(motionPreference.matches)motionOptIn=false;draw({focus:false});});
+ btn.addEventListener('click',()=>{
+  if(mode==='off')return;
+  if(!playing && motionPreference.matches && !motionOptIn){motionOptIn=true;draw({focus:false});return;}
+  try{if(playing)svg.pauseAnimations();else svg.unpauseAnimations();}catch(e){}
+  playing=!playing;btn.textContent=playing?'暫停動畫':'播放動畫';
+ });
+ $('venueRouteReplay').addEventListener('click',()=>{
+  motionOptIn=true;draw({focus:false});try{svg.setCurrentTime(0);svg.unpauseAnimations()}catch(e){}
+  playing=true;btn.textContent='暫停動畫';
+ });
+ $('venueRouteFocus').addEventListener('click',()=>{const route=R[venue]?.routes?.[skill];if(route)focusDestination(route);});
+ const cancelPending=()=>{pendingMapFocus=null;};
+ viewport.addEventListener('pointerdown',cancelPending,{passive:true});
+ viewport.addEventListener('wheel',cancelPending,{passive:true});
+ picture.addEventListener('load',()=>{
+  const request=pendingMapFocus;
+  if(request&&request.venue===venue&&request.skill===skill){
+   pendingMapFocus=null;const route=R[venue]?.routes?.[skill];
+   if(route)focusDestination(route,{showMap:request.showMap});
+  }
+ });
+ const motionChanged=()=>{motionOptIn=false;draw({focus:false});};
+ if(motionPreference.addEventListener)motionPreference.addEventListener('change',motionChanged);
+ else if(motionPreference.addListener)motionPreference.addListener(motionChanged);
  window.GK_VENUE_ROUTE={render,selectSkill};
  const current=new URLSearchParams(location.search).get('venue')||'nkh';render(current);
 })();
