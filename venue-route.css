@@ -42,6 +42,5 @@
 }
 @media(prefers-reduced-motion:reduce){
  .venue-target-ring,.venue-route-pulse{animation:none!important;opacity:1}
- .venue-route-mover animateMotion{display:none}
  .venue-image-viewport{scroll-behavior:auto}
 }
