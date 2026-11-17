@@ -18,3 +18,16 @@
 @keyframes venuePulsate{0%,100%{opacity:.1;transform:scale(.75)}50%{opacity:.34;transform:scale(1.5)}}
 @media(max-width:620px){.venue-route-panel{padding:13px}.venue-route-form label{flex:1 1 100%}.venue-route-form button{flex:1 1 auto}.venue-image-viewport .venue-map-stage{min-width:540px}.venue-route-heading strong{font-size:15px}}
 @media(prefers-reduced-motion:reduce){.venue-route-pulse{animation:none}}
+
+/* 選取的競賽館舍：固定目的地座標，雙層脈衝僅作視覺提示 */
+.venue-target-halo{pointer-events:none}
+.venue-target-ring{transform-box:fill-box;transform-origin:center;animation:venueTargetSpotlight 2.4s ease-out infinite}
+.venue-target-ring-delayed{animation-delay:1.2s}
+@keyframes venueTargetSpotlight{0%{transform:scale(.68);opacity:1}95%,100%{transform:scale(1.35);opacity:0}}
+.venue-program-panel [data-skill][aria-pressed="true"],#venuePrograms [data-skill][aria-pressed="true"]{
+  outline:3px solid #c6562c;outline-offset:2px;background:#fff0df;color:#782f19;font-weight:800;
+}
+#venueRouteLabel{font-size:clamp(15px,2vw,20px);line-height:1.5;color:#7c2c19}
+#venueRouteFocus{font-weight:800}
+@media(max-width:620px){#venueRouteLabel{font-size:16px}.venue-route-status{padding:12px}}
+@media(prefers-reduced-motion:reduce){.venue-target-ring{animation:none;opacity:.85}}
