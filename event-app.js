@@ -10,7 +10,7 @@ const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const url=new URL(location.href);
 function setQuery(k,v){try{const u=new URL(location.href);u.searchParams.set(k,v);history.replaceState({},'',u.pathname+u.search+u.hash)}catch(e){}}
 const labels={checkin:'報到／點名',meeting:'會議',contest:'競賽',rest:'休息',press:'記者會',ceremony:'典禮',other:'其他'};
-const titleDays={'24':['11 月 24 日','星期二','TUESDAY · NOV 24'], '25':['11 月 25 日','星期三','WEDNESDAY · NOV 25'], '26':['11 月 26 日','星期四','THURSDAY · NOV 26'], '27':['11 月 27 日','星期五','FRIDAY · NOV 27']};
+const titleDays={'24':['11 月 24 日','星期二',''], '25':['11 月 25 日','星期三',''], '26':['11 月 26 日','星期四',''], '27':['11 月 27 日','星期五','']};
 function initHeader(){
  const nav=$(`[data-nav="${page}"]`);if(nav)nav.classList.add('active');
  const menu=$('#menuButton'),mn=$('#mobileNav');if(menu){menu.addEventListener('click',()=>{const open=mn.classList.toggle('open');menu.setAttribute('aria-expanded',String(open))})}
