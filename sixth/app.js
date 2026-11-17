@@ -8,6 +8,14 @@
   if (!DATA || !Array.isArray(DATA.programs)) { document.body.textContent='導覽資料未載入，請確認 data.js 是否與 index.html 放在同一資料夾。'; return; }
   const $ = id => document.getElementById(id);
   const byId = id => DATA.programs.find(p => p.id === id);
+  // 已確認外場職種的館舍與報到時間，與「座標非實測入口」分開處理。
+  const isExteriorVenue = program => Boolean(program && program.site !== '北科附工');
+  const isExteriorMapReference = pin => Boolean(pin && pin.verification === 'pending' && !pin.edited && isExteriorVenue(byId(pin.programId)));
+  const usableVenuePin = pin => Boolean(pin && (pin.verification !== 'pending' || isExteriorMapReference(pin)));
+  const locationPinStatus = pin => isExteriorMapReference(pin) ? '館舍位置示意（非實測入口）' : (pin?.status || '圖面定位');
+  const isParkingService = item => Boolean(item && ['17','20','23'].includes(item.id));
+  const isTruckService = item => Boolean(item && ['21','22'].includes(item.id));
+  const servicePinSymbol = item => isParkingService(item) ? 'P' : isTruckService(item) ? '卸' : item?.id || '';
   const sites = DATA.sites;
   const STORAGE_KEY = 'gk115-map-corrections-v2';
   const PREVIOUS_STORAGE_KEY = 'gk115-map-corrections-v1';
@@ -84,7 +92,9 @@
     if(!p || !elements.shareUrlText)return;
     const map=DATA.maps.find(m=>m.id===defaultProgramMap(p));
     const pending=DATA.pins.some(pin=>pin.programId===p.id&&pin.verification==='pending');
-    elements.venueGuideSummary.textContent=map?`${p.site}｜${map.title}；地圖位置僅供辨認館舍範圍${pending?'，部分位置待現場核對':''}，不代表實測入口。`:'此職種沒有對應的場域導覽圖。';
+    elements.venueGuideSummary.textContent=map
+      ?`${p.site}｜${map.title}；${pending&&isExteriorVenue(p)?'競賽館舍已確認，所示定位僅代表圖面館舍方向':pending?'部分位置仍須核對':'地圖位置依原圖對位'}，不代表實測入口。`
+      :'此職種沒有對應的場域導覽圖。';
     elements.venueGuideBtn.disabled=!map;
     elements.venueGuideOriginal.hidden=!map;
     if(map)elements.venueGuideOriginal.href=map.original||map.preview;
@@ -116,8 +126,8 @@
   const prefersReducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
   const mapScrollBehavior=()=>prefersReducedMotion.matches?'auto':'smooth';
   function scrollToProgramLocation(){
-    const pin=currentDestination==='practical'&&mapId===destinationMap(byId(current),currentDestination)?shownPins().find(x=>x.programId===current&&x.verification!=='pending'):null;
-    if(!pin){elements.mapViewport.scrollIntoView({block:'center',behavior:mapScrollBehavior()});toast('本圖沒有可確認的精確定位，請依現場指示');return;}
+    const pin=currentDestination==='practical'&&mapId===destinationMap(byId(current),currentDestination)?shownPins().find(x=>x.programId===current&&usableVenuePin(x)):null;
+    if(!pin){elements.mapViewport.scrollIntoView({block:'center',behavior:mapScrollBehavior()});toast('已顯示正式場館文字資訊；此目的地沒有可用的圖面標記，請依現場指示');return;}
     if(!elements.mapImage.complete||!elements.mapImage.naturalWidth){pendingFocus=true;return;}
     pendingFocus=false;
     if(zoom<1.4)setZoom(1.4,false);
@@ -133,9 +143,14 @@
     const expectedMap=destinationMap(p,currentDestination);
     const mapPins=mapId===expectedMap?DATA.pins.filter(pin=>pin.mapId===mapId&&pin.programId===p.id):[];
     const confirmed=mapPins.some(pin=>pin.verification!=='pending');
+    const externalReference=mapPins.some(isExteriorMapReference);
     elements.destinationStatus.textContent=confirmed
-      ?'地圖標記依原圖位置對位，只供辨認館舍範圍，不代表實測入口。'
-      :mapPins.length?'此點位尚待現場核對，地圖不會以動態高亮標示；請依現場指示。':'本圖沒有可確認的精確定位；請依現場指示。';
+      ?'圖面位置已對位，可使用呼吸燈辨認館舍範圍；標記不是實測入口。'
+      :externalReference&&currentDestination==='practical'
+      ?'本職種競賽館舍及報到時間已確定；橘色虛線呼吸燈標示導覽圖上的館舍方向，並非實測入口。'
+      :mapPins.length&&currentDestination==='practical'
+      ?'此圖面點位需再核對，請以文字所列正式場館及現場指示為準。'
+      :'此目的地已列出正式館舍資訊，圖面未提供精確定位點；請依館舍資訊及現場指示。';
     const hasAdminRoom=p.site==='北科附工'&&currentDestination==='theory'&&/行政大樓/.test(p.theory||'');
     elements.destinationFloorLink.hidden=!hasAdminRoom;
     if(hasAdminRoom)elements.destinationFloorLink.href=`../floor.html?skill=${p.id}`;
@@ -148,7 +163,7 @@
     const p=byId(current);if(!p)return;
     currentDestination=purpose;
     const targetMap=destinationMap(p,purpose);if(!targetMap)return;
-    const hasConfirmed=DATA.pins.some(pin=>pin.mapId===targetMap&&pin.programId===p.id&&pin.verification!=='pending');
+    const hasConfirmed=purpose==='practical'&&DATA.pins.some(pin=>pin.mapId===targetMap&&pin.programId===p.id&&usableVenuePin(pin));
     const changed=mapId!==targetMap;
     mapId=targetMap;site=p.site;zoom=hasConfirmed?1.4:1;
     closeCluster();hideMobileCard();
@@ -256,7 +271,10 @@
       const btn=create('button','program-item');btn.type='button';btn.setAttribute('role','listitem');btn.setAttribute('aria-pressed',String(current===p.id));
       const lbl=create('span','program-label');lbl.append(create('span','program-label-name',p.name),create('span','program-mini-time',`11/24 報到 ${p.registrationTime||'待確認'}`));
       btn.append(create('span','program-no',p.id),lbl);
-      if(DATA.pins.some(pin=>pin.programId===p.id&&pin.verification==='pending') || Object.keys(corrections).some(k=>k.endsWith(`:${p.id}`))) btn.append(create('span','program-review','待核對'));
+      const unconfirmed=DATA.pins.some(pin=>pin.programId===p.id&&pin.verification==='pending'&&!isExteriorMapReference(pin));
+      const edited=Object.keys(corrections).some(k=>k.endsWith(`:${p.id}`));
+      if(unconfirmed||edited)btn.append(create('span','program-review','位置待核對'));
+      else if(DATA.pins.some(pin=>pin.programId===p.id&&isExteriorMapReference(pin)))btn.append(create('span','program-review venue-reference-tag','館舍示意'));
       btn.append(create('span','program-arrow','›'));
       btn.addEventListener('click',()=>chooseProgram(p.id));elements.programList.append(btn);
     }
@@ -277,14 +295,17 @@
     elements.detailNotes.hidden=!p.notes?.length;
     elements.detailNotes.textContent=(p.notes||[]).join(' ');
     elements.globalProgram.value=p.id;
-    const uncertain=DATA.pins.filter(pin=>pin.programId===p.id&&pin.verification==='pending');
+    const uncertain=DATA.pins.filter(pin=>pin.programId===p.id&&pin.verification==='pending'&&!isExteriorMapReference(pin));
+    const outsideReference=DATA.pins.some(pin=>pin.programId===p.id&&isExteriorMapReference(pin));
     const changed=Object.entries(corrections).filter(([key])=>key.endsWith(`:${p.id}`));
     const editedCount=changed.reduce((n,[key,points])=>n+(Array.isArray(points)?Math.max(1,points.filter(point=>point.verification==='pending').length):1),0);
     const verify=elements.detailVerification;
     verify.replaceChildren();
     verify.className='verify-banner '+(uncertain.length||editedCount?'verify-pending':'verify-source');
     if(uncertain.length||editedCount){
-      verify.append(create('strong','','⚠ 此職種有定位待現場核對'),create('span','','未核對的點位不代表已確認館舍入口、樓層或動線；請依現場人員指示。'));
+      verify.append(create('strong','','⚠ 此職種有圖面定位需再核對'),create('span','','未核對的座標不代表已確認入口、樓層或動線；請依現場人員指示。'));
+    }else if(outsideReference){
+      verify.append(create('strong','','正式競賽館舍及報到時間已確認'),create('span','','選取職種後，橘色呼吸標記提示館舍方向；座標並非入口實測，請依現場指示通行。'));
     }else{
       verify.append(create('strong','','依場域圖面標示'),create('span','','圖面標點僅供辨識場地相對位置，不代表現場入口實測。'));
     }
@@ -304,7 +325,7 @@
   function chooseService(id,{focus=true}={}){
     if(!serviceById(id))return;
     currentService=id;closeCluster();renderServiceList();renderPins();showMobileCard('service');
-    if(focus && window.innerWidth>520)requestAnimationFrame(()=>setTimeout(locateSelected,40));
+    if(focus)requestAnimationFrame(()=>{elements.mapViewport.scrollIntoView({behavior:mapScrollBehavior(),block:'center'});locateSelected();});
   }
   function renderServiceList(){
     const q=elements.serviceSearch.value.trim().toLocaleLowerCase();
@@ -324,6 +345,11 @@
       s.pending?'⚠ 尚待正式公告；請勿將候選日期或場地視為實際指引':s.hasPin?'圖上有編號定位（非實測入口／車位）':s.referencePinServiceId?'無固定停車位置點；可參考校門入口':'無固定定位點，請參考文字說明');
     elements.serviceDetail.append(status);
     if(s.statusNote) elements.serviceDetail.append(create('p','service-clarification',s.statusNote));
+    if(isParkingService(s)){
+      elements.serviceDetail.append(create('p','service-clarification',s.hasPin
+        ?'P 圖示表示官方導覽圖中的停車區域，不代表每個車格皆可使用；請依停車證及現場指揮。'
+        :'本類停車資訊依正式交通圖及文字指引呈現，沒有經確認的精確停車格座標。'));
+    }
     const hasPoint=DATA.servicePins.some(p=>p.mapId===mapId&&p.serviceId===currentService);
     const hasReference=Boolean(s.referencePinServiceId&&DATA.servicePins.some(p=>p.mapId===mapId&&p.serviceId===s.referencePinServiceId));
     elements.serviceLocateBtn.disabled=!(hasPoint||hasReference);
@@ -359,14 +385,15 @@
       const ordinal=sameItems.indexOf(p)+1;
       const idTag=create('b','',id);const content=create('span','',datum?.name||id);
       if(sameItems.length>1)content.append(create('small','',`第 ${ordinal} 處定位`));
-      if(p.verification==='pending'||datum?.pending)content.append(create('small','','待核對／待公告'));
+      if(isExteriorMapReference(p))content.append(create('small','','已確認競賽館舍｜圖面方向示意'));
+      else if(p.verification==='pending'||datum?.pending)content.append(create('small','','圖面座標待核對／待公告'));
       button.append(idTag,content);
       button.addEventListener('click',()=>{
         closeCluster();
         if(isService)chooseService(id,{focus:false});
         else {
           chooseProgram(id,{focus:false,preserveMap:true});
-          if(p.verification!=='pending'){
+          if(usableVenuePin(p)){
             const stage=elements.mapStage.getBoundingClientRect(),view=elements.mapViewport.getBoundingClientRect();
             const x=stage.left+stage.width*p.x/100,y=stage.top+stage.height*p.y/100;
             elements.mapViewport.scrollTo({left:elements.mapViewport.scrollLeft+x-(view.left+view.width/2),top:elements.mapViewport.scrollTop+y-(view.top+view.height/2),behavior:mapScrollBehavior()});
@@ -397,16 +424,19 @@
         btn.addEventListener('click',e=>{e.stopPropagation();openCluster(group,isService);});
         elements.pinLayer.append(btn);
         // The chosen point remains at its original coordinate even inside a cluster.
-        const selected=isService?group.find(p=>p.serviceId===currentService):currentDestination==='practical'&&mapId===destinationMap(byId(current),currentDestination)?group.find(p=>p.programId===current&&p.verification!=='pending'):null;
+        const selected=isService?group.find(p=>p.serviceId===currentService):currentDestination==='practical'&&mapId===destinationMap(byId(current),currentDestination)?group.find(p=>p.programId===current&&usableVenuePin(p)):null;
         if(selected){
           const selectedId=isService?selected.serviceId:selected.programId;
           const info=isService?serviceById(selectedId):byId(selectedId);
-          const marker=create('button','map-pin is-active selected-target selected-cluster-pin',selectedId);
+          const externalReference=!isService&&isExteriorMapReference(selected);
+          const parking=isService&&isParkingService(info);
+          const truck=isService&&isTruckService(info);
+          const marker=create('button',`map-pin is-active selected-target selected-cluster-pin ${externalReference?'venue-illustrative':''} ${parking?'parking-marker':''} ${truck?'unloading-marker':''}`,isService?servicePinSymbol(info):selectedId);
           marker.type='button';marker.style.left=`${selected.x}%`;marker.style.top=`${selected.y}%`;positionSelectedLabel(marker,selected);
           marker.setAttribute('aria-label',`${selectedId} ${info?.name||''}，點選展開附近位置`);
-          marker.title=`${selectedId} ${info?.name||''}｜位置請依現場指示`;
+          marker.title=`${selectedId} ${info?.name||''}｜${locationPinStatus(selected)}`;
           const skill=byId(selectedId),place=skill?destinationValue(skill,currentDestination):'';
-          const label=create('span','selected-pin-label',`${selectedId} ${info?.name||''}｜${place.replace(/\s+/g,' ').trim()}`);marker.append(label);
+          const label=create('span','selected-pin-label',isService?`${info?.name||''}｜${info?.place||''}`:`${selectedId} ${info?.name||''}｜${place.replace(/\s+/g,' ').trim()}${externalReference?'（館舍示意）':''}`);marker.append(label);
           marker.addEventListener('click',e=>{e.stopPropagation();openCluster(group,isService);});
           elements.pinLayer.append(marker);
         }
@@ -415,18 +445,21 @@
       const p=group[0],id=isService?p.serviceId:p.programId,datum=isService?serviceById(id):byId(id);
       if(!datum)continue;
       const active=isService?(id===currentService):(id===current);
-      const needsReview=isService?Boolean(datum.pending):(p.verification==='pending'||DATA.pins.some(x=>x.mapId===mapId&&x.programId===id&&x.verification==='pending'));
+      const externalReference=!isService&&isExteriorMapReference(p);
+      const needsReview=isService?Boolean(datum.pending):(p.verification==='pending'&&!externalReference);
       const within=all.filter(q=>(isService?q.serviceId:q.programId)===id),index=within.indexOf(p);
       const editorTarget=editMode&&!isService&&active&&index===editIndex;
-      const highlight=active&&!needsReview&&currentDestination==='practical'&&mapId===destinationMap(byId(id),currentDestination);
-      const btn=create('button',`map-pin ${highlight?'is-active selected-target':''} ${p.edited?'is-edited':''} ${needsReview?'needs-review':''} ${editorTarget?'is-editor-target':''}`,id);
+      const highlight=active&&!needsReview&&(isService||currentDestination==='practical'&&mapId===destinationMap(byId(id),currentDestination));
+      const parking=isService&&isParkingService(datum);
+      const truck=isService&&isTruckService(datum);
+      const btn=create('button',`map-pin ${highlight?'is-active selected-target':''} ${externalReference?'venue-illustrative':''} ${parking?'parking-marker':''} ${truck?'unloading-marker':''} ${p.edited?'is-edited':''} ${needsReview?'needs-review':''} ${editorTarget?'is-editor-target':''}`,isService?servicePinSymbol(datum):id);
       btn.type='button';btn.style.left=`${p.x}%`;btn.style.top=`${p.y}%`;if(highlight)positionSelectedLabel(btn,p);
       if(isService)btn.dataset.service=id;else btn.dataset.program=id;
-      btn.title=`${id} ${datum.name}${within.length>1?`（第 ${index+1} 處）`:''}｜${needsReview?'待核對：':''}${p.status||'圖面定位'}`;
-      btn.setAttribute('aria-label',`${id} ${datum.name}${within.length>1?`第 ${index+1} 處`:''}，${needsReview?'待核對／待公告，':''}點選查看`);
+      btn.title=`${id} ${datum.name}${within.length>1?`（第 ${index+1} 處）`:''}｜${locationPinStatus(p)}`;
+      btn.setAttribute('aria-label',`${id} ${datum.name}${within.length>1?`第 ${index+1} 處`:''}，${externalReference?'館舍方向示意，':needsReview?'座標待核對／待公告，':''}點選查看`);
       if(highlight){
         const place=destinationValue(datum,currentDestination);
-        const label=create('span','selected-pin-label',`${id} ${datum.name}｜${place.replace(/\s+/g,' ').trim()}`);
+        const label=create('span','selected-pin-label',isService?`${datum.name}｜${datum.place}`:`${id} ${datum.name}｜${place.replace(/\s+/g,' ').trim()}${externalReference?'（館舍示意）':''}`);
         btn.append(label);
       }
       btn.addEventListener('click',ev=>{
@@ -447,10 +480,14 @@
     }
     const selected=all.filter(x=>x.programId===current);
     elements.locateBtn.disabled=(!selected.length && !DATA.pins.some(x=>x.programId===current));
-    elements.locateBtn.textContent=selected.some(p=>p.verification!=='pending')?'⌖ 在地圖上定位':'⌖ 查看職種位置資訊';
+    elements.locateBtn.textContent=selected.some(usableVenuePin)?'⌖ 在地圖上顯示館舍':'⌖ 查看職種位置資訊';
     if(selected.length){
-      const pending=selected.filter(p=>p.verification==='pending'||DATA.pins.some(x=>x.mapId===mapId&&x.programId===current&&x.verification==='pending')).length;
-      elements.mapStatus.textContent=pending?`⚠ ${current} ${byId(current)?.name||''}：${pending} 處定位待現場核對；點位僅作圖面參考。`:`${current} ${byId(current)?.name||''}（${selected.length} 處；密集點可展開群組）。`;
+      const pending=selected.filter(p=>p.verification==='pending'&&!isExteriorMapReference(p)).length;
+      const exterior=selected.some(isExteriorMapReference);
+      elements.mapStatus.textContent=exterior
+        ?`${current} ${byId(current)?.name||''}：競賽館舍及報到時間已確定，橘色虛線呼吸標記為圖面方向示意（非實測入口）；共 ${selected.length} 處。`
+        :pending?`⚠ ${current} ${byId(current)?.name||''}：${pending} 處定位待現場核對；請依正式場館資訊。`
+        :`${current} ${byId(current)?.name||''}（${selected.length} 處；密集點可展開群組）。`;
     }else if(mapId==='map-01'||mapId==='map-02'){
       elements.mapStatus.textContent='這張圖尚無確認的職種定位點；可使用下方索引查看報到或學科地點。';
     }else elements.mapStatus.textContent=`本圖沒有 ${current} 的可確認定位，請參考場域地圖及現場指示。`;
@@ -478,7 +515,9 @@
     elements.mobileCardTitle.textContent=`${datum.id}｜${datum.name}`;
     elements.mobileCardLabel.textContent=kind==='service'?'北科附工大會服務':'職種快速資訊';
     const area=kind==='service'?datum.place:destinationValue(datum,currentDestination);
-    const note=kind==='service'&&datum.pending?'【待公告】':kind==='program'&&DATA.pins.some(x=>x.programId===datum.id&&x.verification==='pending')?'【部分點位待核對】':'';
+    const note=kind==='service'&&datum.pending?'【待公告】'
+      :kind==='program'&&DATA.pins.some(x=>x.programId===datum.id&&x.verification==='pending'&&!isExteriorMapReference(x))?'【圖面點位待核對】'
+      :kind==='program'&&isExteriorVenue(datum)?'【競賽館舍已確認・圖面方向示意】':'';
     elements.mobileCardText.textContent=kind==='service'?`${note}位置：${area||'未提供'}`:`${note}${destinationLabel(currentDestination)}：${area||'未提供'}`;
     elements.mobileCard.hidden=false;
   }
@@ -540,7 +579,7 @@
   }
   function locateSelected(){
     const targetServiceId=(mapId==='map-00'&&serviceById(currentService)?.referencePinServiceId)||currentService;
-    const pin=mapId==='map-00'?shownServicePins().find(x=>x.serviceId===targetServiceId):currentDestination==='practical'&&mapId===destinationMap(byId(current),currentDestination)?shownPins().find(x=>x.programId===current&&x.verification!=='pending'):null;
+    const pin=mapId==='map-00'?shownServicePins().find(x=>x.serviceId===targetServiceId):currentDestination==='practical'&&mapId===destinationMap(byId(current),currentDestination)?shownPins().find(x=>x.programId===current&&usableVenuePin(x)):null;
     if(!pin)return;
     const stage=elements.mapStage.getBoundingClientRect(),view=elements.mapViewport.getBoundingClientRect();
     const x=stage.left+stage.width*pin.x/100,y=stage.top+stage.height*pin.y/100;
