@@ -39,7 +39,7 @@
 </section>
 <main class="shell">
 <section aria-labelledby="explorer-title" class="explorer-section" id="explorer">
-<div class="section-heading"><div><h2 id="explorer-title">互動校園地圖</h2><p class="section-subtitle">先選場域，也可以直接選擇 01–29 職種。圖上已標點的職種可點選查看細節；重點圖為視圖裁切，位置不代表實測入口。</p></div><span class="light-pill">地圖標記僅供辨認位置；待核對點不會動態高亮。</span></div>
+<div class="section-heading"><div><h2 id="explorer-title">互動校園地圖</h2><p class="section-subtitle">先選場域，也可以直接選擇 01–29 職種。圖上已標點的職種可點選查看細節；重點圖為視圖裁切，位置不代表實測入口。</p></div><span class="light-pill">選擇職種即可查看場館位置。</span></div>
 <div aria-label="選擇競賽場域" class="site-tabs" id="siteTabs" role="group"></div>
 <div class="workspace">
 <aside aria-labelledby="sidebar-title" class="sidebar">
@@ -85,7 +85,7 @@
 <div class="service-list" id="serviceList"></div>
 <div aria-live="polite" class="service-detail" id="serviceDetail"></div>
 <button class="locate-btn" id="serviceLocateBtn" type="button">⌖ 在地圖上查看此服務點</button>
-<p class="service-warning">服務 18、19、25、26 的日期、路線或場地尚待公告，請勿依候選位置前往。21 為後門裝卸區域，22 為校門入口；23 為校門指引，不代表停車位置。</p>
+<p class="service-warning">停車以紫色 P 標記；工具車卸貨入口另有專用標示。沒有精確車格的項目，請依大會官方交通圖及現場人員指引。</p>
 </section>
 <section aria-labelledby="detail-title" class="details" id="disciplineDetails">
 <div class="details-top"><div><span class="small-label">職種資訊</span><div class="details-name"><span class="detail-number" id="detailNumber">01</span><h3 id="detail-title">選擇職種</h3></div></div><button class="locate-btn" id="locateBtn" type="button">⌖ 在地圖上定位</button></div>
@@ -109,7 +109,7 @@
 <button class="quick-route-button" data-route="theory" type="button"><span>02 / 學科</span><strong>筆試位置</strong><small id="quickTheory">—</small></button>
 <button class="quick-route-button" data-route="practical" type="button"><span>03 / 術科</span><strong>實作位置</strong><small id="quickPractical">—</small></button>
 </div>
-<p class="quick-route-hint" id="routeHint">點選後將切換至對應的場域導覽圖；尚未核定的教室及出入口不會自行建立精確座標。</p>
+<p class="quick-route-hint" id="routeHint">點選後將切換至對應的場域導覽圖；圖面未標示入口時，請以正式館舍及教室資訊辨認位置。</p>
 <div class="timebar-head" id="studentTimeline"><div><span class="small-label">11/24 — 11/26</span><h4>三日競賽時間軸</h4></div><label class="audience-toggle"><input id="includeStaffEvents" type="checkbox"/> 查看完整流程（會議、休息及工作事項）</label></div>
 <div aria-label="切換競賽日期" class="day-tabs" id="studentDayTabs" role="group"></div>
 <div aria-live="polite" class="day-summary" id="daySummary"></div>
@@ -140,7 +140,7 @@
 <div class="program-tips" hidden="" id="programTips"></div>
 <p class="tip-source">提醒僅用於行程確認，未列出的證件、器材及進場規定並不代表免帶或可帶，務必以職種正式規定為準。</p>
 </section>
-<section aria-labelledby="programExtraTitle" class="program-extra" id="programExtra">
+<details class="program-extra-panel"><summary>更多資訊：崗位配置圖、原圖與分享</summary><section aria-labelledby="programExtraTitle" class="program-extra" id="programExtra">
 <div class="program-extra-head"><span class="small-label">職種場地資訊</span><h4 id="programExtraTitle">職種位置與分享</h4></div>
 <div class="program-asset-grid">
 <div class="asset-tile">
@@ -148,7 +148,7 @@
 <strong>場域術科導覽圖</strong>
 <p id="venueGuideSummary">依所屬場域圖面標點顯示，尚非入口實測位置。</p>
 <button class="feature-btn" id="venueGuideBtn" type="button">在地圖中顯示位置</button>
-<a class="feature-link" href="#" id="venueGuideOriginal" rel="noopener" target="_blank">查看場域場域地圖 ↗</a>
+<a class="feature-link" href="#" id="venueGuideOriginal" rel="noopener" target="_blank">查看場域地圖 ↗</a>
 </div>
 <div class="asset-tile">
 <span aria-hidden="true" class="asset-icon">▣</span>
@@ -172,15 +172,13 @@
 </div>
 </div>
 </section>
+</details>
 </section>
 <details class="extra-notes"><summary>館舍與場地說明</summary><ul id="mapNotes"></ul><p>以下列出地圖上可辨認的館舍名稱；場地如有異動請以現場標示為準。</p></details>
 </div>
 </div>
 </section>
-<section class="bottom-sections" id="instructions">
-<div><h2>三步驟快速使用</h2><div class="steps"><div><b>01</b><strong>選擇場域</strong><p>上方切換七個場域，北科附工另有四類地圖；可選重點地圖或完整圖。</p></div><div><b>02</b><strong>選擇職種</strong><p>可用職種選單、密集定位群組，或報到／學科圖的教室索引找資料。</p></div><div><b>03</b><strong>查看試場資訊</strong><p>閱讀報到、學科、術科及會議位置；必要時另開高解析原圖，並可複製職種專屬網址。</p></div></div></div>
-</section>
-<section class="data-notes" id="data-notes"><div><p class="overline"></p><h2>場地與路線提醒</h2><p>圖面標記只供辨認校園與館舍範圍，不代表實測入口。尚待核對的定位不會以動態高亮顯示。</p><p>步行路線尚未核定，請勿視為正式通行導航；交通、停車及安全事項請依官方圖與現場指示。</p></div></section>
+<section class="data-notes" id="data-notes"><div><p class="overline"></p><h2>入場及交通提醒</h2><p>圖面標記供辨認校園與館舍位置，不代表實測入口。</p><p>步行路線尚未核定，請勿視為正式通行導航；交通、停車及安全事項請依官方圖與現場指示。</p></div></section>
 </main>
 <footer class="footer"><div class="shell"><strong>115 工科賽一站式資訊平台</strong><span>地點與時間異動請依正式公告及現場指示。</span></div></footer>
 <aside aria-label="目前選取的導覽資訊" aria-live="polite" class="mobile-card" hidden="" id="mobileCard"><button aria-label="關閉浮動資訊卡" class="mobile-card-close" id="mobileCardClose" type="button">✕</button><div class="mobile-card-inner"><span class="mobile-card-label" id="mobileCardLabel">職種資訊</span><strong id="mobileCardTitle"></strong><p id="mobileCardText"></p><div class="mobile-card-actions"><button id="mobileCardLocate" type="button">在圖上定位</button><button id="mobileCardDetails" type="button">查看完整資訊</button></div></div></aside>
