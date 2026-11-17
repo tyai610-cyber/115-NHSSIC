@@ -183,3 +183,25 @@ body[data-mode="editor"] .admin-panel{border:2px solid #b6d2df;border-radius:12p
  html:focus-within{scroll-behavior:auto!important}
  .map-pin,.map-pin::before,.selected-target::before{animation:none!important;transition:none!important}
 }
+
+/* 外場正式館舍：明確亮燈，但不聲稱圖面座標是實測門口 */
+.map-pin.venue-illustrative{background:#bb7217;border:3px dashed #fff0be;box-shadow:0 0 0 6px #f9b84d66,0 4px 11px #5239128a}
+.map-pin.venue-illustrative.selected-target{outline:3px dashed #fff6d6;box-shadow:0 0 0 9px #ffcb6499,0 0 20px 5px #e88b24a8!important}
+.map-pin.venue-illustrative.selected-target::before{border:4px dashed #f4a340}
+.map-pin.venue-illustrative .selected-pin-label{background:#865016;border-color:#ffdf9e}
+.map-pin.parking-marker{background:#6845ae!important;color:#fff!important;border:3px solid #fff!important;font-size:16px;font-weight:950;min-width:35px;min-height:35px}
+.map-pin.parking-marker.is-active{box-shadow:0 0 0 7px #bb9bff88,0 0 18px 4px #6743b3aa!important}
+.map-pin.parking-marker.selected-target::before{border-color:#7c54d1}
+.map-pin.parking-marker .selected-pin-label{background:#48307a;border-color:#e3d8ff}
+.map-pin.unloading-marker{background:#397a72!important;border:3px solid #fff!important;font-size:12px;font-weight:950;min-width:35px;min-height:35px}
+.map-pin.unloading-marker.selected-target::before{border-color:#168c81}
+.map-pin.unloading-marker .selected-pin-label{background:#16534d;border-color:#d6fff5}
+@media(max-width:620px){
+ .map-pin.parking-marker,.map-pin.unloading-marker{min-width:42px;min-height:42px}
+ .map-pin.venue-illustrative.selected-target{min-width:42px;min-height:42px}
+}
+@media(prefers-reduced-motion:reduce){
+ .map-pin.venue-illustrative.selected-target::before,
+ .map-pin.parking-marker.selected-target::before,
+ .map-pin.unloading-marker.selected-target::before{animation:none!important;opacity:.9}
+}
