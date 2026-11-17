@@ -10,7 +10,7 @@
   const byId = id => DATA.programs.find(p => p.id === id);
   // 已確認外場職種的館舍與報到時間，與「座標非實測入口」分開處理。
   const isExteriorVenue = program => Boolean(program && program.site !== '北科附工');
-  const isExteriorMapReference = pin => Boolean(pin && pin.verification === 'pending' && isExteriorVenue(byId(pin.programId)));
+  const isExteriorMapReference = pin => Boolean(pin && pin.verification === 'pending' && !pin.edited && isExteriorVenue(byId(pin.programId)));
   const usableVenuePin = pin => Boolean(pin && (pin.verification !== 'pending' || isExteriorMapReference(pin)));
   const locationPinStatus = pin => isExteriorMapReference(pin) ? '館舍位置示意（非實測入口）' : (pin?.status || '圖面定位');
   const isParkingService = item => Boolean(item && ['17','20','23'].includes(item.id));
@@ -271,7 +271,10 @@
       const btn=create('button','program-item');btn.type='button';btn.setAttribute('role','listitem');btn.setAttribute('aria-pressed',String(current===p.id));
       const lbl=create('span','program-label');lbl.append(create('span','program-label-name',p.name),create('span','program-mini-time',`11/24 報到 ${p.registrationTime||'待確認'}`));
       btn.append(create('span','program-no',p.id),lbl);
-      if(DATA.pins.some(pin=>pin.programId===p.id&&pin.verification==='pending') || Object.keys(corrections).some(k=>k.endsWith(`:${p.id}`))) btn.append(create('span','program-review','待核對'));
+      const unconfirmed=DATA.pins.some(pin=>pin.programId===p.id&&pin.verification==='pending'&&!isExteriorMapReference(pin));
+      const edited=Object.keys(corrections).some(k=>k.endsWith(`:${p.id}`));
+      if(unconfirmed||edited)btn.append(create('span','program-review','位置待核對'));
+      else if(DATA.pins.some(pin=>pin.programId===p.id&&isExteriorMapReference(pin)))btn.append(create('span','program-review venue-reference-tag','館舍示意'));
       btn.append(create('span','program-arrow','›'));
       btn.addEventListener('click',()=>chooseProgram(p.id));elements.programList.append(btn);
     }
@@ -512,7 +515,9 @@
     elements.mobileCardTitle.textContent=`${datum.id}｜${datum.name}`;
     elements.mobileCardLabel.textContent=kind==='service'?'北科附工大會服務':'職種快速資訊';
     const area=kind==='service'?datum.place:destinationValue(datum,currentDestination);
-    const note=kind==='service'&&datum.pending?'【待公告】':kind==='program'&&DATA.pins.some(x=>x.programId===datum.id&&x.verification==='pending')?'【部分點位待核對】':'';
+    const note=kind==='service'&&datum.pending?'【待公告】'
+      :kind==='program'&&DATA.pins.some(x=>x.programId===datum.id&&x.verification==='pending'&&!isExteriorMapReference(x))?'【圖面點位待核對】'
+      :kind==='program'&&isExteriorVenue(datum)?'【競賽館舍已確認・圖面方向示意】':'';
     elements.mobileCardText.textContent=kind==='service'?`${note}位置：${area||'未提供'}`:`${note}${destinationLabel(currentDestination)}：${area||'未提供'}`;
     elements.mobileCard.hidden=false;
   }
