@@ -46,7 +46,7 @@
   function navigateMap(purpose){
     const p=program();if(!p)return;
     if(window.GK_OPEN_DESTINATION)window.GK_OPEN_DESTINATION(purpose);
-    $('routeHint').textContent=`已切換至${purpose==='registration'?'報到地點':purpose==='theory'?'學科試場':'術科試場'}。地圖只高亮可確認的定位；未確認位置請依現場指示。`;
+    $('routeHint').textContent=`已切換至${purpose==='registration'?'報到地點':purpose==='theory'?'學科試場':'術科試場'}。地圖以既有圖面標示館舍位置，入場方向請依現場指示。`;
   }
   function updateQuickRoute(){
     const p=program();if(!p)return;
@@ -170,7 +170,7 @@
   function renderExamTips(){
     const p=program();if(!p)return;
     const general=$('generalTips');general.replaceChildren();
-    const basics=[`確認 ${p.id} ${p.name} 的 11/24 首日報到：${p.registrationTime||'待公告'}。`,'若 11/25 或 11/26 有再次點名／梯次報到，請以三日時間軸及職種通知為準。','出門前核對報到地點、學科教室與術科試場；地圖點位非實測入口。','考試證明文件、服裝、工具與可帶物品，依該職種正式競賽規定準備。'];
+    const basics=[`確認 ${p.id} ${p.name} 的 11/24 首日報到：${p.registrationTime||'請依職種公告'}。`,'若 11/25 或 11/26 有再次點名／梯次報到，請以三日時間軸及職種通知為準。','出門前核對報到地點、學科教室與術科試場；地圖點位非實測入口。','考試證明文件、服裝、工具與可帶物品，依該職種正式競賽規定準備。'];
     basics.forEach(t=>general.append(create('li','',t)));
     const notes=T.programNotes[chosen]||[];
     const el=$('programTips');el.hidden=!notes.length;el.replaceChildren();

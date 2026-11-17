@@ -30,8 +30,8 @@ function shortTimelineTitle(event){
 }
 function initHome(){
  const search=$('#quickSkillSearch'),res=$('#quickSkillResults');
- const renderResults=()=>{const q=search.value.trim();const found=q?searchMatches(q).slice(0,9):[];
-   res.innerHTML=q?(found.length?found.map(({skill:s,why})=>`<a href="skills.html?skill=${s.id}"><span>${s.id} ${esc(s.name)}${matchBadge(why)}</span><small>${esc(s.venue)}</small></a>`).join(''):'<p class="quick-no-results" role="status">查無符合職種，請嘗試其他關鍵字或簡稱。</p>'):'';
+ const renderResults=()=>{const q=search.value.trim();const found=q?searchMatches(q).slice(0,6):[];
+   res.innerHTML=q?(found.length?found.map(({skill:s,why})=>`<div class="quick-skill-hit"><a href="skills.html?skill=${s.id}"><span><b>${s.id} ${esc(s.name)}</b>${matchBadge(why)}</span><small>${esc(s.venue)} · 11/24 報到 ${esc(s.registrationTime)}</small></a><a class="quick-map-action" href="sixth/index.html?program=${s.id}&destination=practical#explorer" aria-label="查看 ${esc(s.name)} 的術科地圖">看地圖</a></div>`).join(''):'<p class="quick-no-results" role="status">查無符合職種，請嘗試其他關鍵字或簡稱。</p>'):'';
  };
  search.addEventListener('input',renderResults);
  search.addEventListener('keydown',e=>{if(e.key==='Escape'){search.value='';renderResults();}else if(e.key==='Enter'){e.preventDefault();const q=search.value.trim(),one=searchMatches(q)[0]?.skill;if(one&&q)location.href=`skills.html?skill=${one.id}`;else if(q)location.href=`skills.html?q=${encodeURIComponent(q)}`}});
@@ -39,7 +39,9 @@ function initHome(){
  const notices=$('#noticeList');
  if(notices && N){
   $('#noticeReviewDate').textContent=N.items.length?`${N.items.length} 項提醒`:'目前無提醒';
-  notices.innerHTML=N.items.map(x=>`<article class="ux-notice ux-notice-${esc(x.kind)}"><span class="ux-status">${esc(x.label)}</span><div><strong>${esc(x.title)}</strong><p>${esc(x.detail)}</p></div><a href="${esc(x.link)}">${esc(x.linkLabel)} →</a></article>`).join('');
+  const renderNotice=x=>`<article class="ux-notice ux-notice-${esc(x.kind)}"><span class="ux-status">${esc(x.label)}</span><div><strong>${esc(x.title)}</strong><p>${esc(x.detail)}</p></div><a href="${esc(x.link)}">${esc(x.linkLabel)} →</a></article>`;
+   const lead=N.items.slice(0,2),remaining=N.items.slice(2);
+   notices.innerHTML=lead.map(renderNotice).join('')+(remaining.length?`<details class="ux-notice-more"><summary>更多日程提醒（${remaining.length}）</summary><div class="ux-notice-more-content">${remaining.map(renderNotice).join('')}</div></details>`:'');
  }
  const promo=$('.portal-event-box'),hero=$('.portal-hero-layout'),entrances=$('#entrances');
  if(promo&&hero&&entrances){const mq=window.matchMedia('(max-width:620px)');const arrange=()=>{if(mq.matches){entrances.insertAdjacentElement('afterend',promo);promo.classList.add('portal-event-after-entrances');}else{hero.appendChild(promo);promo.classList.remove('portal-event-after-entrances');}};arrange();if(mq.addEventListener)mq.addEventListener('change',arrange);else mq.addListener(arrange);}
@@ -75,13 +77,13 @@ function initSkills(){
   const venueLink=`venues.html?venue=${encodeURIComponent(s.venueId)}&skill=${s.id}`;
   detail.innerHTML=`<div class="skill-ident"><div><span class="skill-code">職種編號 ${s.id}</span><h2>${esc(s.name)}</h2></div><span class="skill-venue">${esc(s.venue)}</span></div>
   <section class="ux-quick-info" aria-label="本職種報到與試場資訊"><div class="ux-quick-report"><small>11/24 報到時間</small><strong>${esc(s.registrationTime)}</strong><span>${esc(s.registrationPlace)}</span><div class="checkin-id-notice" role="note" aria-label="選手報到證件提醒"><span class="checkin-id-notice__icon" aria-hidden="true">▣</span><div class="checkin-id-notice__content"><strong>選手報到時請出示學生證或身分證</strong></div></div></div><div class="ux-quick-place"><p><b>學科位置</b><span>${esc(s.theory||'依職種公告')}</span></p><p><b>術科位置</b><span>${esc(s.practical||'依職種公告')}</span></p></div></section>
-  ${skillExamSummary(s)}
-  <div class="ux-primary-actions"><a href="individual.html?skill=${s.id}&focus=all" class="ux-primary-action">查看完整三日細項 →</a><a href="sixth/index.html?program=${s.id}&destination=practical#explorer" class="ux-primary-action secondary">查看術科試場 →</a>${s.venueId!=='nkh'?`<a href="${venueLink}" class="ux-primary-action secondary">場域步行路線示意（尚未核定） →</a>`:`<a href="sixth/traffic.html" class="ux-primary-action secondary">校園步行路線示意（尚未核定） →</a>`}</div>
-  <details class="ux-other-skill-info"><summary>其他資訊：領隊會議與教室</summary><div class="ux-meeting"><b>領隊會議及賽後檢討</b><p>${esc(s.meeting||'依公告')}</p></div><div class="skill-detail-actions"><a href="agenda.html?day=24" class="secondary">大會活動日程 ↗</a><a href="sixth/index.html?program=${s.id}&destination=practical#explorer">互動校園地圖 ↗</a>${s.venueId==='nkh' && /行政大樓/.test(s.theory)?`<a href="floor.html?skill=${s.id}" class="secondary">北科附工行政大樓教室格位 ↗</a>`:''}</div></details>
-  <p class="skill-footnote">時間、場地如有待核對提醒，請依主辦單位最新公告與現場指示。</p>`;
+  <div class="ux-primary-actions"><a href="sixth/index.html?program=${s.id}&destination=practical#explorer" class="ux-primary-action">查看試場地圖 →</a><a href="individual.html?skill=${s.id}&focus=all" class="ux-primary-action secondary">查看完整日程 →</a></div>
+  <details class="ux-schedule-more" ${T?.warnings?.[s.id]?.length?'open':''}><summary>學術科重點時段（11/24–11/26）</summary>${skillExamSummary(s)}</details>
+  <details class="ux-other-skill-info"><summary>其他資訊：領隊會議、交通與教室</summary><div class="ux-meeting"><b>領隊會議及賽後檢討</b><p>${esc(s.meeting||'依公告')}</p></div><div class="skill-detail-actions"><a href="agenda.html?day=24" class="secondary">大會日程 ↗</a><a href="${venueLink}" class="secondary">場域總覽 ↗</a><a href="${s.venueId!=='nkh'?venueLink:'sixth/traffic.html'}" class="secondary">步行方向示意（非正式導航） ↗</a>${s.venueId==='nkh' && /行政大樓/.test(s.theory)?`<a href="floor.html?skill=${s.id}" class="secondary">行政大樓教室 ↗</a>`:''}</div></details>
+  <p class="skill-footnote">地圖標示館舍位置供辨識；入口與通行方向以現場指示為準。</p>`;
   queryUpdate('skill',id);
  };
- list.addEventListener('click',e=>{const b=e.target.closest('[data-skill]');if(!b)return;id=b.dataset.skill;draw();if(window.matchMedia('(max-width:850px)').matches)detail.scrollIntoView({behavior:'smooth',block:'start'});});if(quick)quick.addEventListener('change',()=>{id=quick.value;input.value='';v.value='all';draw();});input.addEventListener('input',draw);v.addEventListener('change',draw);draw();
+ list.addEventListener('click',e=>{const b=e.target.closest('[data-skill]');if(!b)return;id=b.dataset.skill;draw();if(window.matchMedia('(max-width:850px)').matches)detail.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});});if(quick)quick.addEventListener('change',()=>{id=quick.value;input.value='';v.value='all';draw();});input.addEventListener('input',draw);v.addEventListener('change',draw);draw();
 }
 function initVenues(){
  let id=venues[qs.get('venue')]?qs.get('venue'):'nkh',type=0,zoom=1;
@@ -93,8 +95,8 @@ function initVenues(){
   if(type>=v.maps.length)type=0;
   tabs.innerHTML=D.venues.map(x=>`<button type="button" data-venue="${x.id}" aria-pressed="${x.id===id}">${esc(x.name)} · ${x.count}</button>`).join('');
   mapTypes.innerHTML=v.maps.map((m,i)=>`<button type="button" data-map="${i}" aria-pressed="${i===type}">${esc(m.name)}</button>`).join('');
-  $('#venueTitle').textContent=v.name;$('#venueHint').textContent=`${v.count} 個職種 · ${v.maps.length} 張來源圖 · 會議分流參考：${v.meetingHint}`;
-  image.src=v.maps[type].src;image.alt=`${v.name}：${v.maps[type].name}（11/12 來源圖網頁縮圖）`;
+  $('#venueTitle').textContent=v.name;$('#venueHint').textContent=`${v.count} 個職種 · ${v.maps.length} 張地圖。選擇職種後可查看館舍位置。`;
+  image.src=v.maps[type].src;image.alt=`${v.name}：${v.maps[type].name}導覽圖`;
   const programs=D.skills.filter(s=>s.venueId===id);$('#venueCount').textContent=programs.length;
   const requested=new URLSearchParams(location.search).get('skill'), selected=programs.some(p=>p.id===requested)?requested:programs[0]?.id;
   $('#venuePrograms').innerHTML=programs.map(s=>`<button type="button" data-skill="${s.id}" aria-pressed="${s.id===selected}" title="定位 ${esc(s.name)}">${s.id}　${esc(s.name)}　⌖</button>`).join('');const deep=$('#venueDeepLink');if(deep){deep.href='sixth/index.html?venue='+encodeURIComponent(id)+'#explorer';deep.textContent='互動校園地圖（'+v.name+'） ↗';}

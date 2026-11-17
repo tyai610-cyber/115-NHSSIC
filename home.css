@@ -26,3 +26,17 @@
   .home-supplement-links a{font-size:11px;padding:9px}
 }
 @media(max-width:360px){.home-supplement-links{grid-template-columns:1fr}}
+
+
+/* 搜尋直接呈現職種、報到時間與地圖捷徑 */
+#quickSkillResults .quick-skill-hit{display:flex;align-items:stretch;gap:7px;padding:4px 0}
+#quickSkillResults .quick-skill-hit>a:first-child{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;justify-content:center}
+#quickSkillResults .quick-skill-hit small{font-size:12px;color:#58758a}
+#quickSkillResults .quick-skill-hit .quick-map-action{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-width:78px;padding:9px 10px;border:1px solid #b5cfdc;border-radius:8px;background:#ecf5f9;color:#145271;font-weight:800;font-size:13px}
+.ux-notice-more{border:1px solid #e0e7ee;border-radius:10px;margin-top:10px;padding:10px 12px;background:#f9fbfc}
+.ux-notice-more>summary{cursor:pointer;font-weight:800;color:#38586d}
+.ux-notice-more-content{display:grid;gap:9px;margin-top:12px}
+.ux-schedule-more{border:1px solid #dee8ef;border-radius:11px;margin:13px 0;padding:10px 14px}
+.ux-schedule-more>summary{cursor:pointer;color:#225772;font-weight:850;font-size:14px;padding:4px 0}
+.ux-schedule-more .ux-skill-summary{margin-top:10px}
+@media(max-width:520px){#quickSkillResults .quick-skill-hit{gap:5px}#quickSkillResults .quick-skill-hit .quick-map-action{min-height:44px;min-width:72px}.ux-schedule-more{padding:9px 10px}}
