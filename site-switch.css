@@ -1,0 +1,38 @@
+/* 六入口自由切換：桌機完整導覽 + 手機五鍵快捷及六項展開面板 */
+.site-top .top-nav,.site-top .mobile-menu,.site-top .mobile-nav{display:none!important}
+.six-switch-bar{position:sticky;top:0;z-index:85;background:#12374a;border-bottom:1px solid #2d5967;box-shadow:0 5px 18px rgba(13,39,56,.12)}
+.six-switch-inner{max-width:1320px;margin:auto;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;padding:8px 18px}
+.six-switch-tab{display:flex;gap:8px;min-height:44px;align-items:center;justify-content:center;text-align:center;padding:7px 6px;color:#deecf1;text-decoration:none;font-size:13px;font-weight:750;border:1px solid transparent;border-radius:9px;white-space:nowrap}
+.six-switch-tab:hover,.six-switch-tab:focus-visible{background:#24536a;color:#fff}
+.six-switch-tab.is-current{background:#e7f5f2;border-color:#b3dedb;color:#0a535d}
+.six-switch-icon{font-size:20px;font-weight:800;line-height:1}
+.six-switch-open{overflow:hidden!important}
+.six-switch-overlay[hidden]{display:none!important}
+.six-switch-overlay{position:fixed;inset:0;z-index:1300;display:flex;align-items:center;justify-content:center;padding:22px}
+.six-switch-backdrop{position:absolute;inset:0;background:rgba(6,24,38,.7)}
+.six-switch-panel{position:relative;width:min(610px,100%);max-height:min(78dvh,680px);overflow-y:auto;background:#fff;color:#17384b;border-radius:20px;padding:23px;box-shadow:0 28px 90px rgba(4,17,33,.3)}
+.six-switch-panel-head{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.six-switch-panel h2{font-size:23px;margin:0;line-height:1.4;color:#153b4e}
+.six-switch-intro{color:#567480;font-size:13px;margin:8px 0 18px}
+.six-switch-close{color:#284954;background:#f0f5f6;border:1px solid #d2e4e6;border-radius:9px;padding:10px 13px;font-size:13px;font-weight:800;min-height:44px}
+.six-switch-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.six-switch-grid-link{border:1px solid #d8e5e7;border-radius:12px;background:#f5f9fa;text-decoration:none;display:flex;align-items:center;justify-content:flex-start;gap:12px;min-height:70px;padding:12px 15px;color:#183b4b;font-size:15px;font-weight:800}
+.six-switch-grid-link:hover,.six-switch-grid-link:focus-visible{background:#e7f3f3;border-color:#86b9c0}
+.six-switch-grid-link.is-current{background:#e1f4ed;border:2px solid #29867f;color:#115a5b}
+.six-switch-grid-link .six-switch-icon{display:grid;place-items:center;width:34px;height:34px;flex:none;border-radius:9px;background:#e6eef1}
+.adaptive-bottom-nav .six-switch-bottom-link,.adaptive-bottom-nav .six-switch-all{min-height:51px;min-width:0;border:0;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:transparent;color:#4f6f78;text-decoration:none;white-space:nowrap;font-size:11px;font-weight:850;cursor:pointer;padding:2px}
+.adaptive-bottom-nav .six-switch-bottom-icon{font-size:21px;line-height:1.1}
+.adaptive-bottom-nav .six-switch-bottom-link.is-current,.adaptive-bottom-nav .six-switch-all.is-current{background:#e5f4f1;color:#087477}
+.adaptive-bottom-nav .six-switch-bottom-link:focus-visible,.adaptive-bottom-nav .six-switch-all:focus-visible{outline:3px solid #efb763;outline-offset:-3px}
+@media(max-width:767px){
+  .six-switch-bar{display:none!important}
+  .adaptive-bottom-nav{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .six-switch-overlay{align-items:flex-end;padding:0}
+  .six-switch-panel{width:100%;max-height:min(82dvh,660px);border-radius:20px 20px 0 0;padding:20px 17px calc(24px + env(safe-area-inset-bottom,0px))}
+  .six-switch-grid{gap:9px}
+  .six-switch-grid-link{min-height:68px;padding:11px 10px;font-size:13px;gap:7px}
+  .six-switch-panel h2{font-size:21px}
+}
+@media(max-width:350px){.adaptive-bottom-nav .six-switch-bottom-link,.adaptive-bottom-nav .six-switch-all{font-size:10px}.adaptive-bottom-nav .six-switch-bottom-icon{font-size:19px}.six-switch-grid-link{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.six-switch-bar *,.six-switch-overlay *{animation:none!important;transition:none!important}}
+@media print{.six-switch-bar,.six-switch-overlay,.adaptive-bottom-nav .six-switch-all{display:none!important}.six-switch-open{overflow:visible!important}}
