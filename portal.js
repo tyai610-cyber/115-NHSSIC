@@ -98,7 +98,7 @@ function initVenues(){
   const programs=D.skills.filter(s=>s.venueId===id);$('#venueCount').textContent=programs.length;
   const requested=new URLSearchParams(location.search).get('skill'), selected=programs.some(p=>p.id===requested)?requested:programs[0]?.id;
   $('#venuePrograms').innerHTML=programs.map(s=>`<button type="button" data-skill="${s.id}" aria-pressed="${s.id===selected}" title="定位 ${esc(s.name)}">${s.id}　${esc(s.name)}　⌖</button>`).join('');const deep=$('#venueDeepLink');if(deep){deep.href='sixth/index.html?venue='+encodeURIComponent(id)+'#explorer';deep.textContent='互動校園地圖（'+v.name+'） ↗';}
-  setZoom(1);queryUpdate('venue',id);if(window.GK_VENUE_ROUTE)window.GK_VENUE_ROUTE.render(id);
+  setZoom(1);queryUpdate('venue',id);if(selected)queryUpdate('skill',selected);if(window.GK_VENUE_ROUTE)window.GK_VENUE_ROUTE.render(id);
   const action=$('#venueDeepLink');if(action&&selected)action.href='sixth/index.html?program='+encodeURIComponent(selected)+'&destination=practical#explorer';
  }
  function setZoom(value){zoom=Math.min(3.5,Math.max(1,Math.round(value*10)/10));const stage=document.getElementById('venueMapStage');if(stage){stage.style.width=zoom*100+'%';image.style.width='100%';}else image.style.width=zoom*100+'%';$('#venueZoomText').textContent=Math.round(zoom*100)+'%';if(zoom===1){viewport.scrollLeft=0;viewport.scrollTop=0}}
