@@ -64,6 +64,8 @@
  btn.addEventListener('click',()=>{if(mode==='off')return;try{if(playing)svg.pauseAnimations();else svg.unpauseAnimations();}catch(e){}playing=!playing;btn.textContent=playing?'暫停動畫':'繼續播放';});
  $('venueRouteReplay').addEventListener('click',()=>{try{svg.setCurrentTime(0);svg.unpauseAnimations()}catch(e){}playing=true;btn.textContent='暫停動畫';});
  $('venueRouteFocus').addEventListener('click',()=>{if(R[venue])focusRoute(R[venue].routes[skill])});
+ // 較慢載入的地圖在顯示完成後再次聚焦，避免手機只停在圖面上緣。
+ picture.addEventListener('load',()=>{const route=R[venue]?.routes?.[skill];if(route)focusDestination(route);});
  window.GK_VENUE_ROUTE={render,selectSkill};
  const current=new URLSearchParams(location.search).get('venue')||'nkh';render(current);
 })();
