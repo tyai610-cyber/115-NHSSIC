@@ -65,7 +65,7 @@
     svg.append(g);
   }
   const selectedName=D.skills.find(s=>s.id===skill)?.name||'競賽場館';
-  label.textContent=`${skill} ${selectedName}｜${r.place}`;info.textContent=`入口：${q.entry}。 ${r.note}`;
+  label.textContent=`${skill} ${selectedName}｜${r.place}`;info.textContent=`入口：${q.entry}。目的地光圈為館舍方向示意，並非已核定的精確入口。 ${r.note}`;
   hint.textContent=`${q.confidence}｜動畫僅供辨識館舍方向，不代表道路已核定、無障礙或實際可通行。`;
   btn.disabled=(mode==='off');
   playing=mode!=='off'&&(!motionPreference.matches||motionOptIn);
