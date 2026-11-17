@@ -96,13 +96,21 @@ function initVenues(){
   $('#venueTitle').textContent=v.name;$('#venueHint').textContent=`${v.count} 個職種 · ${v.maps.length} 張來源圖 · 會議分流參考：${v.meetingHint}`;
   image.src=v.maps[type].src;image.alt=`${v.name}：${v.maps[type].name}（11/12 來源圖網頁縮圖）`;
   const programs=D.skills.filter(s=>s.venueId===id);$('#venueCount').textContent=programs.length;
-  $('#venuePrograms').innerHTML=programs.map(s=>`<button type="button" data-skill="${s.id}">${s.id}　${esc(s.name)}　↗</button>`).join('');const deep=$('#venueDeepLink');if(deep){deep.href='sixth/index.html?venue='+encodeURIComponent(id)+'#explorer';deep.textContent='互動校園地圖（'+v.name+'） ↗';}
-  setZoom(1);queryUpdate('venue',id);if(window.GK_VENUE_ROUTE)window.GK_VENUE_ROUTE.render(id);
+  const requested=new URLSearchParams(location.search).get('skill'), selected=programs.some(p=>p.id===requested)?requested:programs[0]?.id;
+  $('#venuePrograms').innerHTML=programs.map(s=>`<button type="button" data-skill="${s.id}" aria-pressed="${s.id===selected}" title="定位 ${esc(s.name)}">${s.id}　${esc(s.name)}　⌖</button>`).join('');const deep=$('#venueDeepLink');if(deep){deep.href='sixth/index.html?venue='+encodeURIComponent(id)+'#explorer';deep.textContent='互動校園地圖（'+v.name+'） ↗';}
+  setZoom(1);queryUpdate('venue',id);if(selected)queryUpdate('skill',selected);if(window.GK_VENUE_ROUTE){window.GK_VENUE_ROUTE.render(id);if(selected)window.GK_VENUE_ROUTE.selectSkill?.(selected,{updateUrl:false});}
+  const action=$('#venueDeepLink');if(action&&selected)action.href='sixth/index.html?program='+encodeURIComponent(selected)+'&destination=practical#explorer';
  }
  function setZoom(value){zoom=Math.min(3.5,Math.max(1,Math.round(value*10)/10));const stage=document.getElementById('venueMapStage');if(stage){stage.style.width=zoom*100+'%';image.style.width='100%';}else image.style.width=zoom*100+'%';$('#venueZoomText').textContent=Math.round(zoom*100)+'%';if(zoom===1){viewport.scrollLeft=0;viewport.scrollTop=0}}
  tabs.addEventListener('click',e=>{const b=e.target.closest('[data-venue]');if(!b)return;id=b.dataset.venue;type=0;draw()});
  mapTypes.addEventListener('click',e=>{const b=e.target.closest('[data-map]');if(!b)return;type=+b.dataset.map;draw()});
- $('#venuePrograms').addEventListener('click',e=>{const b=e.target.closest('[data-skill]');if(b)location.href=`skills.html?skill=${b.dataset.skill}`});
+ $('#venuePrograms').addEventListener('click',e=>{const button=e.target.closest('[data-skill]');if(!button)return;
+  const skillId=button.dataset.skill;if(!byId[skillId])return;
+  queryUpdate('skill',skillId);$('#venuePrograms').querySelectorAll('[data-skill]').forEach(x=>x.setAttribute('aria-pressed',String(x===button)));
+  $('#venueDeepLink').href='sixth/index.html?program='+encodeURIComponent(skillId)+'&destination=practical#explorer';
+  if(window.GK_VENUE_ROUTE?.selectSkill?.(skillId))return;
+  location.href='sixth/index.html?program='+encodeURIComponent(skillId)+'&destination=practical#explorer';
+ });
  $('#mapPlus').addEventListener('click',()=>setZoom(zoom+.25));$('#mapMinus').addEventListener('click',()=>setZoom(zoom-.25));$('#mapReset').addEventListener('click',()=>setZoom(1));draw();
 }
 if(page==='home')initHome();else if(page==='skills')initSkills();else if(page==='venues')initVenues();
