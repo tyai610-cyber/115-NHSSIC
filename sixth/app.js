@@ -331,7 +331,7 @@
     for(const svc of hits){
       const btn=create('button','service-item');btn.type='button';btn.setAttribute('aria-pressed',String(svc.id===currentService));
       btn.append(create('span','service-no',svc.id),create('span','service-item-name',svc.name));
-      if(svc.pending){btn.classList.add('pending-service');btn.append(create('span','service-review','待公告'));}
+
       btn.addEventListener('click',()=>chooseService(svc.id));elements.serviceList.append(btn);
     }
     if(!hits.length)elements.serviceList.append(create('p','list-empty','找不到符合的服務項目。'));
@@ -497,7 +497,7 @@
     elements.mapShortcutList.replaceChildren();
     for(const p of forSite(site)){
       const btn=create('button','shortcut-item');btn.type='button';btn.setAttribute('aria-pressed',String(p.id===current));
-      btn.append(create('b','',`${p.id} ${p.name}`),create('span','',registration?`11/24 ${p.registrationTime||'待確認'}｜${p.registration||'未填'}`:`學科：${p.theory||'未填'}`));
+      btn.append(create('b','',`${p.id} ${p.name}`),create('span','',registration?`11/24 ${p.registrationTime||'請依公告'}｜${p.registration||'未填'}`:`學科：${p.theory||'未填'}`));
       btn.addEventListener('click',()=>chooseProgram(p.id,{focus:false,preserveMap:true}));elements.mapShortcutList.append(btn);
     }
   }
@@ -643,7 +643,7 @@
     });
     elements.copyProgramSummary.addEventListener('click',async()=>{
       const p=byId(current);if(!p)return;
-      const src=`115工科賽｜${p.id} ${p.name}\n場域：${p.site}\n11/24 報到：${p.registrationTime||'待確認'}｜${p.registration||'待確認'}\n學科：${p.theory||'待確認'}\n術科：${p.practical||'待確認'}\n領隊／檢討：${p.meeting||'待確認'}\n${currentPublicShareUrl?'導覽：'+currentPublicShareUrl+'\n':''}圖面位置非現場入口實測；以主辦單位最新公告為準。`;
+      const src=`115工科賽｜${p.id} ${p.name}\n場域：${p.site}\n11/24 報到：${p.registrationTime||'請依公告'}｜${p.registration||'依職種公告'}\n學科：${p.theory||'依職種公告'}\n術科：${p.practical||'依職種公告'}\n領隊／檢討：${p.meeting||'依職種公告'}\n${currentPublicShareUrl?'導覽：'+currentPublicShareUrl+'\n':''}圖面位置非現場入口實測；以主辦單位最新公告為準。`;
       toast(await copyText(src)?'已複製職種資訊':'無法自動複製，請改用瀏覽器選取文字');
     });
 
