@@ -31,3 +31,17 @@
 #venueRouteFocus{font-weight:800}
 @media(max-width:620px){#venueRouteLabel{font-size:16px}.venue-route-status{padding:12px}}
 @media(prefers-reduced-motion:reduce){.venue-target-ring{animation:none;opacity:.85}}
+
+/* 地圖目標旁顯示職種標籤，讓箭頭／光圈與名稱相鄰且易辨識 */
+.venue-target-label{pointer-events:none;filter:drop-shadow(0 7px 12px #12384c88)}
+.venue-target-label text{paint-order:stroke;stroke:#702b1b;stroke-width:1px}
+.venue-image-viewport{scroll-margin-top:24px}
+@media(max-width:620px){
+ .venue-image-viewport{scroll-margin-top:10px}
+ .venue-route-form select,.venue-route-form button{font-size:14px;min-height:46px}
+}
+@media(prefers-reduced-motion:reduce){
+ .venue-target-ring,.venue-route-pulse{animation:none!important;opacity:1}
+ .venue-route-mover animateMotion{display:none}
+ .venue-image-viewport{scroll-behavior:auto}
+}
