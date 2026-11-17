@@ -225,7 +225,7 @@
     }
     elements.globalProgram.value=id;
     if(updateUrl)syncUrl(id);
-    showMobileCard('program');
+    if(focus)hideMobileCard();else showMobileCard('program');
     if(focus){requestAnimationFrame(scrollToProgramLocation);}
   }
   function renderMapSelect(){
