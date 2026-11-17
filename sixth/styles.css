@@ -150,3 +150,20 @@ body[data-mode="editor"] .admin-panel{border:2px solid #b6d2df;border-radius:12p
 @media(prefers-reduced-motion:reduce){.selected-target::before{animation:none;opacity:.85;inset:-8px}}
 .destination-floor-link[hidden]{display:none!important}
 @media(max-width:520px){.destination-card{padding:12px}.destination-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.destination-tabs button{padding:7px 4px;font-size:11px}.destination-card-head strong{font-size:15px}.selected-pin-label{max-width:44vw;font-size:10px;padding:5px 6px}}
+
+/* 正式查詢介面：選取點優先、重疊清單避免被手機底部選單遮擋 */
+.map-pin.selected-target{isolation:isolate;outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 8px #ffad38aa,0 0 18px 5px #eb6524aa,0 4px 10px #16304780!important}
+.map-pin.selected-target::before{border-width:4px;border-color:#ea5421;animation:selected-pulse 2.25s ease-out infinite}
+.map-pin.selected-target .selected-pin-label{background:#752817;color:#fff;border:2px solid #fff5dc;font-size:13px;font-weight:850;line-height:1.4;white-space:normal;max-width:min(64vw,350px);box-shadow:0 8px 24px #19334b66}
+.pin-layer:has(.selected-target) .map-pin:not(.selected-target):not(.pin-cluster){opacity:.43}
+.pin-layer:has(.selected-target) .map-pin:not(.selected-target):hover,
+.pin-layer:has(.selected-target) .map-pin:not(.selected-target):focus-visible{opacity:1}
+@media(max-width:620px){
+ .cluster-chooser{left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom,0px));width:auto;max-height:min(58vh,440px)}
+ .cluster-items button{min-height:48px;font-size:15px}
+ .map-pin.selected-target{min-width:40px;min-height:40px}
+ .selected-pin-label{max-width:min(74vw,310px)!important;font-size:13px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .map-pin.selected-target::before{animation:none;opacity:.8}
+}
