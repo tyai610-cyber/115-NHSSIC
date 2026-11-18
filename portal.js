@@ -93,6 +93,7 @@ function initVenues(){
   if(type>=v.maps.length)type=0;
   tabs.innerHTML=D.venues.map(x=>`<button type="button" data-venue="${x.id}" aria-pressed="${x.id===id}">${esc(x.name)} · ${x.count}</button>`).join('');
   mapTypes.innerHTML=v.maps.map((m,i)=>`<button type="button" data-map="${i}" aria-pressed="${i===type}">${esc(m.name)}</button>`).join('');
+  const variants=$('#venueMapVariants');if(variants)variants.hidden=v.maps.length<2;
   $('#venueTitle').textContent=v.name;$('#venueHint').textContent=`${v.count} 個職種 · ${v.maps.length} 張來源圖 · 會議分流參考：${v.meetingHint}`;
   image.src=v.maps[type].src;image.alt=`${v.name}：${v.maps[type].name}（11/12 來源圖網頁縮圖）`;
   const programs=D.skills.filter(s=>s.venueId===id);$('#venueCount').textContent=programs.length;

@@ -37,12 +37,14 @@
   let shadow=svgEl('path',{d,stroke:'#072338','stroke-width':'21',opacity:'.72',fill:'none','stroke-linejoin':'round','stroke-linecap':'round'});
   let line=svgEl('path',{d,stroke:'#23e0cb','stroke-width':'12',fill:'none','stroke-linejoin':'round','stroke-linecap':'round','stroke-dasharray':'22 15'});svg.append(shadow,line);
   const mark=(pt,c,text)=>{let [x,y]=pxy(pt);let g=svgEl('g');g.append(svgEl('circle',{cx:x,cy:y,r:37,fill:c,opacity:'.16',class:'venue-route-pulse'}));g.append(svgEl('circle',{cx:x,cy:y,r:20,fill:c,stroke:'#fff','stroke-width':7}));g.append(svgEl('text',{x,y:y-43,'font-size':37,'font-weight':'900','text-anchor':'middle',stroke:'#ffffff','stroke-width':9,'paint-order':'stroke',fill:c}));g.lastChild.textContent=text;svg.append(g);};
-  mark(r.p[0],'#087b6c','入口');mark(r.p[r.p.length-1],'#d52c51','場館');
-  // 只針對目前選取的目的地加強辨識，不移動地圖資料座標。
+  mark(r.p[0],'#087b6c','入口');
+  // 不改變來源座標：雙層光圈在固定中心點後方繪製。
   const [tx,ty]=pxy(r.p[r.p.length-1]),targetHalo=svgEl('g',{class:'venue-target-halo','aria-hidden':'true'});
-  targetHalo.append(svgEl('circle',{cx:tx,cy:ty,r:55,fill:'none',stroke:'#b91c1c','stroke-width':10,class:'venue-target-ring'}));
-  targetHalo.append(svgEl('circle',{cx:tx,cy:ty,r:79,fill:'none',stroke:'#ffffff','stroke-width':7,opacity:'.9',class:'venue-target-ring venue-target-ring-delayed'}));
+  targetHalo.append(svgEl('circle',{cx:tx,cy:ty,r:43,fill:'#0b2d44',opacity:'.85',class:'venue-target-backdrop'}));
+  targetHalo.append(svgEl('circle',{cx:tx,cy:ty,r:65,fill:'none',stroke:'#FFD600','stroke-width':13,class:'venue-target-ring'}));
+  targetHalo.append(svgEl('circle',{cx:tx,cy:ty,r:76,fill:'none',stroke:'#ffffff','stroke-width':10,class:'venue-target-ring venue-target-ring-delayed'}));
   svg.append(targetHalo);
+  mark(r.p[r.p.length-1],'#FF5722','場館');
   const targetName=D.skills.find(s=>s.id===skill)?.name||'競賽場館';
   const caption=`${skill} ${targetName}`;
   const captionWidth=Math.min(650,Math.max(235,Array.from(caption).length*43+70));
@@ -73,7 +75,7 @@
   try{if(playing){svg.unpauseAnimations();svg.setCurrentTime(0);}else svg.pauseAnimations();}catch(e){}
   if(focus)focusDestination(r,{showMap});
  }
- function render(venueId){venue=venueId;let q=R[venueId];panel.hidden=!q;if(!q){svg.replaceChildren();return;}
+ function render(venueId){venue=venueId;let q=R[venueId];panel.hidden=!q;const disclosure=$('venueRouteDisclosure');if(disclosure)disclosure.hidden=!q;if(!q){svg.replaceChildren();return;}
   let skills=D.skills.filter(s=>s.venueId===venueId&&q.routes[s.id]);if(!skills.length){panel.hidden=true;return;}
   if(lastRequested && q.routes[lastRequested]){skill=lastRequested;lastRequested=null;}else if(!q.routes[skill])skill=skills[0].id;
   sel.innerHTML=skills.map(s=>`<option value="${s.id}">${s.id} ${esc(s.name)}｜${esc(q.routes[s.id].place)}</option>`).join('');sel.value=skill;
