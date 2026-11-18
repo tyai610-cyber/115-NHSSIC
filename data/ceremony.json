@@ -26,17 +26,17 @@
       "source": "p.122"
     },
     {
+      "id": "c05",
+      "time": "08:30",
+      "title": "典禮開始",
+      "kind": "milestone",
+      "source": "最新確認：115/11/18（取代手冊 p.122 的 08:50）"
+    },
+    {
       "id": "c04",
       "time": "08:40–08:50",
       "title": "迎賓表演－匠心樂章",
       "kind": "performance",
-      "source": "p.122"
-    },
-    {
-      "id": "c05",
-      "time": "08:50",
-      "title": "典禮開始",
-      "kind": "milestone",
       "source": "p.122"
     },
     {
@@ -158,5 +158,8 @@
       "kind": "milestone",
       "source": "p.123"
     }
-  ]
+  ],
+  "confirmedStart": "08:30",
+  "startTimeConfirmedOn": "115/11/18",
+  "detailTimeNote": "原手冊除典禮開始外之其他節目時段尚待新版流程核對，原始 PDF 所載 08:50 開始已不適用"
 }
