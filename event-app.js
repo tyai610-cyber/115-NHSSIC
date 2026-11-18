@@ -65,7 +65,7 @@ function startCeremony(){
   const shown=filter==='all'?data:data.filter(x=>x.kind===filter || (filter==='ceremony' && x.kind==='milestone'));
   $('#ceremonyList').innerHTML=shown.map((x)=>{
    const kindMap={registration:'報到',ceremony:'典禮',performance:'表演',awarding:'頒獎',milestone:'重要節點',final:'交接'};
-   return `<article class="ceremony-row ${x.kind==='awarding'?'award':''} ${x.kind==='milestone'?'milestone':''}" role="button" tabindex="0" aria-pressed="false" aria-label="選取程序：${esc(x.time)} ${esc(x.title)}" data-ceremony="${x.id}"><time class="time">${esc(x.time)}</time><h3>${esc(x.title)}</h3><span class="kind">${esc(kindMap[x.kind])}</span></article>`;
+   return `<article class="ceremony-row ${x.kind==='awarding'?'award':''} ${x.kind==='milestone'?'milestone':''}" role="button" tabindex="0" aria-pressed="false" aria-label="選取程序：${esc(x.time)} ${esc(x.title)}" data-ceremony="${x.id}"><time class="time">${esc(x.time)}</time><h3>${esc(x.title)}</h3><span class="kind">${esc(kindMap[x.kind])}${x.id==='c05'?' · 確定時間':' · 舊版待核'}</span></article>`;
   }).join('');
  }
  $('#ceremonyFilters').addEventListener('click',e=>{const b=e.target.closest('button[data-filter]');if(!b)return;filter=b.dataset.filter;render()});
