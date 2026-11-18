@@ -205,3 +205,49 @@ body[data-mode="editor"] .admin-panel{border:2px solid #b6d2df;border-radius:12p
  .map-pin.parking-marker.selected-target::before,
  .map-pin.unloading-marker.selected-target::before{animation:none!important;opacity:.9}
 }
+
+/* 115/11/19｜七場域導覽：圖上方僅保留單位名稱，其他控制收合於下方 */
+.explorer-section>.section-heading .section-subtitle,.explorer-section>.section-heading .light-pill{display:none}
+.main-panel>.map-head{padding:10px 14px 8px;display:flex;min-height:0}
+.main-panel>.map-head h3{font-size:clamp(19px,2.2vw,24px);margin:0;line-height:1.45;font-weight:850}
+.main-panel>.map-head .map-subtitle{display:none}
+.map-compact-options{border:1px solid #dbe7ea;background:#fff;margin:10px 12px;border-radius:10px}
+.map-compact-options summary{min-height:44px;padding:11px 13px;cursor:pointer;font-size:13px;font-weight:800;color:#23586e}
+.map-compact-options summary:focus-visible{outline:3px solid #e6af49;outline-offset:2px}
+.map-compact-tools{padding:0 10px 12px}
+.map-compact-tools .map-toolbar{margin:0 0 10px}
+.map-compact-tools .map-hint{margin:8px 0}
+.map-compact-downloads{display:flex;gap:10px;flex-wrap:wrap;padding:6px 0}
+.map-compact-downloads .original-link{display:inline-flex}
+.main-panel>.destination-card{margin:10px 12px}
+@media(max-width:520px){
+ .main-panel>.map-head{padding:8px 10px}
+ .map-compact-options,.main-panel>.destination-card{margin-left:8px;margin-right:8px}
+ .map-compact-tools .map-toolbar{display:flex;flex-wrap:wrap}
+}
+/* 外場示意館舍：亮橘固定中心，金黃和白色交錯擴散；不改動定位座標 */
+.map-pin.venue-illustrative.selected-target,
+.map-pin.venue-illustrative.selected-cluster-pin{
+ background:#FF5722!important;color:#fff!important;border:3px solid #fff!important;
+ box-shadow:0 0 0 5px #0b2d4499,0 0 0 10px #FFD600bb,0 0 22px 8px #ff5722b8!important;
+ z-index:16!important;isolation:isolate;overflow:visible!important;
+}
+.map-pin.venue-illustrative.selected-target::before,
+.map-pin.venue-illustrative.selected-target::after,
+.map-pin.venue-illustrative.selected-cluster-pin::before,
+.map-pin.venue-illustrative.selected-cluster-pin::after{
+ content:"";position:absolute;inset:-11px;border-radius:50%;box-sizing:border-box;
+ border:4px solid #FFD600;pointer-events:none;transform-origin:center;
+ animation:externalVenueBeacon 2s ease-out infinite;
+}
+.map-pin.venue-illustrative.selected-target::after,
+.map-pin.venue-illustrative.selected-cluster-pin::after{border-color:#fff;animation-delay:-1s;inset:-15px}
+@keyframes externalVenueBeacon{0%{transform:scale(.74);opacity:1}70%{opacity:.5}100%{transform:scale(1.8);opacity:0}}
+@media(max-width:620px){.map-pin.venue-illustrative.selected-target{min-width:43px;min-height:43px}}
+@media(prefers-reduced-motion:reduce){
+ .map-pin.venue-illustrative.selected-target::before,
+ .map-pin.venue-illustrative.selected-target::after,
+ .map-pin.venue-illustrative.selected-cluster-pin::before,
+ .map-pin.venue-illustrative.selected-cluster-pin::after{animation:none!important;transform:none!important;opacity:1!important}
+}
+@media print{.map-compact-options{display:none}}
