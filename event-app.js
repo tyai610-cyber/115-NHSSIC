@@ -28,7 +28,7 @@ function startAgenda(){
   $('#dayTabs').innerHTML=A.days.map(d=>`<button type="button" role="tab" data-day="${d}" aria-selected="${d===day}" class="${d===day?'active':''}"><small>星期${{'24':'二','25':'三','26':'四','27':'五'}[d]}</small><strong>11/${d}</strong></button>`).join('');
   $('#agendaDateEn').textContent=titleDays[day][2];$('#agendaDateTitle').innerHTML=`${titleDays[day][0]} <small>${titleDays[day][1]}</small>`;
   // 11/27 的22個程序以典禮詳細表 p.122–123 為主要來源。原大會概覽留在頁面差異說明。
-  const dayEvents=day==='27'?[...DATA.ceremony.events.map(x=>({id:'detail-'+x.id,date:'27',time:x.time,title:x.title,kind:x.kind==='registration'?'checkin':'ceremony',who:['all'],place:DATA.ceremony.venue,detail:'典禮詳細程序；依 p.122–123',source:x.source,flag:null,venues:[]})),...A.events.filter(e=>e.id==='27-20')]:A.events.filter(ev=>ev.date===day);
+  const dayEvents=day==='27'?[...DATA.ceremony.events.map(x=>({id:'detail-'+x.id,date:'27',time:x.time,title:x.title,kind:x.kind==='registration'?'checkin':'ceremony',who:['all'],place:DATA.ceremony.venue,detail:x.id==='c05'?'典禮正式開始 08:30（最新確定）':'原手冊 p.122–123 舊版細項時段；尚待新版核對',source:x.source,flag:null,venues:[]})),...A.events.filter(e=>e.id==='27-20')]:A.events.filter(ev=>ev.date===day);
   if($('#agendaCeremonyPriority'))$('#agendaCeremonyPriority').hidden=day!=='27';
   if($('#agendaLegacy'))$('#agendaLegacy').hidden=day!=='27';
   venueBox.disabled=day==='27';
@@ -41,7 +41,7 @@ function startAgenda(){
    if(venue!=='all'&&ev.venues.length&&!ev.venues.includes(venue))return false;
    return true;
   }).sort((a,b)=>fmt(a.time).localeCompare(fmt(b.time)));
-  $('#agendaSummary').textContent=day==='27'?`典禮詳細表 22 項程序＋賦歸 1 項；目前顯示 ${shown.length} 項。以 07:40–08:10 報到、08:50 正式開始為主要時程。`: `本日大會概覽 ${dayEvents.length} 項；目前顯示 ${shown.length} 項。個別職種仍以專屬日程為準。`;
+  $('#agendaSummary').textContent=day==='27'?`典禮詳細表 22 項程序＋賦歸 1 項；目前顯示 ${shown.length} 項。以 08:30 正式開始（確定）為準；報到入席 07:40–08:10 為原手冊時段，其他細項尚待新版確認。`: `本日大會概覽 ${dayEvents.length} 項；目前顯示 ${shown.length} 項。個別職種仍以專屬日程為準。`;
   $('#agendaList').innerHTML=shown.length?shown.map(ev=>{
    const hasVenue=venue!=='all'&&!ev.venues.length&&ev.who.includes('judge');
    const place=hasVenue?A.venues[venue].name+'（依該場域安排）':ev.place;
