@@ -542,7 +542,7 @@
     const map=getMap();if(!map)return;
     const focus=activeFocus(); updateModeButtons();
     elements.mapViewport.style.setProperty('--map-aspect',String(1/displayedAspect()));
-    elements.mapTitle.textContent=`${site}｜${map.title}`;elements.mapSubtitle.textContent=focus?'重點地圖':'完整圖面';
+    elements.mapTitle.textContent=site;elements.mapSubtitle.textContent='';
     elements.originalLink.href=map.original||map.preview;
     elements.downloadOriginal.hidden=!map.original; if(map.original){elements.downloadOriginal.href=map.original;elements.downloadOriginal.download=map.sourceName;}
     elements.originalLink.textContent=map.original?'開啟原始高解析圖 ↗':'開啟完整網頁版圖面 ↗';
