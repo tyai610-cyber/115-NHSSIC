@@ -16,6 +16,33 @@
   ];
   var bar, overlay, bottom, trigger, closeButton, lastFocus;
 
+  function selectedSkill() {
+    var params = new URLSearchParams(location.search);
+    var choice = params.get("skill") || params.get("program");
+    if (/^(0[1-9]|1[0-9]|2[0-9])$/.test(choice || "")) {
+      try { sessionStorage.setItem("gk115-last-skill", choice); } catch (_) {}
+      return choice;
+    }
+    try {
+      var previous = sessionStorage.getItem("gk115-last-skill");
+      return /^(0[1-9]|1[0-9]|2[0-9])$/.test(previous || "") ? previous : null;
+    } catch (_) { return null; }
+  }
+  function skillAwareUrl(path) {
+    var dest = new URL(path, root);
+    var file = dest.pathname.substring(dest.pathname.lastIndexOf("/") + 1);
+    var skill = selectedSkill();
+    if (skill && (file === "skills.html" || file === "venues.html"))
+      dest.searchParams.set("skill", skill);
+    return dest.href;
+  }
+  function updateSkillLink(a, path) {
+    var refresh = function () { a.href = skillAwareUrl(path); };
+    refresh();
+    a.addEventListener("pointerenter", refresh);
+    a.addEventListener("focus", refresh);
+    a.addEventListener("click", refresh);
+  }
   function url(path) { return new URL(path, root).href; }
   function node(tag, className, text) {
     var e = document.createElement(tag);
@@ -27,6 +54,7 @@
     var a = node("a", className);
     a.href = url(item.href);
     a.dataset.sixEntry = item.id;
+    updateSkillLink(a, item.href);
     var icon = node("span", "six-switch-icon", item.icon);
     icon.setAttribute("aria-hidden", "true");
     a.appendChild(icon);
@@ -137,6 +165,7 @@
     var a = node("a", "six-switch-bottom-link");
     a.href = url(href);
     a.dataset.sixShort = id;
+    updateSkillLink(a, href);
     var i = node("span", "six-switch-bottom-icon", icon);
     i.setAttribute("aria-hidden", "true");
     a.appendChild(i);
