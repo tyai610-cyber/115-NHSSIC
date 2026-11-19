@@ -307,3 +307,24 @@ body[data-mode="editor"] .admin-panel{border:2px solid #b6d2df;border-radius:12p
   animation:none!important;transform:none!important;opacity:1!important;
  }
 }
+
+/* V10｜三目的地操作在地圖之前；不增加地圖表頭 */
+.main-panel>.destination-card{margin:2px 12px 10px;padding:10px 14px;border-left:4px solid #16748a;background:#f8fbfc}
+.main-panel>.destination-card .destination-card-head{gap:12px}
+.main-panel>.destination-card .destination-card-head strong{font-size:clamp(16px,2vw,19px)}
+.main-panel>.destination-card .destination-tabs{margin:9px 0 7px}
+.main-panel>.destination-card .destination-tabs button{min-height:46px;font-size:14px;padding:10px 12px;cursor:pointer}
+.main-panel>.destination-card .destination-place{font-size:14px;line-height:1.6}
+.main-panel>.destination-card .destination-status{font-size:12px}
+.main-panel>.destination-card .destination-tabs button:focus-visible{outline:3px solid #e5a72d;outline-offset:2px}
+.mobile-card-close{min-width:44px;min-height:44px;width:44px;height:44px}
+.mobile-card-actions button{min-height:44px;font-size:12px}
+@media(max-width:520px){
+ .main-panel>.destination-card{margin:0 8px 8px;padding:9px 10px}
+ .main-panel>.destination-card .destination-card-head{flex-wrap:wrap}
+ .main-panel>.destination-card .destination-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+ .main-panel>.destination-card .destination-tabs button{padding:9px 2px;font-size:12px;min-height:46px}
+ .main-panel>.destination-card .destination-place{font-size:13px}
+ .main-panel>.destination-card .destination-status{font-size:12px}
+ .mobile-card-inner{padding-right:42px}
+}
