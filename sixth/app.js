@@ -197,7 +197,7 @@
   // Regular map-03 coordinates remain untouched. Non-practical external choices reuse
   // an explicitly labelled campus-building reference (never an invented classroom/desk).
   function destinationPinsFor(targetMap,purpose){
-    const original=selectedPins().filter(pin=>pin.mapId===targetMap);
+    const original=(targetMap===mapId?selectedPins():DATA.pins.filter(pin=>pin.mapId===targetMap));
     if(purpose==='practical')return original;
     const map=DATA.maps.find(m=>m.id===targetMap);
     if(!map)return [];
