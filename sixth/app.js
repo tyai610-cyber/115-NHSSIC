@@ -567,6 +567,17 @@
   }
   function renderMap(){
     const map=getMap();if(!map)return;
+    // 報到或學科格位可能位於重點裁切範圍之外。必要時自動顯示完整圖，避免定位燈消失。
+    if(mapMode==='focus'&&FOCUS[mapId]){
+      const frame=FOCUS[mapId];
+      const pinSet=destinationPinsFor(mapId,currentDestination)
+        .filter(p=>p.programId===current&&usableVenuePin(p));
+      const outside=pinSet.some(p=>{
+        const y=(p.y/100)*frame.sourceHeight;
+        return y<frame.top || y>frame.top+frame.height;
+      });
+      if(outside)mapMode='full';
+    }
     const focus=activeFocus(); updateModeButtons();
     elements.mapViewport.style.setProperty('--map-aspect',String(1/displayedAspect()));
     elements.mapTitle.textContent=site;elements.mapSubtitle.textContent='';
