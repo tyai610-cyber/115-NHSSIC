@@ -151,21 +151,21 @@
     const hasPurposePin=candidates.some(usableVenuePin);
     elements.destinationStatus.textContent=localReferences.length
       ?localReferences.some(pin=>pin.sourceKind==='classroom_diagram')
-        ?'藍色「學」呼吸燈標示來源學科圖的教室配置格位；不是實際門口或進出動線。'
+        ?'教室位置示意：藍色「學」標記對應學科圖配置格位，非教室門口；請依現場標示入場。'
         :localReferences.some(pin=>pin.sourceKind==='registration_symbol')
-          ?'橘色「報」呼吸燈標示來源報到圖原印標記；實際桌位仍依現場指引。'
-          :`${destinationLabel(currentDestination)}以同科館圖面位置標示呼吸燈；為館舍區域示意，非教室或實測入口。`
+          ?'報到區域參考：橘色「報」標記對應來源報到圖，實際桌位請依現場指引。'
+          :`地圖僅標示館舍區域，並非${destinationLabel(currentDestination)}的精確門口或桌位；請依現場指示。`
       :externalReferences
-        ?`${destinationLabel(currentDestination)}以已標註之競賽館舍圖面方向顯示呼吸燈，不代表該報到桌／學科教室的精確位置。`
+        ?`地圖僅標示已公布的競賽館舍區域，非${destinationLabel(currentDestination)}的精確教室／報到桌。`
         :mapped
-          ?'來源圖已標註館舍範圍；呼吸燈是圖面定位，非實測門口。'
+          ?'已標示圖面參考位置；不是現場實測門口。'
           :hasPurposePin?'此位置仍須核對；請以正式文字與現場指引為準。'
-          :'此目的地尚未有可靠的可亮燈座標，保留正式地點文字；位置待核對，不會自行猜測地圖位置。';
+          :'詳細位置尚待核對；請依上方已公布地點文字與現場指引，地圖不猜測精確位置。';
     const hasAdminRoom=p.site==='北科附工'&&currentDestination==='theory'&&/行政大樓/.test(p.theory||'');
     elements.destinationFloorLink.hidden=!hasAdminRoom;
     if(hasAdminRoom)elements.destinationFloorLink.href=`../floor.html?skill=${p.id}`;
     if(elements.returnSkillDetails)elements.returnSkillDetails.href=`../skills.html?skill=${p.id}`;
-    elements.destinationTabs?.querySelectorAll('[data-purpose]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.purpose===currentDestination)));
+    elements.destinationTabs?.querySelectorAll('[data-purpose]').forEach(button=>{button.setAttribute('aria-pressed',String(button.dataset.purpose===currentDestination));button.setAttribute('aria-label',`${destinationLabel(button.dataset.purpose)}，${button.dataset.purpose===currentDestination?'目前選取':'點選切換地圖'}`);});
   }
 
   function navigateDestination(purpose,{updateUrl=true,scroll=true}={}){

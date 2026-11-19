@@ -47,8 +47,8 @@
 <div class="workspace">
 <aside aria-labelledby="sidebar-title" class="sidebar">
 <div class="side-head"><div><span class="small-label">職種查詢</span><h3 id="sidebar-title">職種快速查詢</h3></div><span class="small-count" id="siteProgramCount">—</span></div>
-<label class="field"><span>跨場域快速跳轉</span><select id="globalProgram"><option value="">選擇 01–29 職種</option></select></label>
-<label class="field"><span>目前場域內搜尋</span><div class="search-wrapper"><svg aria-hidden="true" viewbox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.3"></circle><path d="m16 16 4.8 4.8"></path></svg><input autocomplete="off" id="programSearch" placeholder="搜尋編號、名稱、教室..." type="search"/></div></label>
+<label class="field"><span>直接選擇職種</span><select id="globalProgram"><option value="">選擇 01–29 職種</option></select></label>
+<label class="field"><span>搜尋此場域的職種</span><div class="search-wrapper"><svg aria-hidden="true" viewbox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.3"></circle><path d="m16 16 4.8 4.8"></path></svg><input autocomplete="off" id="programSearch" placeholder="搜尋編號、名稱、教室..." type="search"/></div></label>
 <div class="list-heading"><span>場域職種列表</span><button class="text-button" id="clearSearch" type="button">清除搜尋</button></div>
 <div class="program-list" id="programList" role="list"></div>
 <p class="sidebar-note">切換職種可查看報到、學科及術科地點。</p>
@@ -58,6 +58,13 @@
 
 
 
+<section class="destination-card" id="destinationCard" aria-label="目前職種目的地">
+<div class="destination-card-head"><div><span id="destinationSite">競賽場域</span><strong id="destinationProgram">選擇職種</strong></div><a id="returnSkillDetails" href="../skills.html">返回職種資訊</a></div>
+<div class="destination-tabs" role="group" aria-label="切換目的地"><button data-purpose="registration" type="button">報到地點</button><button data-purpose="theory" type="button">學科試場</button><button data-purpose="practical" type="button">術科試場</button></div>
+<p class="destination-place" id="destinationPlace">選擇職種後顯示地點</p>
+<p class="destination-status" id="destinationStatus" role="status"></p>
+<a class="destination-floor-link" id="destinationFloorLink" hidden>查看行政大樓教室位置 ↗</a>
+</section>
 <div aria-label="可捲動及縮放的校園導覽圖" class="map-viewport" id="mapViewport" tabindex="0">
 <div class="map-stage" id="mapStage">
 <img alt="校園導覽圖載入中" decoding="async" id="mapImage" loading="eager"/><div class="map-loading" hidden="" id="mapLoading">地圖載入中…</div>
@@ -72,13 +79,7 @@
 <button aria-label="放大地圖" class="tool-btn" id="zoomIn" type="button">＋</button>
 <button class="tool-btn tool-text" id="zoomReset" type="button">重設</button>
 </div>
-</div><div class="map-compact-downloads"><a class="original-link" href="#" id="originalLink" rel="noopener" target="_blank">開啟原始高解析圖 <span aria-hidden="true">↗</span></a><a class="original-link" download="" href="#" id="downloadOriginal">下載原始圖檔 <span aria-hidden="true">↓</span></a></div><div aria-live="polite" class="map-hint" id="mapStatus">點選地圖中的編號，可查看職種與場地資訊。</div><details class="map-shortcuts" hidden="" id="mapShortcutBox"><summary id="mapShortcutHeading">圖面職種查詢索引</summary><div class="shortcut-explain" id="mapShortcutExplain"></div><div class="shortcut-list" id="mapShortcutList"></div></details></div></details><section class="destination-card" id="destinationCard" aria-label="目前職種目的地">
-<div class="destination-card-head"><div><span id="destinationSite">競賽場域</span><strong id="destinationProgram">選擇職種</strong></div><a id="returnSkillDetails" href="../skills.html">返回職種資訊</a></div>
-<div class="destination-tabs" role="group" aria-label="切換目的地"><button data-purpose="registration" type="button">報到地點</button><button data-purpose="theory" type="button">學科試場</button><button data-purpose="practical" type="button">術科試場</button></div>
-<p class="destination-place" id="destinationPlace">選擇職種後顯示地點</p>
-<p class="destination-status" id="destinationStatus" role="status"></p>
-<a class="destination-floor-link" id="destinationFloorLink" hidden>查看行政大樓教室位置 ↗</a>
-</section>
+</div><div class="map-compact-downloads"><a class="original-link" href="#" id="originalLink" rel="noopener" target="_blank">開啟原始高解析圖 <span aria-hidden="true">↗</span></a><a class="original-link" download="" href="#" id="downloadOriginal">下載原始圖檔 <span aria-hidden="true">↓</span></a></div><div aria-live="polite" class="map-hint" id="mapStatus">點選地圖中的編號，可查看職種與場地資訊。</div><details class="map-shortcuts" hidden="" id="mapShortcutBox"><summary id="mapShortcutHeading">圖面職種查詢索引</summary><div class="shortcut-explain" id="mapShortcutExplain"></div><div class="shortcut-list" id="mapShortcutList"></div></details></div></details>
 <div class="map-footer"><span><i class="legend-pip legend-other"></i>職種定位點</span><span><i class="legend-pip legend-current"></i>目前選取</span><span><i class="legend-pip legend-pending"></i>待現場核對</span><span id="pinCount">—</span></div>
 <div aria-label="密集定位群組清單" aria-modal="false" class="cluster-chooser" hidden="" id="clusterChooser" role="dialog"><div class="cluster-head"><strong id="clusterTitle">選擇定位點</strong><button aria-label="關閉定位群組" id="clusterClose" type="button">✕</button></div><div class="cluster-items" id="clusterItems"></div><p>群組只合併畫面上的點選按鈕，不會改動原始座標或核定狀態。</p></div>
 <section aria-labelledby="services-title" class="service-section" hidden="" id="serviceSection">
@@ -151,7 +152,7 @@
 <strong>場域術科導覽圖</strong>
 <p id="venueGuideSummary">依所屬場域圖面標點顯示，尚非入口實測位置。</p>
 <button class="feature-btn" id="venueGuideBtn" type="button">在地圖中顯示位置</button>
-<a class="feature-link" href="#" id="venueGuideOriginal" rel="noopener" target="_blank">查看場域場域地圖 ↗</a>
+<a class="feature-link" href="#" id="venueGuideOriginal" rel="noopener" target="_blank">查看場域導覽圖 ↗</a>
 </div>
 <div class="asset-tile">
 <span aria-hidden="true" class="asset-icon">▣</span>

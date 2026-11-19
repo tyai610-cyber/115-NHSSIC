@@ -59,3 +59,8 @@
  .portal-event-after-entrances .portal-source{font-size:10px}
 }
 @media print{.portal-mobile-entrances-link{display:none!important}}
+
+/* V10 考生優先顯示三個目的地，老師重點另以可展開資訊呈現 */
+.ux-primary-actions .ux-primary-action{min-height:46px;display:inline-flex;align-items:center;justify-content:center;text-align:center;line-height:1.5}
+.ux-teacher-hint{font-size:13px;line-height:1.65;color:#45606a;padding:9px 12px;margin:6px 0 10px;background:#edf5f7;border-left:3px solid #347789}
+@media(max-width:520px){.ux-primary-actions{gap:8px}.ux-primary-actions .ux-primary-action{font-size:13px;padding:10px 12px;min-height:46px}.ux-teacher-hint{font-size:12px}}
