@@ -383,3 +383,53 @@ body[data-mode="editor"] .admin-panel{border:2px solid #b6d2df;border-radius:12p
  .service-desk-orb::before,.service-desk-orb::after{animation:none!important;opacity:.85!important;transform:none!important}
 }
 @media print{.service-desk-map-prompt{display:none!important}}
+
+/* 115/11/23：服務台實際圖面疊點。座標固定在官方 14/16 號的中點。
+ * 群組按鈕僅視覺上移，絕不調整群組資料或其他原圖點座標。
+ */
+.map-pin.service-desk-pin{
+  z-index:25!important;isolation:isolate;overflow:visible!important;
+  width:42px;height:42px;min-width:42px;min-height:42px;
+  background:#ffd33e!important;color:#163448!important;
+  border:3px solid #fff!important;font-size:19px;font-weight:950;
+  box-shadow:0 0 0 6px #e8a21c66,0 0 20px 6px #ffc928bb,0 3px 14px #0b293f99!important;
+}
+.map-pin.service-desk-pin:hover,.map-pin.service-desk-pin:focus-visible{
+  z-index:32!important;transform:translate(-50%,-50%) scale(1.13);
+}
+.map-pin.service-desk-pin::before,.map-pin.service-desk-pin::after{
+  content:"";position:absolute;inset:-10px;box-sizing:border-box;border-radius:50%;
+  border:4px solid #ffc323;pointer-events:none;
+  animation:gkServiceDeskPulse 1.9s ease-out infinite;
+}
+.map-pin.service-desk-pin::after{inset:-14px;border-color:#fff;animation-delay:-.95s}
+.map-pin.service-desk-pin .service-desk-pin-label{
+  position:absolute;top:calc(100% + 7px);left:50%;transform:translateX(-50%);
+  color:#fff;background:#12364b;border:2px solid #ffe098;
+  border-radius:7px;font-weight:900;font-size:12px;line-height:1.25;letter-spacing:.02em;
+  padding:5px 9px;white-space:nowrap;box-shadow:0 2px 8px #0b294266;pointer-events:none;
+}
+/* 14、16 所在群組稍微往上顯示，確保「服」在原座標清晰可點。 */
+.map-pin.pin-cluster.near-desk-cluster{
+  z-index:18!important;transform:translate(-50%,-50%) translateY(-63px);
+  background:#17435f;border:3px solid #f0d89b;
+  box-shadow:0 3px 10px #0926387f!important;
+}
+.map-pin.pin-cluster.near-desk-cluster::after{
+  content:"";position:absolute;left:50%;top:100%;height:40px;
+  border-left:2px dashed #17435f9e;pointer-events:none;
+}
+.map-pin.pin-cluster.near-desk-cluster:hover,.map-pin.pin-cluster.near-desk-cluster:focus-visible{
+  z-index:28!important;transform:translate(-50%,-50%) translateY(-63px) scale(1.10);
+}
+@media(max-width:520px){
+ .map-pin.service-desk-pin{width:46px;height:46px;min-width:46px;min-height:46px;font-size:20px}
+ .map-pin.pin-cluster.near-desk-cluster{transform:translate(-50%,-50%) translateY(-70px)}
+ .map-pin.pin-cluster.near-desk-cluster:hover,.map-pin.pin-cluster.near-desk-cluster:focus-visible{
+   transform:translate(-50%,-50%) translateY(-70px) scale(1.08)}
+ .map-pin.service-desk-pin .service-desk-pin-label{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){
+ .map-pin.service-desk-pin::before,.map-pin.service-desk-pin::after{
+   animation:none!important;opacity:.85!important;transform:none!important}
+}
