@@ -8,6 +8,9 @@
   // A separate, non-numbered service point; the official A3 item 01–28 is preserved.
   if(V12_PATCH.serviceDesk && !DATA.services.some(s=>s.id===V12_PATCH.serviceDesk.id))
     DATA.services.push({...V12_PATCH.serviceDesk,displayId:'服'});
+  // 加在原有地圖服務點資料之後；官方 01–28 的圖面資料完全不變。
+  if(V12_PATCH.serviceDeskPin && !DATA.servicePins.some(p=>p.serviceId==='desk'))
+    DATA.servicePins.push({...V12_PATCH.serviceDeskPin});
   const DIAGRAMS = window.GK_DIAGRAMS?.items || {};
   const IS_EDITOR = document.body.dataset.mode === 'editor';
   if (!DATA || !Array.isArray(DATA.programs)) { document.body.textContent='導覽資料未載入，請確認 data.js 是否與 index.html 放在同一資料夾。'; return; }
@@ -374,13 +377,10 @@
   function chooseService(id,{focus=true}={}){
     if(!serviceById(id))return;
     currentService=id;closeCluster();renderServiceList();renderPins();showMobileCard('service');
-    if(id==='desk'){
-      elements.serviceDeskBeacon?.classList.add('is-selected');
-      if(focus)requestAnimationFrame(()=>elements.serviceDeskBeacon?.scrollIntoView({behavior:mapScrollBehavior(),block:'center'}));
-    }else{
-      elements.serviceDeskBeacon?.classList.remove('is-selected');
-      if(focus)requestAnimationFrame(()=>{elements.mapViewport.scrollIntoView({behavior:mapScrollBehavior(),block:'center'});locateSelected();});
-    }
+    if(focus)requestAnimationFrame(()=>{
+      elements.mapViewport.scrollIntoView({behavior:mapScrollBehavior(),block:'center'});
+      requestAnimationFrame(locateSelected);
+    });
     if(routeReady && !IS_EDITOR && location.protocol!=='file:'){
       const url=new URL(location.href);
       if(id==='desk'){url.searchParams.delete('program');url.searchParams.delete('destination');url.searchParams.set('service','desk');url.hash='explorer';}
@@ -401,12 +401,12 @@
     if(!hits.length)elements.serviceList.append(create('p','list-empty','找不到符合的服務項目。'));
     const s=serviceById(currentService);if(!s)return;
     elements.serviceDetail.replaceChildren();
-    elements.serviceDetail.append(create('h4','',s.locationUnmapped?s.name:`${s.id}｜${s.name}`),create('p','',`場地／位置：${s.place}`));
+    elements.serviceDetail.append(create('h4','',s.id==='desk'?s.name:`${s.id}｜${s.name}`),create('p','',`場地／位置：${s.place}`));
     const status=create('div',`service-status ${s.pending?'is-pending':''}`,
       s.pending?'⚠ 尚待正式公告；請勿將候選日期或場地視為實際指引':s.locationUnmapped?'服務台在穿堂；目前僅提供醒目呼吸提示，不是地圖座標，現場位置待核對':s.hasPin?'圖上有編號定位（非實測入口／車位）':s.referencePinServiceId?'無固定停車位置點；可參考校門入口':'無固定定位點，請參考文字說明');
     elements.serviceDetail.append(status);
     if(s.statusNote) elements.serviceDetail.append(create('p','service-clarification',s.statusNote));
-    if(s.locationUnmapped){
+    if(s.id==='desk'){
       const link=create('a','feature-link','開啟穿堂服務台專屬連結 ↗');
       const url=new URL(location.href);
       url.searchParams.delete('program');url.searchParams.delete('destination');
@@ -421,8 +421,8 @@
     }
     const hasPoint=DATA.servicePins.some(p=>p.mapId===mapId&&p.serviceId===currentService);
     const hasReference=Boolean(s.referencePinServiceId&&DATA.servicePins.some(p=>p.mapId===mapId&&p.serviceId===s.referencePinServiceId));
-    elements.serviceLocateBtn.disabled=!(hasPoint||hasReference||s.locationUnmapped);
-    elements.serviceLocateBtn.textContent=s.locationUnmapped?'◉ 查看穿堂服務台呼吸提示（非地圖定位）':hasPoint?'⌖ 在圖上定位此服務項目':hasReference?`⌖ 查看${s.referenceLabel||'入口'}`:'⌖ 本項目沒有圖面定位';
+    elements.serviceLocateBtn.disabled=!(hasPoint||hasReference);
+    elements.serviceLocateBtn.textContent=s.id==='desk'&&hasPoint?'⌖ 查看地圖中「服」定位點':hasPoint?'⌖ 在圖上定位此服務項目':hasReference?`⌖ 查看${s.referenceLabel||'入口'}`:'⌖ 本項目沒有圖面定位';
   }
   function clusteringGroups(all){
     const map=getMap(),stageW=elements.mapStage.getBoundingClientRect().width||elements.mapViewport.clientWidth||720;
@@ -480,12 +480,16 @@
   function renderPins(){
     const isService=mapId==='map-00';
     const all=isService?shownServicePins():shownPins();
-    const groups=clusteringGroups(all);
+    // 服務台永遠獨立成「服」呼吸燈；鄰近 14/16 交由群組按鈕展開。
+    const deskPoint=isService?all.find(p=>p.serviceId==='desk'):null;
+    const clustered=isService?all.filter(p=>p.serviceId!=='desk'):all;
+    const groups=clusteringGroups(clustered);
     elements.pinLayer.replaceChildren();
     for(const group of groups){
       if(group.length>1){
         const x=group.reduce((a,p)=>a+p.x,0)/group.length,y=group.reduce((a,p)=>a+p.y,0)/group.length;
-        const btn=create('button','map-pin pin-cluster',`+${group.length}`);btn.type='button';
+        const nearDesk=isService&&deskPoint&&Math.hypot((x-deskPoint.x)*(elements.mapStage.getBoundingClientRect().width||720)/100,(y-deskPoint.y)*(elements.mapStage.getBoundingClientRect().width||720)*displayedAspect()/100)<80;
+        const btn=create('button',`map-pin pin-cluster ${nearDesk?'near-desk-cluster':''}`,`+${group.length}`);btn.type='button';
         btn.style.left=`${x}%`;btn.style.top=`${y}%`;
         btn.title=`${group.length} 處位置重疊，點選展開`;
         btn.setAttribute('aria-label',`此處有 ${group.length} 個定位點，點選展開清單`);
@@ -494,7 +498,7 @@
         elements.pinLayer.append(btn);
         // The chosen point remains at its original coordinate even inside a cluster.
         const selected=isService?group.find(p=>p.serviceId===currentService):group.find(selectedVisiblePin);
-        if(selected){
+        if(selected && !nearDesk){
           const selectedId=isService?selected.serviceId:selected.programId;
           const info=isService?serviceById(selectedId):byId(selectedId);
           const externalReference=!isService&&isExteriorMapReference(selected);
@@ -538,7 +542,20 @@
         else chooseProgram(id,{focus:false,preserveMap:true});
       });elements.pinLayer.append(btn);
     }
-    elements.pinCount.textContent=`定位點 ${all.length} 處 · 分為 ${groups.length} 組`;
+    if(deskPoint){
+      const deskInfo=serviceById('desk');
+      const marker=create('button',`map-pin service-desk-pin ${currentService==='desk'?'is-active selected-target':''}`,'服');
+      marker.type='button';
+      marker.dataset.service='desk';
+      marker.style.left=`${deskPoint.x}%`;
+      marker.style.top=`${deskPoint.y}%`;
+      marker.title='服務台｜行政大樓穿堂（14、16 號之間；圖面示意）';
+      marker.setAttribute('aria-label','服務台，行政大樓穿堂，位於原圖14與16號之間，點選查看資訊');
+      marker.append(create('span','service-desk-pin-label','服務台'));
+      marker.addEventListener('click',ev=>{ev.stopPropagation();closeCluster();chooseService('desk',{focus:false});});
+      elements.pinLayer.append(marker);
+    }
+    elements.pinCount.textContent=`定位點 ${all.length} 處 · 分為 ${groups.length+(deskPoint?1:0)} 組`;
     if(isService){
       const selected=all.filter(x=>x.serviceId===currentService),svc=serviceById(currentService);
       if(svc?.pending)elements.mapStatus.textContent=`⚠ ${currentService} ${svc.name}：日期／場地尚待公告，請勿依候選資訊前往。`;
@@ -752,17 +769,16 @@
     elements.locateBtn.addEventListener('click',()=>{if(!elements.locateBtn.disabled){scrollToProgramLocation();}else chooseProgram(current,{focus:true,preserveMap:false,updateUrl:false});});
     elements.serviceLocateBtn.addEventListener('click',()=>{
       const s=serviceById(currentService);
-      if(s?.locationUnmapped){
-        elements.serviceDeskBeacon?.scrollIntoView({behavior:mapScrollBehavior(),block:'center'});
-        elements.serviceDeskAction?.focus();
-        toast('服務台在穿堂，原圖未標位置；目前是呼吸提示，非精確地圖定位');
+      if(s?.id==='desk'){
+        elements.mapViewport.scrollIntoView({behavior:mapScrollBehavior(),block:'center'});
+        requestAnimationFrame(locateSelected);
         return;
       }
       if(s?.referencePinServiceId) toast('僅參考校門入口，不是停車位或裝卸位置');
       locateSelected();
     });
     elements.serviceSearch.addEventListener('input',renderServiceList);
-    elements.serviceDeskAction?.addEventListener('click',()=>chooseService('desk',{focus:false}));
+    // 服務台現已在圖中有明確的獨立點位，透過地圖標記直接選取。
     if(IS_EDITOR){
     elements.editToggle.addEventListener('click',()=>{editMode=!editMode;editAction='move';editIndex=0;closeCluster();hideMobileCard();elements.editToggle.setAttribute('aria-pressed',String(editMode));elements.editToggle.textContent=editMode?'結束校正模式':'開啟校正模式';elements.mapStage.classList.toggle('edit-mode',editMode);elements.editStatus.textContent=editMode?'先選擇要移動的第幾處點位，再在地圖點新位置；也可切換新增模式。變更僅存於本機。':'校正模式已關閉。';renderEditorUI();renderPins();});
     elements.mapStage.addEventListener('click',clickOnMap);
@@ -779,8 +795,8 @@
       const desk=cardType==='service'&&currentService==='desk';
       hideMobileCard();
       if(desk){
-        elements.serviceDeskBeacon?.scrollIntoView({behavior:mapScrollBehavior(),block:'center'});
-        elements.serviceDeskAction?.focus();
+        elements.mapViewport.scrollIntoView({behavior:mapScrollBehavior(),block:'center'});
+        requestAnimationFrame(locateSelected);
         return;
       }
       elements.mapViewport.scrollIntoView({behavior:mapScrollBehavior(),block:'center'});
