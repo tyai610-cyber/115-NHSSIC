@@ -14,9 +14,11 @@
 <script defer="" src="focus-meta.js"></script>
 <script defer="" src="program-diagrams.js"></script>
 <script defer="" defer_="" src="timeline-data.js"></script><script defer="" src="destination-beacons.js"></script>
+<script defer="" src="v12-map-patch.js"></script>
 <script defer="" src="app.js"></script><script defer="" defer_="" src="student-dashboard.js"></script>
 <link href="../adaptive-layout.css" rel="stylesheet"/><link rel="stylesheet" href="../site-switch.css"/>
 <script defer src="../site-switch.js"></script>
+<link rel="stylesheet" href="../design-v12.css">
 </head>
 <body class="adaptive-site">
 <a class="skip" href="#explorer">跳至互動地圖</a>
@@ -65,6 +67,13 @@
 <p class="destination-status" id="destinationStatus" role="status"></p>
 <a class="destination-floor-link" id="destinationFloorLink" hidden>查看行政大樓教室位置 ↗</a>
 </section>
+<div class="service-desk-map-prompt" id="serviceDeskBeacon" hidden role="group" aria-label="大會服務台在穿堂，圖面位置尚待對位">
+  <button type="button" class="service-desk-map-button" id="serviceDeskAction" aria-label="查看穿堂服務台資訊，原圖沒有精確定位，請依現場指示">
+    <span class="service-desk-orb" aria-hidden="true">服</span>
+    <span class="service-desk-map-text"><strong>服務台｜穿堂</strong><small>呼吸提示・原圖尚未對位</small></span>
+    <span class="service-desk-map-action" aria-hidden="true">查看資訊</span>
+  </button>
+</div>
 <div aria-label="可捲動及縮放的校園導覽圖" class="map-viewport" id="mapViewport" tabindex="0">
 <div class="map-stage" id="mapStage">
 <img alt="校園導覽圖載入中" decoding="async" id="mapImage" loading="eager"/><div class="map-loading" hidden="" id="mapLoading">地圖載入中…</div>
@@ -83,8 +92,8 @@
 <div class="map-footer"><span><i class="legend-pip legend-other"></i>職種定位點</span><span><i class="legend-pip legend-current"></i>目前選取</span><span><i class="legend-pip legend-pending"></i>待現場核對</span><span id="pinCount">—</span></div>
 <div aria-label="密集定位群組清單" aria-modal="false" class="cluster-chooser" hidden="" id="clusterChooser" role="dialog"><div class="cluster-head"><strong id="clusterTitle">選擇定位點</strong><button aria-label="關閉定位群組" id="clusterClose" type="button">✕</button></div><div class="cluster-items" id="clusterItems"></div><p>群組只合併畫面上的點選按鈕，不會改動原始座標或核定狀態。</p></div>
 <section aria-labelledby="services-title" class="service-section" hidden="" id="serviceSection">
-<div class="service-head"><div><span class="small-label">大會服務對照</span><h3 id="services-title">北科附工 01–28 服務項目</h3></div><span class="small-count">28 項服務</span></div>
-<p class="service-intro">此區為大會服務項目，與 29 個競賽職種分開。點選地圖上的紅色編號或下方服務清單，可查閱位置說明。</p>
+<div class="service-head"><div><span class="small-label">大會服務對照</span><h3 id="services-title">北科附工大會服務（原圖 01–28＋新增穿堂服務台）</h3></div><span class="small-count">原圖 28 項＋1 新增</span></div>
+<p class="service-intro">此區為大會服務項目，與 29 個競賽職種分開。點選原圖紅色編號或服務清單查看詳細資訊。穿堂服務台另以金色呼吸提示顯示，尚未標定原圖位置。</p>
 <label class="field"><span>搜尋服務項目或位置</span><input autocomplete="off" id="serviceSearch" placeholder="例如：第三會議室、醫療、停車場" type="search"/></label>
 <div class="service-list" id="serviceList"></div>
 <div aria-live="polite" class="service-detail" id="serviceDetail"></div>
