@@ -86,16 +86,40 @@
     url.searchParams.set('program',programId);
     url.searchParams.set('destination',currentDestination);
     url.searchParams.delete('service');
+    url.searchParams.delete('view');
+    url.searchParams.delete('venue');
     url.hash='explorer';
     return url.href;
   }
   function isPublicWebUrl(){
     return location.protocol==='https:' && !['localhost','127.0.0.1'].includes(location.hostname);
   }
-  function syncUrl(programId){
+  function syncUrl(programId,{push=false}={}){
     if(!routeReady || IS_EDITOR || location.protocol==='file:')return;
-    try {window.history.replaceState({program:programId},'',currentShareUrl(programId));}
-    catch(err){/* 本機或受限網頁不修改網址列 */}
+    try{
+      const dest=currentShareUrl(programId);
+      if(dest===location.href)return;
+      window.history[push?'pushState':'replaceState']({program:programId},'',dest);
+    }catch(err){/* 本機或受限網頁不修改網址列 */}
+  }
+  // 服務為獨立模式，不計入七個場域；保留既有 map-00 的資料及地圖引擎。
+  function serviceUrl(id=null){
+    const url=new URL(window.location.href);
+    url.searchParams.delete('program');url.searchParams.delete('skill');
+    url.searchParams.delete('destination');url.searchParams.delete('venue');
+    url.searchParams.set('view','services');
+    if(id && serviceById(id))url.searchParams.set('service',id);
+    else url.searchParams.delete('service');
+    url.hash='explorer';
+    return url.href;
+  }
+  function syncServiceUrl(id=null,{push=false}={}){
+    if(!routeReady || IS_EDITOR || location.protocol==='file:')return;
+    try{
+      const dest=serviceUrl(id);
+      if(dest===location.href)return;
+      window.history[push?'pushState':'replaceState']({service:id||null},'',dest);
+    }catch(err){/* 本機或受限網頁不修改網址列 */}
   }
   function renderProgramExtra(){
     const p=byId(current);
@@ -265,6 +289,13 @@
     for(const p of [...DATA.programs].sort((a,b)=>a.id.localeCompare(b.id))) {const opt=create('option','',`${p.id}｜${p.name} · ${p.site}`); opt.value=p.id;optFrag.append(opt);}
     elements.globalProgram.append(optFrag);
   }
+  function enterServiceMode({serviceId=null,updateUrl=true,scroll=false,push=false}={}){
+    site='北科附工';mapId='map-00';zoom=1;mapMode='focus';
+    currentService=serviceId&&serviceById(serviceId)?serviceId:'desk';
+    hideMobileCard();closeCluster();renderAll();
+    if(updateUrl)syncServiceUrl(serviceId,{push});
+    if(scroll)requestAnimationFrame(()=>elements.mapViewport.scrollIntoView({behavior:mapScrollBehavior(),block:'start'}));
+  }
   function chooseSite(name) {
     if(!sites.some(x=>x.name===name))return;
     site=name;
@@ -274,7 +305,7 @@
     current=forSite(site)[0]?.id||'';currentDestination='practical';
     zoom=1;
     hideMobileCard();closeCluster();renderAll();
-    if(current)syncUrl(current);
+    if(current)syncUrl(current,{push:true});
   }
   function chooseProgram(id,{focus=true,preserveMap=false,updateUrl=true}={}) {
     const p=byId(id);if(!p)return;
@@ -290,7 +321,7 @@
       closeCluster();renderProgramList();renderDetails();renderPins();renderShortcuts();renderEditorUI();
     }
     elements.globalProgram.value=id;
-    if(updateUrl)syncUrl(id);
+    if(updateUrl)syncUrl(id,{push:true});
     if(focus)hideMobileCard();else showMobileCard('program');
     if(focus){requestAnimationFrame(scrollToProgramLocation);}
   }
@@ -366,8 +397,21 @@
   }
   function renderServices(){
     const isService=mapId==='map-00';
+    document.body.classList.toggle('v13-service-mode',isService);
+    const entry=$('serviceModeButton');
+    if(entry){
+      entry.setAttribute('aria-pressed',String(isService));
+      entry.textContent=isService?'目前顯示大會服務互動圖 ✓':'開啟大會服務互動圖 ↗';
+    }
+    const tabs=elements.siteTabs.querySelectorAll('[data-site]');
+    tabs.forEach(tab=>tab.setAttribute('aria-pressed',String(!isService&&tab.dataset.site===site)));
+    const heading=$('explorer-title');
+    if(heading)heading.textContent=isService?'北科附工大會服務互動圖':'互動校園地圖';
+    const sidebar=$('mapWorkspace')?.querySelector('.sidebar');
+    if(sidebar)sidebar.hidden=isService;
+    elements.destinationTabs?.closest('.destination-card')?.toggleAttribute('hidden',isService);
     elements.serviceSection.hidden=!isService;
-    if(elements.serviceDeskBeacon)elements.serviceDeskBeacon.hidden=!isService;
+    if(elements.serviceDeskBeacon)elements.serviceDeskBeacon.hidden=true;
     elements.disciplineDetails.hidden=isService;
     if(elements.adminPanel)elements.adminPanel.hidden=isService;
     if(!isService)return;
@@ -381,12 +425,8 @@
       elements.mapViewport.scrollIntoView({behavior:mapScrollBehavior(),block:'center'});
       requestAnimationFrame(locateSelected);
     });
-    if(routeReady && !IS_EDITOR && location.protocol!=='file:'){
-      const url=new URL(location.href);
-      if(id==='desk'){url.searchParams.delete('program');url.searchParams.delete('destination');url.searchParams.set('service','desk');url.hash='explorer';}
-      else url.searchParams.delete('service');
-      try{history.replaceState({service:id},'',url)}catch(e){}
-    }
+    syncServiceUrl(id);
+
   }
   function renderServiceList(){
     const q=elements.serviceSearch.value.trim().toLocaleLowerCase();
@@ -640,7 +680,7 @@
     }
     const focus=activeFocus(); updateModeButtons();
     elements.mapViewport.style.setProperty('--map-aspect',String(1/displayedAspect()));
-    elements.mapTitle.textContent=site;elements.mapSubtitle.textContent='';
+    elements.mapTitle.textContent=mapId==='map-00'?'北科附工｜大會服務互動圖':site;elements.mapSubtitle.textContent='';
     elements.originalLink.href=map.original||map.preview;
     elements.downloadOriginal.hidden=!map.original; if(map.original){elements.downloadOriginal.href=map.original;elements.downloadOriginal.download=map.sourceName;}
     elements.originalLink.textContent=map.original?'開啟原始高解析圖 ↗':'開啟完整網頁版圖面 ↗';
@@ -737,8 +777,11 @@
       site=requestedVenue;current=forSite(site)[0]?.id||'01';currentDestination='practical';
       mapId=destinationMap(byId(current),currentDestination)||'map-03';
     }
-    if(requestedService==='desk' && !requested){
-      site='北科附工';mapId='map-00';currentService='desk';
+    // 已知職種參數優先於服務參數；服務模式允許單獨的 ?view=services。
+    if(!(requested&&byId(requested)) &&
+      (params.get('view')==='services' || (requestedService&&serviceById(requestedService)))){
+      site='北科附工';mapId='map-00';
+      currentService=requestedService&&serviceById(requestedService)?requestedService:'desk';
     }
     globalSelect();renderAll();routeReady=true;
     if(requested && byId(requested) && !IS_EDITOR){
@@ -758,7 +801,17 @@
 
     elements.programSearch.addEventListener('input',renderProgramList);
     $('clearSearch').addEventListener('click',()=>{elements.programSearch.value='';renderProgramList();});
-    elements.mapSelect.addEventListener('change',e=>{mapId=e.target.value;zoom=1;editIndex=0;renderMap();renderDestinationCard();});
+    elements.mapSelect.addEventListener('change',e=>{
+      const next=e.target.value;
+      if(next==='map-00'){enterServiceMode({updateUrl:true,push:true});return;}
+      mapId=next;zoom=1;editIndex=0;
+      const matching={registration:'map-01',theory:'map-02',practical:'map-03'};
+      if(site==='北科附工'){
+        const purpose=Object.keys(matching).find(k=>matching[k]===next);
+        if(purpose)currentDestination=purpose;
+      }
+      renderAll();syncUrl(current,{push:true});
+    });
     elements.destinationTabs?.addEventListener('click',e=>{const b=e.target.closest('[data-purpose]');if(b)navigateDestination(b.dataset.purpose);});
     window.GK_OPEN_DESTINATION=purpose=>navigateDestination(purpose);
     elements.focusMode.addEventListener('click',()=>{if(mapMode==='focus')return;mapMode='focus';zoom=1;renderMap();elements.mapViewport.scrollTop=0;});
@@ -778,6 +831,7 @@
       locateSelected();
     });
     elements.serviceSearch.addEventListener('input',renderServiceList);
+    $('serviceModeButton')?.addEventListener('click',()=>enterServiceMode({serviceId:null,updateUrl:true,scroll:true,push:true}));
     // 服務台現已在圖中有明確的獨立點位，透過地圖標記直接選取。
     if(IS_EDITOR){
     elements.editToggle.addEventListener('click',()=>{editMode=!editMode;editAction='move';editIndex=0;closeCluster();hideMobileCard();elements.editToggle.setAttribute('aria-pressed',String(editMode));elements.editToggle.textContent=editMode?'結束校正模式':'開啟校正模式';elements.mapStage.classList.toggle('edit-mode',editMode);elements.editStatus.textContent=editMode?'先選擇要移動的第幾處點位，再在地圖點新位置；也可切換新增模式。變更僅存於本機。':'校正模式已關閉。';renderEditorUI();renderPins();});
@@ -812,10 +866,21 @@
       if(rect.top < window.innerHeight*0.7) hideMobileCard();
     },{passive:true});
     window.addEventListener('popstate',()=>{
-      const params=new URLSearchParams(location.search),id=params.get('program'),purpose=params.get('destination'),serviceId=params.get('service');
-      if(serviceId==='desk'){site='北科附工';mapId='map-00';currentService='desk';renderAll();return;}
-      if(['registration','theory','practical'].includes(purpose))currentDestination=purpose;
-      if(byId(id)){site=byId(id).site;mapId=destinationMap(byId(id),currentDestination);chooseProgram(id,{focus:true,preserveMap:true,updateUrl:false});}
+      const params=new URLSearchParams(location.search);
+      const id=params.get('program')||params.get('skill'),purpose=params.get('destination'),serviceId=params.get('service');
+      // 優先序：有效 program > service / view=services > 場域預設。
+      if(byId(id)){
+        currentDestination=['registration','theory','practical'].includes(purpose)?purpose:'practical';
+        site=byId(id).site;current=id;mapId=destinationMap(byId(id),currentDestination);zoom=1;
+        renderAll();return;
+      }
+      if(params.get('view')==='services'||(serviceId&&serviceById(serviceId))){
+        enterServiceMode({serviceId,updateUrl:false});return;
+      }
+      const byVenue={nkh:'北科附工',division:'桃竹苗分署',vanung:'萬能科大',nangang:'南港高工',sanchong:'三重商工',taishan:'泰山高中',xinxing:'新興高中'};
+      site=byVenue[params.get('venue')]||'北科附工';current=forSite(site)[0]?.id||'01';
+      currentDestination='practical';mapId=destinationMap(byId(current),currentDestination);zoom=1;
+      renderAll();
     });
     if(IS_EDITOR){
     $('exportPins').addEventListener('click',exportCorrections);
