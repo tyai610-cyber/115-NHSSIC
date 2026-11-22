@@ -46,7 +46,11 @@
 <section aria-labelledby="explorer-title" class="explorer-section" id="explorer">
 <div class="section-heading"><div><h2 id="explorer-title">互動校園地圖</h2><p class="section-subtitle">先選場域，也可以直接選擇 01–29 職種。圖上已標點的職種可點選查看細節；重點圖為視圖裁切，位置不代表實測入口。</p></div><span class="light-pill">地圖標記僅供辨認位置；待核對點不會動態高亮。</span></div>
 <div aria-label="選擇競賽場域" class="site-tabs" id="siteTabs" role="group"></div>
-<div class="workspace">
+<div class="v13-service-entry" role="group" aria-label="大會服務獨立互動圖">
+  <div class="v13-service-entry-copy"><span class="v13-service-kicker">大會服務專區 · 非第八競賽場域</span><strong>北科附工大會服務互動圖</strong><small>大會服務、接待、停車及穿堂服務台｜原圖 28 項＋新增服務台</small></div>
+  <button class="v13-service-entry-button" type="button" id="serviceModeButton" aria-pressed="false" aria-controls="serviceSection">開啟大會服務互動圖 <span aria-hidden="true">↗</span></button>
+</div>
+<div class="workspace" id="mapWorkspace">
 <aside aria-labelledby="sidebar-title" class="sidebar">
 <div class="side-head"><div><span class="small-label">職種查詢</span><h3 id="sidebar-title">職種快速查詢</h3></div><span class="small-count" id="siteProgramCount">—</span></div>
 <label class="field"><span>直接選擇職種</span><select id="globalProgram"><option value="">選擇 01–29 職種</option></select></label>
@@ -184,7 +188,7 @@
 </div>
 </section>
 <section class="bottom-sections" id="instructions">
-<div><h2>三步驟快速使用</h2><div class="steps"><div><b>01</b><strong>選擇場域</strong><p>上方切換七個場域，北科附工另有四類地圖；可選重點地圖或完整圖。</p></div><div><b>02</b><strong>選擇職種</strong><p>可用職種選單、密集定位群組，或報到／學科圖的教室索引找資料。</p></div><div><b>03</b><strong>查看試場資訊</strong><p>閱讀報到、學科、術科及會議位置；必要時另開高解析原圖，並可複製職種專屬網址。</p></div></div></div>
+<div><h2>三步驟快速使用</h2><div class="steps"><div><b>01</b><strong>選擇場域</strong><p>上方可選七個競賽場域，或直接進入北科附工大會服務互動圖；可切換重點地圖及完整圖。</p></div><div><b>02</b><strong>選擇職種</strong><p>可用職種選單、密集定位群組，或報到／學科圖的教室索引找資料。</p></div><div><b>03</b><strong>查看試場資訊</strong><p>閱讀報到、學科、術科及會議位置；必要時另開高解析原圖，並可複製職種專屬網址。</p></div></div></div>
 </section>
 <section class="data-notes" id="data-notes"><div><p class="overline"></p><h2>場地與路線提醒</h2><p>圖面標記只供辨認校園與館舍範圍，不代表實測入口。尚待核對的定位不會以動態高亮顯示。</p><p>步行路線尚未核定，請勿視為正式通行導航；交通、停車及安全事項請依官方圖與現場指示。</p></div></section>
 </main>
