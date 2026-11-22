@@ -33,6 +33,7 @@
   let loadSequence=0, pendingFocus=false;
   let currentPublicShareUrl='';
   let routeReady=false;
+  let servicesExpanded=false;
   let editAction='move', editIndex=0, currentCluster=null, cardType='program';
   let corrections = {};
   const elements = {
@@ -43,7 +44,7 @@
     detailRegistration:$('detailRegistration'),detailTheory:$('detailTheory'),detailPractical:$('detailPractical'),detailMeeting:$('detailMeeting'),
     detailRegistrationDate:$('detailRegistrationDate'),detailRegistrationTime:$('detailRegistrationTime'),registrationTag:$('registrationTag'),registrationTasksBox:$('registrationTasksBox'),registrationTasksList:$('registrationTasksList'),
     detailNotes:$('detailNotes'),detailVerification:$('detailVerification'),locateBtn:$('locateBtn'),mapNotes:$('mapNotes'),editToggle:$('editToggle'),editStatus:$('editStatus'),toast:$('toast'),
-    serviceSection:$('serviceSection'),disciplineDetails:$('disciplineDetails'),serviceList:$('serviceList'),serviceSearch:$('serviceSearch'),serviceDetail:$('serviceDetail'),serviceLocateBtn:$('serviceLocateBtn'),serviceDeskBeacon:$('serviceDeskBeacon'),serviceDeskAction:$('serviceDeskAction'),adminPanel:$('adminPanel'),
+    serviceSection:$('serviceSection'),serviceDetailSection:$('serviceDetailSection'),serviceListWrap:$('serviceListWrap'),serviceListToggle:$('serviceListToggle'),serviceChoiceHint:$('serviceChoiceHint'),disciplineDetails:$('disciplineDetails'),serviceList:$('serviceList'),serviceSearch:$('serviceSearch'),serviceDetail:$('serviceDetail'),serviceLocateBtn:$('serviceLocateBtn'),serviceDeskBeacon:$('serviceDeskBeacon'),serviceDeskAction:$('serviceDeskAction'),adminPanel:$('adminPanel'),
     mapShortcutBox:$('mapShortcutBox'),mapShortcutHeading:$('mapShortcutHeading'),mapShortcutExplain:$('mapShortcutExplain'),mapShortcutList:$('mapShortcutList'),clusterChooser:$('clusterChooser'),clusterTitle:$('clusterTitle'),clusterItems:$('clusterItems'),
     mobileCard:$('mobileCard'),mobileCardTitle:$('mobileCardTitle'),mobileCardText:$('mobileCardText'),mobileCardLabel:$('mobileCardLabel'),pinIndex:$('pinIndex'),movePinMode:$('movePinMode'),addPinMode:$('addPinMode'),removePin:$('removePin'),
     venueGuideSummary:$('venueGuideSummary'),venueGuideBtn:$('venueGuideBtn'),venueGuideOriginal:$('venueGuideOriginal'),indoorDiagramStatus:$('indoorDiagramStatus'),indoorDiagramList:$('indoorDiagramList'),indoorDiagramPending:$('indoorDiagramPending'),
@@ -290,6 +291,11 @@
     elements.globalProgram.append(optFrag);
   }
   function enterServiceMode({serviceId=null,updateUrl=true,scroll=false,push=false}={}){
+    // Reopening the active service tab must not silently discard the user's selection.
+    if(mapId==='map-00'&&serviceId===null){
+      if(scroll)requestAnimationFrame(()=>elements.mapViewport.scrollIntoView({behavior:mapScrollBehavior(),block:'start'}));
+      return;
+    }
     site='北科附工';mapId='map-00';zoom=1;mapMode='focus';
     currentService=serviceId&&serviceById(serviceId)?serviceId:'desk';
     hideMobileCard();closeCluster();renderAll();
@@ -407,10 +413,28 @@
     tabs.forEach(tab=>tab.setAttribute('aria-pressed',String(!isService&&tab.dataset.site===site)));
     const heading=$('explorer-title');
     if(heading)heading.textContent=isService?'北科附工大會服務互動圖':'互動校園地圖';
+    const subtitle=$('explorerSubtitle'),notice=$('explorerNotice');
+    if(subtitle)subtitle.textContent=isService
+      ?'在上方選擇服務編號或搜尋名稱，下方地圖即顯示對應呼吸標記。點選地圖也能同步選取上方項目。'
+      :'先選擇競賽場域或 01–29 職種，再查看報到、學科與術科位置。圖面標記並非實測入口。';
+    if(notice)notice.textContent=isService
+      ?'原圖 28 項＋穿堂服務台；定位僅供辨識，請以現場指引為準。'
+      :'位置待核對的定位點不作動態高亮；請依正式公告。';
+    const legend={
+      primary:$('mapLegendPrimary'),selected:$('mapLegendSelected'),pending:$('mapLegendPending')
+    };
+    if(legend.primary)legend.primary.innerHTML=isService
+      ?'<i class="legend-pip legend-service"></i>大會服務編號'
+      :'<i class="legend-pip legend-other"></i>職種定位點';
+    if(legend.selected)legend.selected.innerHTML=isService
+      ?'<i class="legend-pip legend-desk"></i>穿堂服務台（金色「服」）'
+      :'<i class="legend-pip legend-current"></i>目前選取';
+    if(legend.pending)legend.pending.innerHTML='<i class="legend-pip legend-pending"></i>待核對位置';
     const sidebar=$('mapWorkspace')?.querySelector('.sidebar');
     if(sidebar)sidebar.hidden=isService;
     elements.destinationTabs?.closest('.destination-card')?.toggleAttribute('hidden',isService);
     elements.serviceSection.hidden=!isService;
+    if(elements.serviceDetailSection)elements.serviceDetailSection.hidden=!isService;
     if(elements.serviceDeskBeacon)elements.serviceDeskBeacon.hidden=true;
     elements.disciplineDetails.hidden=isService;
     if(elements.adminPanel)elements.adminPanel.hidden=isService;
@@ -418,32 +442,86 @@
     renderServiceList();
   }
   function serviceById(id){return DATA.services.find(s=>s.id===id);}
-  function chooseService(id,{focus=true}={}){
+  function scrollServiceChoiceIntoView(){
+    const list=elements.serviceList;
+    const selected=[...list.querySelectorAll('[data-service-id]')].find(btn=>btn.dataset.serviceId===currentService);
+    if(!selected)return;
+    const outer=list.getBoundingClientRect(),inner=selected.getBoundingClientRect();
+    if(inner.top<outer.top+5)list.scrollTop+=inner.top-outer.top-8;
+    else if(inner.bottom>outer.bottom-5)list.scrollTop+=inner.bottom-outer.bottom+8;
+  }
+  function chooseService(id,{focus=true,fromMap=false}={}){
     if(!serviceById(id))return;
-    currentService=id;closeCluster();renderServiceList();renderPins();showMobileCard('service');
+    const preserveFocus=elements.serviceList.contains(document.activeElement);
+    currentService=id;closeCluster();
+    // A map marker can be selected while the service list is filtered.
+    // Restore the full list if necessary so the selected button remains visible.
+    if(fromMap && elements.serviceSearch.value.trim()){
+      const q=elements.serviceSearch.value.trim().toLocaleLowerCase();
+      const svc=serviceById(id);
+      if(!`${svc.id} ${svc.name} ${svc.place}`.toLocaleLowerCase().includes(q))elements.serviceSearch.value='';
+    }
+    renderServiceList();renderPins();
+    if(fromMap)showMobileCard('service');else hideMobileCard();
+    if(preserveFocus){
+      const selected=[...elements.serviceList.querySelectorAll('[data-service-id]')].find(btn=>btn.dataset.serviceId===id);
+      selected?.focus({preventScroll:true});
+    }
+    if(fromMap)requestAnimationFrame(scrollServiceChoiceIntoView);
     if(focus)requestAnimationFrame(()=>{
-      elements.mapViewport.scrollIntoView({behavior:mapScrollBehavior(),block:'center'});
-      requestAnimationFrame(locateSelected);
+      // Without an actual point, never scroll to an invented location.
+      const svc=serviceById(id);
+      const resolved=svc?.referencePinServiceId||id;
+      const hasPin=shownServicePins().some(pin=>pin.serviceId===resolved);
+      if(hasPin){
+        elements.mapViewport.scrollIntoView({behavior:mapScrollBehavior(),block:'center'});
+        requestAnimationFrame(locateSelected);
+      }else{
+        elements.serviceDetailSection?.scrollIntoView({behavior:mapScrollBehavior(),block:'nearest'});
+      }
     });
     syncServiceUrl(id);
-
   }
   function renderServiceList(){
     const q=elements.serviceSearch.value.trim().toLocaleLowerCase();
+    const preservedScroll=elements.serviceList.scrollTop;
     elements.serviceList.replaceChildren();
-    const hits=DATA.services.filter(s=>!q||`${s.id} ${s.name} ${s.place}`.toLocaleLowerCase().includes(q));
+    // Desk shortcut first, official 01–28 still retain their original ascending order.
+    const hits=DATA.services.filter(svc=>!q||`${svc.id} ${svc.name} ${svc.place}`.toLocaleLowerCase().includes(q))
+      .sort((a,b)=>a.id==='desk'?-1:b.id==='desk'?1:a.id.localeCompare(b.id,'zh-Hant',{numeric:true}));
     for(const svc of hits){
-      const btn=create('button','service-item');btn.type='button';btn.setAttribute('aria-pressed',String(svc.id===currentService));
+      const btn=create('button',`service-item ${svc.id==='desk'?'service-item-desk':''}`);btn.type='button';
+      btn.dataset.serviceId=svc.id;
+      btn.setAttribute('aria-pressed',String(svc.id===currentService));
+      btn.setAttribute('aria-label',`${svc.name}，位置：${svc.place}，點選查看地圖標記`);
       btn.append(create('span','service-no',svc.displayId||svc.id),create('span','service-item-name',svc.name));
       if(svc.pending){btn.classList.add('pending-service');btn.append(create('span','service-review','待公告'));}
-      btn.addEventListener('click',()=>chooseService(svc.id));elements.serviceList.append(btn);
+      btn.addEventListener('click',()=>chooseService(svc.id,{focus:true,fromMap:false}));
+      elements.serviceList.append(btn);
+    }
+    const showAll=servicesExpanded||hits.length<=8;
+    elements.serviceListWrap?.classList.toggle('is-expanded',showAll);
+    if(elements.serviceListToggle){
+      elements.serviceListToggle.hidden=hits.length<=8;
+      elements.serviceListToggle.textContent=servicesExpanded?'收合服務清單':`展開全部 ${hits.length} 項服務`;
+      elements.serviceListToggle.setAttribute('aria-expanded',String(showAll));
+    }
+    if(!showAll)elements.serviceList.scrollTop=preservedScroll;
+    if(elements.serviceChoiceHint){
+      const selected=serviceById(currentService);
+      const reference=selected?.referencePinServiceId||currentService;
+      const knownPin=DATA.servicePins.some(pin=>pin.mapId==='map-00'&&pin.serviceId===reference);
+      elements.serviceChoiceHint.textContent=selected?.pending
+        ?'此服務項目的日期或場地待公告；請以正式公告為準。'
+        :knownPin?`已選取：${selected?.name||''}。下方地圖可查看對應呼吸標記（非實測入口）。`
+        :'此項目尚無固定定位點；請閱讀地圖下方說明，不會建立假呼吸燈。';
     }
     if(!hits.length)elements.serviceList.append(create('p','list-empty','找不到符合的服務項目。'));
     const s=serviceById(currentService);if(!s)return;
     elements.serviceDetail.replaceChildren();
     elements.serviceDetail.append(create('h4','',s.id==='desk'?s.name:`${s.id}｜${s.name}`),create('p','',`場地／位置：${s.place}`));
     const status=create('div',`service-status ${s.pending?'is-pending':''}`,
-      s.pending?'⚠ 尚待正式公告；請勿將候選日期或場地視為實際指引':s.locationUnmapped?'服務台在穿堂；目前僅提供醒目呼吸提示，不是地圖座標，現場位置待核對':s.hasPin?'圖上有編號定位（非實測入口／車位）':s.referencePinServiceId?'無固定停車位置點；可參考校門入口':'無固定定位點，請參考文字說明');
+      s.pending?'⚠ 尚待正式公告；請勿將候選日期或場地視為實際指引':s.id==='desk'?'已新增金黃色「服」圖面定位標記；位於原圖 14 與 16 號之間，非實測入口。':s.locationUnmapped?'尚無地圖定位，請參考文字說明':s.hasPin?'圖上有編號定位（非實測入口／車位）':s.referencePinServiceId?'無固定停車位置點；可參考校門入口':'無固定定位點，請參考文字說明');
     elements.serviceDetail.append(status);
     if(s.statusNote) elements.serviceDetail.append(create('p','service-clarification',s.statusNote));
     if(s.id==='desk'){
@@ -499,7 +577,7 @@
       button.append(idTag,content);
       button.addEventListener('click',()=>{
         closeCluster();
-        if(isService)chooseService(id,{focus:false});
+        if(isService)chooseService(id,{focus:false,fromMap:true});
         else {
           chooseProgram(id,{focus:false,preserveMap:true});
           if(usableVenuePin(p)){
@@ -538,18 +616,19 @@
         elements.pinLayer.append(btn);
         // The chosen point remains at its original coordinate even inside a cluster.
         const selected=isService?group.find(p=>p.serviceId===currentService):group.find(selectedVisiblePin);
-        if(selected && !nearDesk){
+        if(selected){
           const selectedId=isService?selected.serviceId:selected.programId;
           const info=isService?serviceById(selectedId):byId(selectedId);
           const externalReference=!isService&&isExteriorMapReference(selected);
           const parking=isService&&isParkingService(info);
           const truck=isService&&isTruckService(info);
-          const marker=create('button',`map-pin is-active selected-target selected-cluster-pin ${externalReference?'venue-illustrative':''} ${selected.purposeReference?'destination-reference':''} ${isService?'':'destination-'+currentDestination} ${parking?'parking-marker':''} ${truck?'unloading-marker':''}`,isService?servicePinSymbol(info):destinationSymbol());
+          const marker=create('button',`map-pin is-active selected-target selected-cluster-pin ${nearDesk?'selected-near-desk '+(selected.x<=deskPoint.x?'near-desk-left':'near-desk-right'):''} ${externalReference?'venue-illustrative':''} ${selected.purposeReference?'destination-reference':''} ${isService?'':'destination-'+currentDestination} ${parking?'parking-marker':''} ${truck?'unloading-marker':''}`,isService?servicePinSymbol(info):destinationSymbol());
           marker.type='button';marker.style.left=`${selected.x}%`;marker.style.top=`${selected.y}%`;positionSelectedLabel(marker,selected);
           marker.setAttribute('aria-label',`${selectedId} ${info?.name||''}，點選展開附近位置`);
           marker.title=`${selectedId} ${info?.name||''}｜${locationPinStatus(selected)}`;
           const skill=byId(selectedId),place=skill?destinationValue(skill,currentDestination):'';
           const label=create('span','selected-pin-label',isService?`${info?.name||''}｜${info?.place||''}`:`${selectedId} ${info?.name||''}｜${place.replace(/\s+/g,' ').trim()}${externalReference?'（館舍示意）':''}`);marker.append(label);
+          if(nearDesk)marker.append(create('span','v15-pin-link',''));
           marker.addEventListener('click',e=>{e.stopPropagation();openCluster(group,isService);});
           elements.pinLayer.append(marker);
         }
@@ -577,7 +656,7 @@
       }
       btn.addEventListener('click',ev=>{
         ev.stopPropagation();closeCluster();
-        if(isService) chooseService(id,{focus:false});
+        if(isService) chooseService(id,{focus:false,fromMap:true});
         else if(editMode){current=id;editIndex=index;renderProgramList();renderDetails();renderEditorUI();renderPins();toast(`已選擇 ${id} 第 ${index+1} 處，點地圖可移動此點`);}
         else chooseProgram(id,{focus:false,preserveMap:true});
       });elements.pinLayer.append(btn);
@@ -592,14 +671,14 @@
       marker.title='服務台｜行政大樓穿堂（14、16 號之間；圖面示意）';
       marker.setAttribute('aria-label','服務台，行政大樓穿堂，位於原圖14與16號之間，點選查看資訊');
       marker.append(create('span','service-desk-pin-label','服務台'));
-      marker.addEventListener('click',ev=>{ev.stopPropagation();closeCluster();chooseService('desk',{focus:false});});
+      marker.addEventListener('click',ev=>{ev.stopPropagation();closeCluster();chooseService('desk',{focus:false,fromMap:true});});
       elements.pinLayer.append(marker);
     }
     elements.pinCount.textContent=`定位點 ${all.length} 處 · 分為 ${groups.length+(deskPoint?1:0)} 組`;
     if(isService){
       const selected=all.filter(x=>x.serviceId===currentService),svc=serviceById(currentService);
       if(svc?.pending)elements.mapStatus.textContent=`⚠ ${currentService} ${svc.name}：日期／場地尚待公告，請勿依候選資訊前往。`;
-      else if(selected.length)elements.mapStatus.textContent=`${currentService}｜${svc?.name||''}（${selected.length} 處）。若點位重疊，請點「＋數量」展開；非實測入口。`;
+      else if(selected.length)elements.mapStatus.textContent=`${currentService==='desk'?'服務台':currentService}｜${svc?.name||''}（${selected.length} 處）。若點位重疊，請點「＋數量」展開；非實測入口。`;
       else if(svc?.referencePinServiceId)elements.mapStatus.textContent=`${currentService} 未提供固定點位；可參考 ${svc.referencePinServiceId} 校門入口，但不是停車位。`;
       else elements.mapStatus.textContent='本項目沒有固定地圖定位，請參考服務對照表。';
       return;
@@ -637,7 +716,7 @@
     if(window.innerWidth>520 || editMode)return;
     const datum=kind==='service'?serviceById(currentService):byId(current);
     if(!datum)return;
-    elements.mobileCardTitle.textContent=datum.locationUnmapped?datum.name:`${datum.id}｜${datum.name}`;
+    elements.mobileCardTitle.textContent=kind==='service'&&datum.id==='desk'?datum.name:`${datum.id}｜${datum.name}`;
     elements.mobileCardLabel.textContent=kind==='service'?'北科附工大會服務':'職種快速資訊';
     const area=kind==='service'?datum.place:destinationValue(datum,currentDestination);
     const note=kind==='service'&&datum.pending?'【待公告】'
@@ -680,7 +759,10 @@
     }
     const focus=activeFocus(); updateModeButtons();
     elements.mapViewport.style.setProperty('--map-aspect',String(1/displayedAspect()));
-    elements.mapTitle.textContent=mapId==='map-00'?'北科附工｜大會服務互動圖':site;elements.mapSubtitle.textContent='';
+    elements.mapTitle.textContent=mapId==='map-00'?'北科附工｜大會服務互動圖':site;
+    elements.mapSubtitle.textContent=mapId==='map-00'
+      ?'服務台在 14 與 16 號之間｜點選地圖標記可查看服務地點'
+      :map.title;
     elements.originalLink.href=map.original||map.preview;
     elements.downloadOriginal.hidden=!map.original; if(map.original){elements.downloadOriginal.href=map.original;elements.downloadOriginal.download=map.sourceName;}
     elements.originalLink.textContent=map.original?'開啟原始高解析圖 ↗':'開啟完整網頁版圖面 ↗';
@@ -831,6 +913,11 @@
       locateSelected();
     });
     elements.serviceSearch.addEventListener('input',renderServiceList);
+    elements.serviceListToggle?.addEventListener('click',()=>{
+      servicesExpanded=!servicesExpanded;
+      renderServiceList();
+      if(!servicesExpanded)requestAnimationFrame(scrollServiceChoiceIntoView);
+    });
     $('serviceModeButton')?.addEventListener('click',()=>enterServiceMode({serviceId:null,updateUrl:true,scroll:true,push:true}));
     // 服務台現已在圖中有明確的獨立點位，透過地圖標記直接選取。
     if(IS_EDITOR){
