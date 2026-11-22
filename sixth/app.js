@@ -406,6 +406,14 @@
       s.pending?'⚠ 尚待正式公告；請勿將候選日期或場地視為實際指引':s.locationUnmapped?'服務台在穿堂；目前僅提供醒目呼吸提示，不是地圖座標，現場位置待核對':s.hasPin?'圖上有編號定位（非實測入口／車位）':s.referencePinServiceId?'無固定停車位置點；可參考校門入口':'無固定定位點，請參考文字說明');
     elements.serviceDetail.append(status);
     if(s.statusNote) elements.serviceDetail.append(create('p','service-clarification',s.statusNote));
+    if(s.locationUnmapped){
+      const link=create('a','feature-link','開啟穿堂服務台專屬連結 ↗');
+      const url=new URL(location.href);
+      url.searchParams.delete('program');url.searchParams.delete('destination');
+      url.searchParams.set('service','desk');url.hash='explorer';
+      link.href=url.href;
+      elements.serviceDetail.append(link);
+    }
     if(isParkingService(s)){
       elements.serviceDetail.append(create('p','service-clarification',s.hasPin
         ?'P 圖示表示官方導覽圖中的停車區域，不代表每個車格皆可使用；請依停車證及現場指揮。'
@@ -579,6 +587,8 @@
       :kind==='program'&&DATA.pins.some(x=>x.programId===datum.id&&x.verification==='pending'&&!isExteriorMapReference(x))?'【圖面點位待核對】'
       :kind==='program'&&isExteriorVenue(datum)?'【競賽館舍已確認・圖面方向示意】':'';
     elements.mobileCardText.textContent=kind==='service'?`${note}位置：${area||'未提供'}${datum.locationUnmapped?'；地圖精確位置待核對':''}`:`${note}${destinationLabel(currentDestination)}：${area||'未提供'}`;
+    const mobileLocate=$('mobileCardLocate');
+    if(mobileLocate)mobileLocate.textContent=datum.locationUnmapped?'查看呼吸提示':'在圖上定位';
     elements.mobileCard.hidden=false;
   }
   function renderEditorUI(){
@@ -765,7 +775,17 @@
     elements.mapViewport.addEventListener('wheel',()=>{pendingFocus=false;},{passive:true});
     $('clusterClose').addEventListener('click',closeCluster);
     $('mobileCardClose').addEventListener('click',hideMobileCard);
-    $('mobileCardLocate').addEventListener('click',()=>{hideMobileCard();elements.mapViewport.scrollIntoView({behavior:mapScrollBehavior(),block:'center'});requestAnimationFrame(locateSelected);});
+    $('mobileCardLocate').addEventListener('click',()=>{
+      const desk=cardType==='service'&&currentService==='desk';
+      hideMobileCard();
+      if(desk){
+        elements.serviceDeskBeacon?.scrollIntoView({behavior:mapScrollBehavior(),block:'center'});
+        elements.serviceDeskAction?.focus();
+        return;
+      }
+      elements.mapViewport.scrollIntoView({behavior:mapScrollBehavior(),block:'center'});
+      requestAnimationFrame(locateSelected);
+    });
     $('mobileCardDetails').addEventListener('click',()=>{hideMobileCard();(cardType==='service'?elements.serviceSection:elements.disciplineDetails).scrollIntoView({behavior:'smooth',block:'start'});});
     document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeCluster();hideMobileCard();}});
     window.addEventListener('resize',()=>requestAnimationFrame(renderPins));
