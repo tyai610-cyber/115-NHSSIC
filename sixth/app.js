@@ -4,6 +4,10 @@
   const DATA = window.GK_DATA;
   const FOCUS = window.GK_FOCUS || {};
   const BEACONS = window.GK_DESTINATION_BEACONS || {registration:{},theory:{}};
+  const V12_PATCH = window.GK_V12_MAP_PATCH || {serviceDesk:null,destinationOverrides:{}};
+  // A separate, non-numbered service point; the official A3 item 01–28 is preserved.
+  if(V12_PATCH.serviceDesk && !DATA.services.some(s=>s.id===V12_PATCH.serviceDesk.id))
+    DATA.services.push({...V12_PATCH.serviceDesk,displayId:'服'});
   const DIAGRAMS = window.GK_DIAGRAMS?.items || {};
   const IS_EDITOR = document.body.dataset.mode === 'editor';
   if (!DATA || !Array.isArray(DATA.programs)) { document.body.textContent='導覽資料未載入，請確認 data.js 是否與 index.html 放在同一資料夾。'; return; }
@@ -36,7 +40,7 @@
     detailRegistration:$('detailRegistration'),detailTheory:$('detailTheory'),detailPractical:$('detailPractical'),detailMeeting:$('detailMeeting'),
     detailRegistrationDate:$('detailRegistrationDate'),detailRegistrationTime:$('detailRegistrationTime'),registrationTag:$('registrationTag'),registrationTasksBox:$('registrationTasksBox'),registrationTasksList:$('registrationTasksList'),
     detailNotes:$('detailNotes'),detailVerification:$('detailVerification'),locateBtn:$('locateBtn'),mapNotes:$('mapNotes'),editToggle:$('editToggle'),editStatus:$('editStatus'),toast:$('toast'),
-    serviceSection:$('serviceSection'),disciplineDetails:$('disciplineDetails'),serviceList:$('serviceList'),serviceSearch:$('serviceSearch'),serviceDetail:$('serviceDetail'),serviceLocateBtn:$('serviceLocateBtn'),adminPanel:$('adminPanel'),
+    serviceSection:$('serviceSection'),disciplineDetails:$('disciplineDetails'),serviceList:$('serviceList'),serviceSearch:$('serviceSearch'),serviceDetail:$('serviceDetail'),serviceLocateBtn:$('serviceLocateBtn'),serviceDeskBeacon:$('serviceDeskBeacon'),serviceDeskAction:$('serviceDeskAction'),adminPanel:$('adminPanel'),
     mapShortcutBox:$('mapShortcutBox'),mapShortcutHeading:$('mapShortcutHeading'),mapShortcutExplain:$('mapShortcutExplain'),mapShortcutList:$('mapShortcutList'),clusterChooser:$('clusterChooser'),clusterTitle:$('clusterTitle'),clusterItems:$('clusterItems'),
     mobileCard:$('mobileCard'),mobileCardTitle:$('mobileCardTitle'),mobileCardText:$('mobileCardText'),mobileCardLabel:$('mobileCardLabel'),pinIndex:$('pinIndex'),movePinMode:$('movePinMode'),addPinMode:$('addPinMode'),removePin:$('removePin'),
     venueGuideSummary:$('venueGuideSummary'),venueGuideBtn:$('venueGuideBtn'),venueGuideOriginal:$('venueGuideOriginal'),indoorDiagramStatus:$('indoorDiagramStatus'),indoorDiagramList:$('indoorDiagramList'),indoorDiagramPending:$('indoorDiagramPending'),
@@ -194,14 +198,30 @@
     }
     return [...grouped.values()].flat().filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.x>=0&&p.x<=100&&p.y>=0&&p.y<=100);
   }
+  function filterDestinationBuildingPins(pins,purpose,targetMap){
+    const result=[];
+    for(const pin of pins){
+      const cfg=V12_PATCH.destinationOverrides?.[pin.programId];
+      if(!cfg || cfg.mapId!==targetMap || !cfg.placeByPurpose?.[purpose]){result.push(pin);continue;}
+      const expected=cfg.pointByPlace[cfg.placeByPurpose[purpose]];
+      // Exact comparison of existing recorded coordinates; no inferred map point.
+      if(expected && Math.abs(pin.x-expected.x)<.002 && Math.abs(pin.y-expected.y)<.002)
+        result.push({...pin,purposeReference:true,placeReference:cfg.placeByPurpose[purpose]});
+    }
+    return result;
+  }
   // Regular map-03 coordinates remain untouched. Non-practical external choices reuse
   // an explicitly labelled campus-building reference (never an invented classroom/desk).
   function destinationPinsFor(targetMap,purpose){
     const original=(targetMap===mapId?selectedPins():DATA.pins.filter(pin=>pin.mapId===targetMap));
-    if(purpose==='practical')return original;
+    if(purpose==='practical')return filterDestinationBuildingPins(original,purpose,targetMap);
     const map=DATA.maps.find(m=>m.id===targetMap);
     if(!map)return [];
-    if(map.site!=='北科附工')return original.map(pin=>({...pin,purposeReference:true}));
+    if(map.site!=='北科附工'){
+      // 29 機器手臂技術：依正式館舍分流，不再將兩棟建築同時當成當前目的地。
+      const external=original.map(pin=>({...pin,purposeReference:true}));
+      return filterDestinationBuildingPins(external,purpose,targetMap);
+    }
     const refs=(BEACONS[purpose]||{});
     return Object.entries(refs).flatMap(([programId,pins])=>pins.map(pin=>({
       mapId:targetMap,programId,...pin,purposeReference:true,
@@ -344,6 +364,7 @@
   function renderServices(){
     const isService=mapId==='map-00';
     elements.serviceSection.hidden=!isService;
+    if(elements.serviceDeskBeacon)elements.serviceDeskBeacon.hidden=!isService;
     elements.disciplineDetails.hidden=isService;
     if(elements.adminPanel)elements.adminPanel.hidden=isService;
     if(!isService)return;
@@ -353,7 +374,19 @@
   function chooseService(id,{focus=true}={}){
     if(!serviceById(id))return;
     currentService=id;closeCluster();renderServiceList();renderPins();showMobileCard('service');
-    if(focus)requestAnimationFrame(()=>{elements.mapViewport.scrollIntoView({behavior:mapScrollBehavior(),block:'center'});locateSelected();});
+    if(id==='desk'){
+      elements.serviceDeskBeacon?.classList.add('is-selected');
+      if(focus)requestAnimationFrame(()=>elements.serviceDeskBeacon?.scrollIntoView({behavior:mapScrollBehavior(),block:'center'}));
+    }else{
+      elements.serviceDeskBeacon?.classList.remove('is-selected');
+      if(focus)requestAnimationFrame(()=>{elements.mapViewport.scrollIntoView({behavior:mapScrollBehavior(),block:'center'});locateSelected();});
+    }
+    if(routeReady && !IS_EDITOR && location.protocol!=='file:'){
+      const url=new URL(location.href);
+      if(id==='desk'){url.searchParams.delete('program');url.searchParams.delete('destination');url.searchParams.set('service','desk');url.hash='explorer';}
+      else url.searchParams.delete('service');
+      try{history.replaceState({service:id},'',url)}catch(e){}
+    }
   }
   function renderServiceList(){
     const q=elements.serviceSearch.value.trim().toLocaleLowerCase();
@@ -361,18 +394,26 @@
     const hits=DATA.services.filter(s=>!q||`${s.id} ${s.name} ${s.place}`.toLocaleLowerCase().includes(q));
     for(const svc of hits){
       const btn=create('button','service-item');btn.type='button';btn.setAttribute('aria-pressed',String(svc.id===currentService));
-      btn.append(create('span','service-no',svc.id),create('span','service-item-name',svc.name));
+      btn.append(create('span','service-no',svc.displayId||svc.id),create('span','service-item-name',svc.name));
       if(svc.pending){btn.classList.add('pending-service');btn.append(create('span','service-review','待公告'));}
       btn.addEventListener('click',()=>chooseService(svc.id));elements.serviceList.append(btn);
     }
     if(!hits.length)elements.serviceList.append(create('p','list-empty','找不到符合的服務項目。'));
     const s=serviceById(currentService);if(!s)return;
     elements.serviceDetail.replaceChildren();
-    elements.serviceDetail.append(create('h4','',`${s.id}｜${s.name}`),create('p','',`場地／位置：${s.place}`));
+    elements.serviceDetail.append(create('h4','',s.locationUnmapped?s.name:`${s.id}｜${s.name}`),create('p','',`場地／位置：${s.place}`));
     const status=create('div',`service-status ${s.pending?'is-pending':''}`,
-      s.pending?'⚠ 尚待正式公告；請勿將候選日期或場地視為實際指引':s.hasPin?'圖上有編號定位（非實測入口／車位）':s.referencePinServiceId?'無固定停車位置點；可參考校門入口':'無固定定位點，請參考文字說明');
+      s.pending?'⚠ 尚待正式公告；請勿將候選日期或場地視為實際指引':s.locationUnmapped?'服務台在穿堂；目前僅提供醒目呼吸提示，不是地圖座標，現場位置待核對':s.hasPin?'圖上有編號定位（非實測入口／車位）':s.referencePinServiceId?'無固定停車位置點；可參考校門入口':'無固定定位點，請參考文字說明');
     elements.serviceDetail.append(status);
     if(s.statusNote) elements.serviceDetail.append(create('p','service-clarification',s.statusNote));
+    if(s.locationUnmapped){
+      const link=create('a','feature-link','開啟穿堂服務台專屬連結 ↗');
+      const url=new URL(location.href);
+      url.searchParams.delete('program');url.searchParams.delete('destination');
+      url.searchParams.set('service','desk');url.hash='explorer';
+      link.href=url.href;
+      elements.serviceDetail.append(link);
+    }
     if(isParkingService(s)){
       elements.serviceDetail.append(create('p','service-clarification',s.hasPin
         ?'P 圖示表示官方導覽圖中的停車區域，不代表每個車格皆可使用；請依停車證及現場指揮。'
@@ -380,8 +421,8 @@
     }
     const hasPoint=DATA.servicePins.some(p=>p.mapId===mapId&&p.serviceId===currentService);
     const hasReference=Boolean(s.referencePinServiceId&&DATA.servicePins.some(p=>p.mapId===mapId&&p.serviceId===s.referencePinServiceId));
-    elements.serviceLocateBtn.disabled=!(hasPoint||hasReference);
-    elements.serviceLocateBtn.textContent=hasPoint?'⌖ 在圖上定位此服務項目':hasReference?`⌖ 查看${s.referenceLabel||'入口'}`:'⌖ 本項目沒有圖面定位';
+    elements.serviceLocateBtn.disabled=!(hasPoint||hasReference||s.locationUnmapped);
+    elements.serviceLocateBtn.textContent=s.locationUnmapped?'◉ 查看穿堂服務台呼吸提示（非地圖定位）':hasPoint?'⌖ 在圖上定位此服務項目':hasReference?`⌖ 查看${s.referenceLabel||'入口'}`:'⌖ 本項目沒有圖面定位';
   }
   function clusteringGroups(all){
     const map=getMap(),stageW=elements.mapStage.getBoundingClientRect().width||elements.mapViewport.clientWidth||720;
@@ -539,13 +580,15 @@
     if(window.innerWidth>520 || editMode)return;
     const datum=kind==='service'?serviceById(currentService):byId(current);
     if(!datum)return;
-    elements.mobileCardTitle.textContent=`${datum.id}｜${datum.name}`;
+    elements.mobileCardTitle.textContent=datum.locationUnmapped?datum.name:`${datum.id}｜${datum.name}`;
     elements.mobileCardLabel.textContent=kind==='service'?'北科附工大會服務':'職種快速資訊';
     const area=kind==='service'?datum.place:destinationValue(datum,currentDestination);
     const note=kind==='service'&&datum.pending?'【待公告】'
       :kind==='program'&&DATA.pins.some(x=>x.programId===datum.id&&x.verification==='pending'&&!isExteriorMapReference(x))?'【圖面點位待核對】'
       :kind==='program'&&isExteriorVenue(datum)?'【競賽館舍已確認・圖面方向示意】':'';
-    elements.mobileCardText.textContent=kind==='service'?`${note}位置：${area||'未提供'}`:`${note}${destinationLabel(currentDestination)}：${area||'未提供'}`;
+    elements.mobileCardText.textContent=kind==='service'?`${note}位置：${area||'未提供'}${datum.locationUnmapped?'；地圖精確位置待核對':''}`:`${note}${destinationLabel(currentDestination)}：${area||'未提供'}`;
+    const mobileLocate=$('mobileCardLocate');
+    if(mobileLocate)mobileLocate.textContent=datum.locationUnmapped?'查看呼吸提示':'在圖上定位';
     elements.mobileCard.hidden=false;
   }
   function renderEditorUI(){
@@ -665,6 +708,7 @@
     corrections=IS_EDITOR?readCorrections():{};
     const params=new URLSearchParams(location.search);
     const requested=params.get('program');
+    const requestedService=params.get('service');
     const requestedDestination=params.get('destination');
     if(['registration','theory','practical'].includes(requestedDestination))currentDestination=requestedDestination;
     const venueNames={nkh:'北科附工',division:'桃竹苗分署',vanung:'萬能科大',nangang:'南港高工',sanchong:'三重商工',taishan:'泰山高中',xinxing:'新興高中'};
@@ -675,6 +719,9 @@
     }else if(requestedVenue && sites.some(x=>x.name===requestedVenue)){
       site=requestedVenue;current=forSite(site)[0]?.id||'01';currentDestination='practical';
       mapId=destinationMap(byId(current),currentDestination)||'map-03';
+    }
+    if(requestedService==='desk' && !requested){
+      site='北科附工';mapId='map-00';currentService='desk';
     }
     globalSelect();renderAll();routeReady=true;
     if(requested && byId(requested) && !IS_EDITOR){
@@ -705,10 +752,17 @@
     elements.locateBtn.addEventListener('click',()=>{if(!elements.locateBtn.disabled){scrollToProgramLocation();}else chooseProgram(current,{focus:true,preserveMap:false,updateUrl:false});});
     elements.serviceLocateBtn.addEventListener('click',()=>{
       const s=serviceById(currentService);
+      if(s?.locationUnmapped){
+        elements.serviceDeskBeacon?.scrollIntoView({behavior:mapScrollBehavior(),block:'center'});
+        elements.serviceDeskAction?.focus();
+        toast('服務台在穿堂，原圖未標位置；目前是呼吸提示，非精確地圖定位');
+        return;
+      }
       if(s?.referencePinServiceId) toast('僅參考校門入口，不是停車位或裝卸位置');
       locateSelected();
     });
     elements.serviceSearch.addEventListener('input',renderServiceList);
+    elements.serviceDeskAction?.addEventListener('click',()=>chooseService('desk',{focus:false}));
     if(IS_EDITOR){
     elements.editToggle.addEventListener('click',()=>{editMode=!editMode;editAction='move';editIndex=0;closeCluster();hideMobileCard();elements.editToggle.setAttribute('aria-pressed',String(editMode));elements.editToggle.textContent=editMode?'結束校正模式':'開啟校正模式';elements.mapStage.classList.toggle('edit-mode',editMode);elements.editStatus.textContent=editMode?'先選擇要移動的第幾處點位，再在地圖點新位置；也可切換新增模式。變更僅存於本機。':'校正模式已關閉。';renderEditorUI();renderPins();});
     elements.mapStage.addEventListener('click',clickOnMap);
@@ -721,7 +775,17 @@
     elements.mapViewport.addEventListener('wheel',()=>{pendingFocus=false;},{passive:true});
     $('clusterClose').addEventListener('click',closeCluster);
     $('mobileCardClose').addEventListener('click',hideMobileCard);
-    $('mobileCardLocate').addEventListener('click',()=>{hideMobileCard();elements.mapViewport.scrollIntoView({behavior:mapScrollBehavior(),block:'center'});requestAnimationFrame(locateSelected);});
+    $('mobileCardLocate').addEventListener('click',()=>{
+      const desk=cardType==='service'&&currentService==='desk';
+      hideMobileCard();
+      if(desk){
+        elements.serviceDeskBeacon?.scrollIntoView({behavior:mapScrollBehavior(),block:'center'});
+        elements.serviceDeskAction?.focus();
+        return;
+      }
+      elements.mapViewport.scrollIntoView({behavior:mapScrollBehavior(),block:'center'});
+      requestAnimationFrame(locateSelected);
+    });
     $('mobileCardDetails').addEventListener('click',()=>{hideMobileCard();(cardType==='service'?elements.serviceSection:elements.disciplineDetails).scrollIntoView({behavior:'smooth',block:'start'});});
     document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeCluster();hideMobileCard();}});
     window.addEventListener('resize',()=>requestAnimationFrame(renderPins));
@@ -731,7 +795,12 @@
       const rect=elements.disciplineDetails.getBoundingClientRect();
       if(rect.top < window.innerHeight*0.7) hideMobileCard();
     },{passive:true});
-    window.addEventListener('popstate',()=>{const params=new URLSearchParams(location.search),id=params.get('program'),purpose=params.get('destination');if(['registration','theory','practical'].includes(purpose))currentDestination=purpose;if(byId(id)){site=byId(id).site;mapId=destinationMap(byId(id),currentDestination);chooseProgram(id,{focus:true,preserveMap:true,updateUrl:false});}});
+    window.addEventListener('popstate',()=>{
+      const params=new URLSearchParams(location.search),id=params.get('program'),purpose=params.get('destination'),serviceId=params.get('service');
+      if(serviceId==='desk'){site='北科附工';mapId='map-00';currentService='desk';renderAll();return;}
+      if(['registration','theory','practical'].includes(purpose))currentDestination=purpose;
+      if(byId(id)){site=byId(id).site;mapId=destinationMap(byId(id),currentDestination);chooseProgram(id,{focus:true,preserveMap:true,updateUrl:false});}
+    });
     if(IS_EDITOR){
     $('exportPins').addEventListener('click',exportCorrections);
     $('importPins').addEventListener('change',async ev=>{await importCorrections(ev.target.files?.[0]);ev.target.value='';});
