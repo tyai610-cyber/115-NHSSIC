@@ -433,3 +433,51 @@ body[data-mode="editor"] .admin-panel{border:2px solid #b6d2df;border-radius:12p
  .map-pin.service-desk-pin::before,.map-pin.service-desk-pin::after{
    animation:none!important;opacity:.85!important;transform:none!important}
 }
+
+/* V13 | 大會服務圖作為七場域以外的獨立操作模式 */
+.v13-service-entry{
+ display:flex;align-items:center;justify-content:space-between;gap:18px;
+ padding:16px 20px;margin:0 0 17px;
+ background:linear-gradient(110deg,#edf7f5 0%,#f9fcfc 65%,#fffaf0 100%);
+ border:1px solid #bdddd9;border-left:5px solid #087f83;border-radius:12px;
+ box-shadow:0 4px 15px #0b29420c;
+}
+.v13-service-entry-copy{min-width:0;display:flex;flex-direction:column;gap:4px}
+.v13-service-kicker{color:#087f83;font-size:10px;font-weight:850;letter-spacing:.07em}
+.v13-service-entry-copy strong{color:#10374d;font-size:18px;line-height:1.4}
+.v13-service-entry-copy small{color:#587585;font-size:12px;line-height:1.55}
+.v13-service-entry-button{
+ flex:none;min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+ border-radius:9px;border:1px solid #0d6375;padding:11px 17px;
+ background:#113d54;color:#fff;font-size:13px;font-weight:850;cursor:pointer;
+ box-shadow:0 3px 8px #0d4b6028
+}
+.v13-service-entry-button:hover{background:#0e6674;color:#fff}
+.v13-service-entry-button:focus-visible{outline:3px solid #d5ac62;outline-offset:3px}
+.v13-service-entry-button[aria-pressed="true"]{color:#0d4a4e;background:#dff3ee;border:1px solid #66a99c}
+.v13-service-mode .v13-service-entry{border-color:#65b1aa;background:linear-gradient(110deg,#e4f4f0,#f5fbf9)}
+.v13-service-mode #mapWorkspace{grid-template-columns:minmax(0,1fr)}
+.v13-service-mode #mapWorkspace>.sidebar,
+.v13-service-mode #destinationCard{display:none!important}
+.v13-service-mode #mapWorkspace>.main-panel{min-width:0}
+.v13-service-mode #serviceSection{display:block!important}
+.v13-service-mode #serviceSection[hidden]{display:none!important}
+.v13-service-mode .service-head h3{font-size:19px;color:#123b54}
+.v13-service-mode #mapViewport{height:min(640px,72vh)}
+.v13-service-mode .service-list{grid-template-columns:repeat(3,minmax(0,1fr));max-height:310px}
+.v13-service-mode .map-footer{background:#fff}
+@media(max-width:800px){
+ .v13-service-entry{align-items:stretch;flex-direction:column;gap:12px;padding:14px}
+ .v13-service-entry-button{width:100%;min-height:46px}
+ .v13-service-mode .service-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:520px){
+ .v13-service-entry{margin-bottom:12px;padding:12px}
+ .v13-service-entry-copy strong{font-size:16px}
+ .v13-service-entry-copy small{font-size:11px}
+ .v13-service-mode #mapViewport{height:auto;min-height:260px;max-height:480px}
+ .v13-service-mode .service-list{grid-template-columns:1fr;max-height:270px}
+ .v13-service-mode .service-section{padding:16px 13px}
+ .v13-service-mode .service-head{align-items:flex-start;gap:8px}
+ .v13-service-mode .service-head h3{font-size:16px}
+}
