@@ -145,3 +145,64 @@ body{background:#f3f7f9}
  .v13-service-entry,.mobile-card{display:none!important}
  .sidebar,.main-panel{box-shadow:none;border:1px solid #bbb}
 }
+
+/* V14.1｜大會服務清單上移：先選擇 → 地圖定位 → 詳細說明 */
+.v15-service-choices{padding:18px 22px 16px;border-bottom:1px solid #d8e6e9;background:linear-gradient(180deg,#fafdfe,#fff)}
+.v15-service-choices[hidden],.service-detail-section[hidden]{display:none!important}
+.v15-service-choices .service-head{gap:12px}
+.v15-service-choices .service-head h3{font-size:19px;line-height:1.55}
+.v15-service-choices .service-intro{margin:7px 0 13px}
+.v15-service-choices .field{margin:0 0 10px}
+.v15-service-choices .service-list{max-height:190px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:2px 3px 3px 2px;margin-bottom:0;align-content:start}
+.v15-service-choices .v15-service-list-wrap.is-expanded .service-list{max-height:430px}
+.v15-service-choices .v15-choices-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:10px}
+.v15-service-toggle{border:1px solid #9bbfc8;background:#edf6f6;color:#124c60;border-radius:9px;font-size:12px;font-weight:850;padding:9px 14px;min-height:44px;cursor:pointer;flex:none}
+.v15-service-toggle:hover{background:#dceeed}
+.v15-service-toggle:focus-visible{outline:3px solid #d7ac5d!important;outline-offset:2px!important}
+.v15-service-toggle[hidden]{display:none!important}
+.v15-service-choice-hint{font-size:11px;line-height:1.6;color:#527282;margin:0;text-align:right}
+.v15-service-choices .service-item{min-width:0;min-height:46px;padding:9px 9px;font-size:12px;line-height:1.45;white-space:normal}
+.v15-service-choices .service-item-name{overflow-wrap:anywhere}
+.v15-service-choices .service-item[aria-pressed=true]{outline:2px solid #0e9290;outline-offset:0}
+.v15-service-choices .service-item.service-item-desk[aria-pressed=true]{outline-color:#c3943b}
+.service-detail-section{padding:19px 22px 24px;border-top:1px solid #d9e5e9;background:linear-gradient(180deg,#fff,#fbfcfd)}
+.v15-service-detail-head{display:flex;flex-direction:column;gap:2px;margin-bottom:9px}
+.v15-service-detail-head span{color:#0b8587;font-size:10px;font-weight:900;letter-spacing:.08em}
+.v15-service-detail-head strong{color:#143a51;font-size:17px}
+.service-detail-section .service-detail{margin:0 0 12px}
+.service-detail-section .service-warning{margin-top:14px}
+.v13-service-mode #serviceSection{display:block!important;padding:18px 22px 16px}
+.v13-service-mode #serviceSection[hidden]{display:none!important}
+.v13-service-mode #serviceDetailSection{display:block}
+.v13-service-mode #serviceDetailSection[hidden]{display:none!important}
+/* 選取第 14／16 附近群組中單點：原資料座標不變，僅以可逆的顯示偏移及細線指回原圖位置。 */
+.map-pin.selected-near-desk{z-index:28!important;transform:translate(-50%,-50%) translateX(var(--v15-desk-shift, -72px));isolation:isolate;overflow:visible}
+.map-pin.selected-near-desk.near-desk-right{--v15-desk-shift:72px}
+.map-pin.selected-near-desk:hover,.map-pin.selected-near-desk:focus-visible{transform:translate(-50%,-50%) translateX(var(--v15-desk-shift,-72px)) scale(1.06)}
+.map-pin.selected-near-desk .v15-pin-link{position:absolute;top:50%;left:50%;width:72px;height:0;border-top:2px dashed #b26a25;pointer-events:none;opacity:.85}
+.map-pin.selected-near-desk.near-desk-left .v15-pin-link{transform:translate(0,-50%)}
+.map-pin.selected-near-desk.near-desk-right .v15-pin-link{transform:translate(-100%,-50%)}
+.map-pin.selected-near-desk .selected-pin-label{bottom:calc(100% + 13px);max-width:min(52vw,280px)}
+@media(max-width:1100px){
+ .v15-service-choices .service-list{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:767px){
+ .v15-service-choices .service-list{grid-template-columns:repeat(2,minmax(0,1fr));max-height:180px}
+ .v15-service-choices .v15-service-list-wrap.is-expanded .service-list{max-height:350px}
+ .v15-service-choices .v15-choices-footer{flex-wrap:wrap}
+ .v15-service-choice-hint{text-align:left}
+ .v13-service-mode #serviceSection{padding:14px 13px}
+ .service-detail-section{padding:17px 13px 20px}
+ .map-pin.selected-near-desk{--v15-desk-shift:-58px}
+ .map-pin.selected-near-desk.near-desk-right{--v15-desk-shift:58px}
+ .map-pin.selected-near-desk .v15-pin-link{width:58px}
+}
+@media(max-width:350px){
+ .v15-service-choices .service-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ .v15-service-choices .service-item{padding:8px 6px;font-size:11px}
+ .v15-service-choices .service-no{min-width:26px}
+ .v15-service-choices .v15-choices-footer{flex-direction:column;align-items:flex-start}
+}
+@media(prefers-reduced-motion:reduce){
+ .v15-service-choices .service-item,.v15-service-toggle,.map-pin.selected-near-desk{transition:none!important}
+}
