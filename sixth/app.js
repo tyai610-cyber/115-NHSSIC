@@ -467,7 +467,7 @@
     elements.serviceDetail.replaceChildren();
     elements.serviceDetail.append(create('h4','',s.id==='desk'?s.name:`${s.id}｜${s.name}`),create('p','',`場地／位置：${s.place}`));
     const status=create('div',`service-status ${s.pending?'is-pending':''}`,
-      s.pending?'⚠ 尚待正式公告；請勿將候選日期或場地視為實際指引':s.locationUnmapped?'服務台在穿堂；目前僅提供醒目呼吸提示，不是地圖座標，現場位置待核對':s.hasPin?'圖上有編號定位（非實測入口／車位）':s.referencePinServiceId?'無固定停車位置點；可參考校門入口':'無固定定位點，請參考文字說明');
+      s.pending?'⚠ 尚待正式公告；請勿將候選日期或場地視為實際指引':s.id==='desk'?'已新增金黃色「服」圖面定位標記；位於原圖 14 與 16 號之間，非實測入口。':s.locationUnmapped?'尚無地圖定位，請參考文字說明':s.hasPin?'圖上有編號定位（非實測入口／車位）':s.referencePinServiceId?'無固定停車位置點；可參考校門入口':'無固定定位點，請參考文字說明');
     elements.serviceDetail.append(status);
     if(s.statusNote) elements.serviceDetail.append(create('p','service-clarification',s.statusNote));
     if(s.id==='desk'){
