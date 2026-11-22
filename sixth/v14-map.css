@@ -128,8 +128,8 @@ body{background:#f3f7f9}
  .service-item{min-height:46px;padding:10px 11px}
  .v13-service-mode #serviceSection{padding:15px 12px 20px}
  .v13-service-mode .service-head h3{font-size:17px}
- .map-pin:not(.service-desk-pin){min-width:39px;min-height:39px}
- .map-pin.pin-cluster{min-width:42px;min-height:42px}
+ .map-pin:not(.service-desk-pin){min-width:44px;min-height:44px}
+ .map-pin.pin-cluster{min-width:44px;min-height:44px}
  .map-pin.service-desk-pin{min-width:46px;min-height:46px}
 }
 @media(max-width:350px){
