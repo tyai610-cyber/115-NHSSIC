@@ -62,6 +62,18 @@
 </aside>
 <div class="main-panel">
 <div class="map-head"><h3 id="mapTitle">讀取地圖中…</h3><p class="map-subtitle" id="mapSubtitle"></p></div>
+<section aria-labelledby="services-title" class="service-section v15-service-choices" hidden id="serviceSection">
+<div class="service-head"><div><span class="small-label">大會服務對照</span><h3 id="services-title">北科附工大會服務（原圖 01–28＋新增穿堂服務台）</h3></div><span class="small-count">原圖 28 項＋1 新增</span></div>
+<p class="service-intro">此區為大會服務項目，與 29 個競賽職種分開。點選原圖紅色編號或服務清單查看詳細資訊。新增穿堂服務台於原圖 14、16 號之間以金色「服」呼吸燈標記；屬承辦單位補充的圖面中點示意，非原圖印製標記或實測入口。</p>
+<label class="field"><span>搜尋服務編號、名稱或位置</span><input autocomplete="off" id="serviceSearch" placeholder="搜尋：服務台、穿堂、14、16、接待、停車…" type="search"/></label>
+<div class="v15-service-list-wrap" id="serviceListWrap">
+  <div class="service-list" id="serviceList" aria-label="選擇大會服務定位項目"></div>
+</div>
+<div class="v15-choices-footer">
+  <button class="v15-service-toggle" id="serviceListToggle" type="button" aria-controls="serviceList" aria-expanded="false">展開全部 29 項服務</button>
+  <p class="v15-service-choice-hint" id="serviceChoiceHint" role="status" aria-live="polite">選擇上方項目，下方地圖將顯示對應呼吸標記。</p>
+</div>
+</section>
 
 
 
@@ -89,14 +101,12 @@
 </div><div class="map-compact-downloads"><a class="original-link" href="#" id="originalLink" rel="noopener" target="_blank">開啟原始高解析圖 <span aria-hidden="true">↗</span></a><a class="original-link" download="" href="#" id="downloadOriginal">下載原始圖檔 <span aria-hidden="true">↓</span></a></div><div aria-live="polite" class="map-hint" id="mapStatus">點選地圖中的編號，可查看職種與場地資訊。</div><details class="map-shortcuts" hidden="" id="mapShortcutBox"><summary id="mapShortcutHeading">圖面職種查詢索引</summary><div class="shortcut-explain" id="mapShortcutExplain"></div><div class="shortcut-list" id="mapShortcutList"></div></details></div></details>
 <div class="map-footer" aria-label="地圖標記說明"><span id="mapLegendPrimary"><i class="legend-pip legend-other"></i>職種定位點</span><span id="mapLegendSelected"><i class="legend-pip legend-current"></i>目前選取</span><span id="mapLegendPending"><i class="legend-pip legend-pending"></i>待現場核對</span><span id="pinCount">—</span></div>
 <div aria-label="密集定位群組清單" aria-modal="false" class="cluster-chooser" hidden="" id="clusterChooser" role="dialog"><div class="cluster-head"><strong id="clusterTitle">選擇定位點</strong><button aria-label="關閉定位群組" id="clusterClose" type="button">✕</button></div><div class="cluster-items" id="clusterItems"></div><p>群組只合併畫面上的點選按鈕，不會改動原始座標或核定狀態。</p></div>
-<section aria-labelledby="services-title" class="service-section" hidden="" id="serviceSection">
-<div class="service-head"><div><span class="small-label">大會服務對照</span><h3 id="services-title">北科附工大會服務（原圖 01–28＋新增穿堂服務台）</h3></div><span class="small-count">原圖 28 項＋1 新增</span></div>
-<p class="service-intro">此區為大會服務項目，與 29 個競賽職種分開。點選原圖紅色編號或服務清單查看詳細資訊。新增穿堂服務台於原圖 14、16 號之間以金色「服」呼吸燈標記；屬承辦單位補充的圖面中點示意，非原圖印製標記或實測入口。</p>
-<label class="field"><span>搜尋服務項目或位置</span><input autocomplete="off" id="serviceSearch" placeholder="例如：服務台、穿堂、第三會議室" type="search"/></label>
-<div class="service-list" id="serviceList"></div>
-<div aria-live="polite" class="service-detail" id="serviceDetail"></div>
-<button class="locate-btn" id="serviceLocateBtn" type="button">⌖ 在地圖上查看此服務點</button>
-<p class="service-warning">服務 18、19、25、26 的日期、路線或場地尚待公告，請勿依候選位置前往。21 為後門裝卸區域，22 為校門入口；23 為校門指引，不代表停車位置。</p>
+
+<section class="service-detail-section" id="serviceDetailSection" hidden aria-label="選取服務項目的詳細資訊">
+  <div class="v15-service-detail-head"><span>目前選取的服務項目</span><strong>定位與使用說明</strong></div>
+  <div aria-live="polite" class="service-detail" id="serviceDetail"></div>
+  <button class="locate-btn" id="serviceLocateBtn" type="button">⌖ 在地圖上查看此服務點</button>
+  <p class="service-warning">服務 18、19、25、26 的日期、路線或場地尚待公告，請勿依候選位置前往。21 為後門裝卸區域，22 為校門入口；23 為校門指引，不代表停車位置。</p>
 </section>
 <section aria-labelledby="detail-title" class="details" id="disciplineDetails">
 <div class="details-top"><div><span class="small-label">職種資訊</span><div class="details-name"><span class="detail-number" id="detailNumber">01</span><h3 id="detail-title">選擇職種</h3></div></div><button class="locate-btn" id="locateBtn" type="button">⌖ 在地圖上定位</button></div>
