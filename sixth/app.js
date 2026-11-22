@@ -290,6 +290,11 @@
     elements.globalProgram.append(optFrag);
   }
   function enterServiceMode({serviceId=null,updateUrl=true,scroll=false,push=false}={}){
+    // Reopening the active service tab must not silently discard the user's selection.
+    if(mapId==='map-00'&&serviceId===null){
+      if(scroll)requestAnimationFrame(()=>elements.mapViewport.scrollIntoView({behavior:mapScrollBehavior(),block:'start'}));
+      return;
+    }
     site='北科附工';mapId='map-00';zoom=1;mapMode='focus';
     currentService=serviceId&&serviceById(serviceId)?serviceId:'desk';
     hideMobileCard();closeCluster();renderAll();
@@ -407,6 +412,23 @@
     tabs.forEach(tab=>tab.setAttribute('aria-pressed',String(!isService&&tab.dataset.site===site)));
     const heading=$('explorer-title');
     if(heading)heading.textContent=isService?'北科附工大會服務互動圖':'互動校園地圖';
+    const subtitle=$('explorerSubtitle'),notice=$('explorerNotice');
+    if(subtitle)subtitle.textContent=isService
+      ?'直接點選原圖服務編號，或在下方搜尋大會服務、停車、接待與穿堂服務台。可縮放地圖，重疊點請展開群組。'
+      :'先選擇競賽場域或 01–29 職種，再查看報到、學科與術科位置。圖面標記並非實測入口。';
+    if(notice)notice.textContent=isService
+      ?'原圖 28 項＋穿堂服務台；定位僅供辨識，請以現場指引為準。'
+      :'位置待核對的定位點不作動態高亮；請依正式公告。';
+    const legend={
+      primary:$('mapLegendPrimary'),selected:$('mapLegendSelected'),pending:$('mapLegendPending')
+    };
+    if(legend.primary)legend.primary.innerHTML=isService
+      ?'<i class="legend-pip legend-service"></i>大會服務編號'
+      :'<i class="legend-pip legend-other"></i>職種定位點';
+    if(legend.selected)legend.selected.innerHTML=isService
+      ?'<i class="legend-pip legend-desk"></i>穿堂服務台（金色「服」）'
+      :'<i class="legend-pip legend-current"></i>目前選取';
+    if(legend.pending)legend.pending.innerHTML='<i class="legend-pip legend-pending"></i>待核對位置';
     const sidebar=$('mapWorkspace')?.querySelector('.sidebar');
     if(sidebar)sidebar.hidden=isService;
     elements.destinationTabs?.closest('.destination-card')?.toggleAttribute('hidden',isService);
@@ -433,7 +455,9 @@
     elements.serviceList.replaceChildren();
     const hits=DATA.services.filter(s=>!q||`${s.id} ${s.name} ${s.place}`.toLocaleLowerCase().includes(q));
     for(const svc of hits){
-      const btn=create('button','service-item');btn.type='button';btn.setAttribute('aria-pressed',String(svc.id===currentService));
+      const btn=create('button',`service-item ${svc.id==='desk'?'service-item-desk':''}`);btn.type='button';
+      btn.setAttribute('aria-pressed',String(svc.id===currentService));
+      btn.setAttribute('aria-label',`${svc.name}，位置：${svc.place}，點選查看地圖標記`);
       btn.append(create('span','service-no',svc.displayId||svc.id),create('span','service-item-name',svc.name));
       if(svc.pending){btn.classList.add('pending-service');btn.append(create('span','service-review','待公告'));}
       btn.addEventListener('click',()=>chooseService(svc.id));elements.serviceList.append(btn);
@@ -599,7 +623,7 @@
     if(isService){
       const selected=all.filter(x=>x.serviceId===currentService),svc=serviceById(currentService);
       if(svc?.pending)elements.mapStatus.textContent=`⚠ ${currentService} ${svc.name}：日期／場地尚待公告，請勿依候選資訊前往。`;
-      else if(selected.length)elements.mapStatus.textContent=`${currentService}｜${svc?.name||''}（${selected.length} 處）。若點位重疊，請點「＋數量」展開；非實測入口。`;
+      else if(selected.length)elements.mapStatus.textContent=`${currentService==='desk'?'服務台':currentService}｜${svc?.name||''}（${selected.length} 處）。若點位重疊，請點「＋數量」展開；非實測入口。`;
       else if(svc?.referencePinServiceId)elements.mapStatus.textContent=`${currentService} 未提供固定點位；可參考 ${svc.referencePinServiceId} 校門入口，但不是停車位。`;
       else elements.mapStatus.textContent='本項目沒有固定地圖定位，請參考服務對照表。';
       return;
@@ -637,7 +661,7 @@
     if(window.innerWidth>520 || editMode)return;
     const datum=kind==='service'?serviceById(currentService):byId(current);
     if(!datum)return;
-    elements.mobileCardTitle.textContent=datum.locationUnmapped?datum.name:`${datum.id}｜${datum.name}`;
+    elements.mobileCardTitle.textContent=kind==='service'&&datum.id==='desk'?datum.name:`${datum.id}｜${datum.name}`;
     elements.mobileCardLabel.textContent=kind==='service'?'北科附工大會服務':'職種快速資訊';
     const area=kind==='service'?datum.place:destinationValue(datum,currentDestination);
     const note=kind==='service'&&datum.pending?'【待公告】'
@@ -680,7 +704,10 @@
     }
     const focus=activeFocus(); updateModeButtons();
     elements.mapViewport.style.setProperty('--map-aspect',String(1/displayedAspect()));
-    elements.mapTitle.textContent=mapId==='map-00'?'北科附工｜大會服務互動圖':site;elements.mapSubtitle.textContent='';
+    elements.mapTitle.textContent=mapId==='map-00'?'北科附工｜大會服務互動圖':site;
+    elements.mapSubtitle.textContent=mapId==='map-00'
+      ?'服務台在 14 與 16 號之間｜點選地圖標記可查看服務地點'
+      :map.title;
     elements.originalLink.href=map.original||map.preview;
     elements.downloadOriginal.hidden=!map.original; if(map.original){elements.downloadOriginal.href=map.original;elements.downloadOriginal.download=map.sourceName;}
     elements.originalLink.textContent=map.original?'開啟原始高解析圖 ↗':'開啟完整網頁版圖面 ↗';
