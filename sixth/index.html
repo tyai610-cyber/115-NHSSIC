@@ -44,11 +44,11 @@
 </section>
 <main class="shell">
 <section aria-labelledby="explorer-title" class="explorer-section" id="explorer">
-<div class="section-heading"><div><h2 id="explorer-title">互動校園地圖</h2><p class="section-subtitle">先選場域，也可以直接選擇 01–29 職種。圖上已標點的職種可點選查看細節；重點圖為視圖裁切，位置不代表實測入口。</p></div><span class="light-pill">地圖標記僅供辨認位置；待核對點不會動態高亮。</span></div>
+<div class="section-heading"><div><h2 id="explorer-title">互動校園地圖</h2><p class="section-subtitle" id="explorerSubtitle">先選場域，也可以直接選擇 01–29 職種。圖上已標點的職種可點選查看細節；重點圖為視圖裁切，位置不代表實測入口。</p></div><span class="light-pill" id="explorerNotice">地圖標記僅供辨認位置；待核對點不會動態高亮。</span></div>
 <div aria-label="選擇競賽場域" class="site-tabs" id="siteTabs" role="group"></div>
 <div class="v13-service-entry" role="group" aria-label="大會服務獨立互動圖">
   <div class="v13-service-entry-copy"><span class="v13-service-kicker">大會服務專區 · 非第八競賽場域</span><strong>北科附工大會服務互動圖</strong><small>大會服務、接待、停車及穿堂服務台｜原圖 28 項＋新增服務台</small></div>
-  <button class="v13-service-entry-button" type="button" id="serviceModeButton" aria-pressed="false" aria-controls="serviceSection">開啟大會服務互動圖 <span aria-hidden="true">↗</span></button>
+  <button class="v13-service-entry-button" type="button" id="serviceModeButton" aria-pressed="false" aria-controls="serviceSection mapViewport">開啟大會服務互動圖 <span aria-hidden="true">↗</span></button>
 </div>
 <div class="workspace" id="mapWorkspace">
 <aside aria-labelledby="sidebar-title" class="sidebar">
@@ -86,7 +86,7 @@
 <button class="tool-btn tool-text" id="zoomReset" type="button">重設</button>
 </div>
 </div><div class="map-compact-downloads"><a class="original-link" href="#" id="originalLink" rel="noopener" target="_blank">開啟原始高解析圖 <span aria-hidden="true">↗</span></a><a class="original-link" download="" href="#" id="downloadOriginal">下載原始圖檔 <span aria-hidden="true">↓</span></a></div><div aria-live="polite" class="map-hint" id="mapStatus">點選地圖中的編號，可查看職種與場地資訊。</div><details class="map-shortcuts" hidden="" id="mapShortcutBox"><summary id="mapShortcutHeading">圖面職種查詢索引</summary><div class="shortcut-explain" id="mapShortcutExplain"></div><div class="shortcut-list" id="mapShortcutList"></div></details></div></details>
-<div class="map-footer"><span><i class="legend-pip legend-other"></i>職種定位點</span><span><i class="legend-pip legend-current"></i>目前選取</span><span><i class="legend-pip legend-pending"></i>待現場核對</span><span id="pinCount">—</span></div>
+<div class="map-footer" aria-label="地圖標記說明"><span id="mapLegendPrimary"><i class="legend-pip legend-other"></i>職種定位點</span><span id="mapLegendSelected"><i class="legend-pip legend-current"></i>目前選取</span><span id="mapLegendPending"><i class="legend-pip legend-pending"></i>待現場核對</span><span id="pinCount">—</span></div>
 <div aria-label="密集定位群組清單" aria-modal="false" class="cluster-chooser" hidden="" id="clusterChooser" role="dialog"><div class="cluster-head"><strong id="clusterTitle">選擇定位點</strong><button aria-label="關閉定位群組" id="clusterClose" type="button">✕</button></div><div class="cluster-items" id="clusterItems"></div><p>群組只合併畫面上的點選按鈕，不會改動原始座標或核定狀態。</p></div>
 <section aria-labelledby="services-title" class="service-section" hidden="" id="serviceSection">
 <div class="service-head"><div><span class="small-label">大會服務對照</span><h3 id="services-title">北科附工大會服務（原圖 01–28＋新增穿堂服務台）</h3></div><span class="small-count">原圖 28 項＋1 新增</span></div>
