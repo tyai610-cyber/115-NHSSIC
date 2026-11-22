@@ -328,3 +328,58 @@ body[data-mode="editor"] .admin-panel{border:2px solid #b6d2df;border-radius:12p
  .main-panel>.destination-card .destination-status{font-size:12px}
  .mobile-card-inner{padding-right:42px}
 }
+
+/* V12 - 穿堂服務台：圖面尚無穿堂座標，明確展示非地理定位的醒目提示。 */
+.service-desk-map-prompt{position:relative;margin:7px 12px 10px;z-index:3}
+.service-desk-map-prompt[hidden]{display:none!important}
+.service-desk-map-button{
+  display:flex;align-items:center;gap:15px;width:100%;min-height:76px;
+  padding:12px 18px;border:2px solid #e8bc59;border-radius:13px;
+  background:linear-gradient(110deg,#102b42,#17465b 78%,#1d5864);
+  color:#fff;text-align:left;cursor:pointer;
+  box-shadow:0 5px 18px #0b29422a;position:relative;overflow:visible
+}
+.service-desk-map-button:hover,.service-desk-map-button:focus-visible{
+  border-color:#ffe7a3;box-shadow:0 0 0 3px #e7b74a55,0 8px 24px #0b294233
+}
+.service-desk-orb{
+  position:relative;flex:none;display:grid;place-items:center;width:46px;height:46px;
+  border-radius:50%;border:3px solid #fff;color:#183047;font-weight:950;font-size:20px;
+  background:#ffdb4b;box-shadow:0 0 0 6px #ffc72a66,0 0 25px 9px #ffc32688;
+  isolation:isolate;
+}
+.service-desk-orb::before,.service-desk-orb::after{
+  content:"";position:absolute;inset:-10px;border:4px solid #ffdb4b;
+  border-radius:50%;pointer-events:none;animation:gkServiceDeskPulse 1.9s ease-out infinite
+}
+.service-desk-orb::after{inset:-14px;border-color:#fff;animation-delay:-.95s}
+@keyframes gkServiceDeskPulse{
+  0%{transform:scale(.74);opacity:1}
+  70%{opacity:.5}
+  100%{transform:scale(1.65);opacity:0}
+}
+.service-desk-map-text{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.service-desk-map-text strong{font-size:17px;line-height:1.35;color:#fff}
+.service-desk-map-text small{font-size:12px;line-height:1.5;color:#ffe3a0}
+.service-desk-map-action{
+  flex:none;display:inline-flex;align-items:center;min-height:35px;
+  padding:7px 11px;border-radius:8px;background:#ffe8a5;color:#193b4c;
+  font-size:12px;font-weight:900
+}
+.service-desk-map-prompt.is-selected .service-desk-map-button{
+  border-color:#fff2bd;box-shadow:0 0 0 3px #f5c35777,0 6px 22px #0b29423d
+}
+.service-item:has(.service-no):is([aria-pressed="true"]){font-weight:800}
+@media(max-width:520px){
+ .service-desk-map-prompt{margin:5px 8px 9px}
+ .service-desk-map-button{gap:11px;padding:10px 13px;min-height:70px}
+ .service-desk-orb{width:42px;height:42px;font-size:18px}
+ .service-desk-map-text strong{font-size:15px}
+ .service-desk-map-text small{font-size:11px}
+ .service-desk-map-action{font-size:11px;padding:7px;min-height:42px}
+}
+@media(max-width:340px){.service-desk-map-action{display:none}}
+@media(prefers-reduced-motion:reduce){
+ .service-desk-orb::before,.service-desk-orb::after{animation:none!important;opacity:.85!important;transform:none!important}
+}
+@media print{.service-desk-map-prompt{display:none!important}}
