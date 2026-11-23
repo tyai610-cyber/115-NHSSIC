@@ -82,3 +82,104 @@
  .adaptive-site{background:#fff!important}
  .adaptive-site :is(.entrance-card,.search-hero,.venue-map-area,.skill-detail){box-shadow:none!important}
 }
+
+/* V14.3 | 首頁全寬大會服務互動圖首要入口。
+ * 原六項入口、全站六功能導覽均維持不變；僅首頁增加獨立大型選項。
+ */
+.adaptive-site .portal-access .v14-home-service-feature{
+ position:relative;isolation:isolate;display:grid;grid-template-columns:72px minmax(0,1fr) auto;
+ align-items:center;gap:20px;width:100%;min-width:0;
+ padding:23px 28px;margin-top:14px;margin-bottom:13px;
+ border:1px solid #245b6b;border-left:5px solid #d9aa59;border-radius:14px;
+ color:#fff;text-decoration:none;
+ background:linear-gradient(112deg,#0a2c43 0%,#103d55 59%,#0a5863 100%);
+ box-shadow:0 12px 26px #0d344525, inset 0 1px 0 #ffffff20;
+ transition:border-color .18s,box-shadow .18s,transform .18s;
+ overflow:hidden;
+}
+.adaptive-site .portal-access .v14-home-service-feature::before{
+ content:"";position:absolute;inset:-20% -4% 0 auto;width:40%;pointer-events:none;z-index:-1;
+ background:radial-gradient(ellipse at 84% 56%,#55c0b41a,transparent 69%);
+}
+.adaptive-site .portal-access .v14-home-service-feature:hover{
+ transform:translateY(-3px);border-color:#d2b470;
+ box-shadow:0 17px 34px #0d344539,inset 0 1px 0 #ffffff2b;
+}
+.adaptive-site .portal-access .v14-home-service-feature:focus-visible{
+ outline:3px solid #dfb567!important;outline-offset:4px!important;
+}
+.adaptive-site .v14-home-service-feature .v14-feature-icon{
+ width:72px;height:72px;display:grid;place-items:center;flex:none;
+ color:#e8f2f1;background:#ffffff12;border:1px solid #d0e4e64a;border-radius:15px;
+ box-shadow:inset 0 0 0 3px #ffffff08;
+}
+.adaptive-site .v14-home-service-feature .v14-feature-icon svg{width:49px;height:49px}
+.adaptive-site .v14-home-service-feature .v14-feature-main{min-width:0;display:flex;flex-direction:column;gap:5px}
+.adaptive-site .v14-home-service-feature .v14-feature-kicker{
+ color:#f5d28d;font-size:11px;font-weight:900;letter-spacing:.08em;line-height:1.35;
+}
+.adaptive-site .v14-home-service-feature .v14-feature-kicker span{padding-inline:5px;color:#b7d6da}
+.adaptive-site .v14-home-service-feature .v14-feature-title{
+ font-size:clamp(20px,2.2vw,29px);font-weight:900;letter-spacing:.02em;line-height:1.3;color:#fff;
+}
+.adaptive-site .v14-home-service-feature .v14-feature-description{
+ color:#e3eef0;font-size:13px;font-weight:550;line-height:1.65;overflow-wrap:anywhere;
+}
+.adaptive-site .v14-home-service-feature .v14-feature-highlights{
+ display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:6px;
+}
+.adaptive-site .v14-home-service-feature .v14-feature-highlights span{
+ padding:5px 10px;border-radius:999px;background:#ffffff12;border:1px solid #d7edf03d;
+ color:#e9f4f3;font-size:11px;font-weight:750;line-height:1.4;
+}
+.adaptive-site .v14-home-service-feature .v14-feature-action{
+ display:flex;align-items:center;gap:10px;color:#ffe2ab;font-size:13px;font-weight:900;
+ white-space:nowrap;padding-left:8px;
+}
+.adaptive-site .v14-home-service-feature .v14-feature-arrow{
+ width:39px;height:39px;display:grid;place-items:center;border-radius:50%;
+ border:1px solid #e2bd7d96;background:#dfad5460;font-size:22px;line-height:1;
+}
+@media(max-width:950px){
+ .adaptive-site .portal-access .v14-home-service-feature{
+  grid-template-columns:60px minmax(0,1fr);gap:15px;padding:19px 21px;
+ }
+ .adaptive-site .v14-home-service-feature .v14-feature-icon{width:60px;height:60px}
+ .adaptive-site .v14-home-service-feature .v14-feature-icon svg{width:42px;height:42px}
+ .adaptive-site .v14-home-service-feature .v14-feature-action{grid-column:2;padding:4px 0 0;justify-content:flex-start}
+}
+@media(max-width:767px){
+ .adaptive-site .portal-access .v14-home-service-feature{
+  grid-template-columns:49px minmax(0,1fr);gap:10px;
+  padding:15px 13px;margin-top:12px;margin-bottom:11px;border-radius:12px;
+ }
+ .adaptive-site .v14-home-service-feature .v14-feature-icon{
+  width:49px;height:49px;border-radius:10px;
+ }
+ .adaptive-site .v14-home-service-feature .v14-feature-icon svg{width:34px;height:34px}
+ .adaptive-site .v14-home-service-feature .v14-feature-kicker{font-size:10px}
+ .adaptive-site .v14-home-service-feature .v14-feature-title{font-size:clamp(17px,5vw,21px)}
+ .adaptive-site .v14-home-service-feature .v14-feature-description{font-size:11px;line-height:1.55}
+ .adaptive-site .v14-home-service-feature .v14-feature-highlights{gap:5px;margin-top:4px}
+ .adaptive-site .v14-home-service-feature .v14-feature-highlights span{font-size:10px;padding:4px 7px}
+ .adaptive-site .v14-home-service-feature .v14-feature-action{font-size:12px;gap:8px}
+ .adaptive-site .v14-home-service-feature .v14-feature-arrow{width:30px;height:30px;font-size:18px}
+}
+@media(max-width:350px){
+ .adaptive-site .portal-access .v14-home-service-feature{grid-template-columns:1fr}
+ .adaptive-site .v14-home-service-feature .v14-feature-icon{width:45px;height:45px}
+ .adaptive-site .v14-home-service-feature .v14-feature-action{grid-column:1}
+}
+@media(prefers-reduced-motion:reduce){
+ .adaptive-site .portal-access .v14-home-service-feature{transition:none!important}
+ .adaptive-site .portal-access .v14-home-service-feature:hover{transform:none}
+}
+@media print{
+ .adaptive-site .portal-access .v14-home-service-feature{
+  box-shadow:none!important;background:#fff!important;color:#17384b!important;
+  border:2px solid #537988!important;
+ }
+ .adaptive-site .v14-home-service-feature :is(.v14-feature-title,.v14-feature-description,.v14-feature-kicker,.v14-feature-highlights span,.v14-feature-action){
+  color:#17384b!important;
+ }
+}
