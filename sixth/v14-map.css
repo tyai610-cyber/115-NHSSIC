@@ -206,3 +206,65 @@ body{background:#f3f7f9}
 @media(prefers-reduced-motion:reduce){
  .v15-service-choices .service-item,.v15-service-toggle,.map-pin.selected-near-desk{transition:none!important}
 }
+
+/* V14.2 第三會議室工具存放區：共用已存在之服務 01 參考點，不新增精確地理座標。 */
+.v15-service-choices .service-item.service-item-tool{
+ background:linear-gradient(110deg,#f0f7fb,#fff);
+ border-color:#a8c8d9;color:#164a65
+}
+.v15-service-choices .service-item.service-item-tool .service-no{
+ background:#d9ebf6;color:#175473;border:1px solid #a3c5d6
+}
+.v15-service-choices .service-item.service-item-tool[aria-pressed="true"]{
+ background:#dceff7;border-color:#467e9a;
+ box-shadow:inset 4px 0 0 #246b8e;
+ outline:2px solid #246b8e;outline-offset:0
+}
+.map-pin.tool-storage-reference{
+ z-index:30!important;isolation:isolate;overflow:visible!important;
+ width:44px;height:44px;min-width:44px;min-height:44px;
+ transform:translate(-50%,-50%) translate(0,-62px);
+ border:3px solid #fff!important;border-radius:50%;
+ background:#e9ae43!important;color:#1a3647!important;
+ font-size:19px;font-weight:950;
+ box-shadow:0 0 0 5px #e3aa4194,0 0 24px 8px #e5b14f88,0 5px 14px #0c344a8a!important
+}
+.map-pin.tool-storage-reference::before,.map-pin.tool-storage-reference::after{
+ content:"";position:absolute;inset:-9px;border:3px solid #efbe68;
+ border-radius:50%;pointer-events:none;animation:gkServiceDeskPulse 2.1s ease-out infinite
+}
+.map-pin.tool-storage-reference::after{
+ inset:-14px;border-color:#ffffff;animation-delay:-1.05s
+}
+.map-pin.tool-storage-reference .tool-storage-reference-label{
+ position:absolute;left:50%;bottom:calc(100% + 12px);transform:translateX(-50%);
+ padding:6px 9px;max-width:min(58vw,270px);white-space:nowrap;
+ background:#143e53;color:#fff;border:2px solid #e8b75e;border-radius:7px;
+ font-size:12px;line-height:1.35;font-weight:900;pointer-events:none;
+ box-shadow:0 4px 11px #0c344a55
+}
+.map-pin.tool-storage-reference .tool-storage-reference-label::after{
+ content:"參照 01 號位置";display:block;color:#f7deb2;
+ font-size:10px;font-weight:650
+}
+.map-pin.tool-storage-reference:hover,.map-pin.tool-storage-reference:focus-visible{
+ transform:translate(-50%,-50%) translate(0,-62px) scale(1.08);
+ z-index:40!important
+}
+@media(max-width:520px){
+ .map-pin.tool-storage-reference{
+  width:46px;height:46px;min-width:46px;min-height:46px;
+  transform:translate(-50%,-50%) translate(0,-66px)
+ }
+ .map-pin.tool-storage-reference:hover,.map-pin.tool-storage-reference:focus-visible{
+  transform:translate(-50%,-50%) translate(0,-66px) scale(1.05)
+ }
+ .map-pin.tool-storage-reference .tool-storage-reference-label{
+  font-size:11px;max-width:60vw;white-space:normal;text-align:center
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .map-pin.tool-storage-reference::before,.map-pin.tool-storage-reference::after{
+  animation:none!important;opacity:.85!important
+ }
+}

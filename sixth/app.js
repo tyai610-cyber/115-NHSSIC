@@ -8,6 +8,8 @@
   // A separate, non-numbered service point; the official A3 item 01–28 is preserved.
   if(V12_PATCH.serviceDesk && !DATA.services.some(s=>s.id===V12_PATCH.serviceDesk.id))
     DATA.services.push({...V12_PATCH.serviceDesk,displayId:'服'});
+  if(V12_PATCH.toolStorage && !DATA.services.some(s=>s.id===V12_PATCH.toolStorage.id))
+    DATA.services.push({...V12_PATCH.toolStorage});
   // 加在原有地圖服務點資料之後；官方 01–28 的圖面資料完全不變。
   if(V12_PATCH.serviceDeskPin && !DATA.servicePins.some(p=>p.serviceId==='desk'))
     DATA.servicePins.push({...V12_PATCH.serviceDeskPin});
@@ -418,7 +420,7 @@
       ?'在上方選擇服務編號或搜尋名稱，下方地圖即顯示對應呼吸標記。點選地圖也能同步選取上方項目。'
       :'先選擇競賽場域或 01–29 職種，再查看報到、學科與術科位置。圖面標記並非實測入口。';
     if(notice)notice.textContent=isService
-      ?'原圖 28 項＋穿堂服務台；定位僅供辨識，請以現場指引為準。'
+      ?'原圖 28 項＋穿堂服務台＋工具存放區；圖面參考點並非室內精確位置，請依現場指引。'
       :'位置待核對的定位點不作動態高亮；請依正式公告。';
     const legend={
       primary:$('mapLegendPrimary'),selected:$('mapLegendSelected'),pending:$('mapLegendPending')
@@ -488,9 +490,9 @@
     elements.serviceList.replaceChildren();
     // Desk shortcut first, official 01–28 still retain their original ascending order.
     const hits=DATA.services.filter(svc=>!q||`${svc.id} ${svc.name} ${svc.place}`.toLocaleLowerCase().includes(q))
-      .sort((a,b)=>a.id==='desk'?-1:b.id==='desk'?1:a.id.localeCompare(b.id,'zh-Hant',{numeric:true}));
+      .sort((a,b)=>a.id==='desk'?-1:b.id==='desk'?1:a.id==='tool-storage'?-1:b.id==='tool-storage'?1:a.id.localeCompare(b.id,'zh-Hant',{numeric:true}));
     for(const svc of hits){
-      const btn=create('button',`service-item ${svc.id==='desk'?'service-item-desk':''}`);btn.type='button';
+      const btn=create('button',`service-item ${svc.id==='desk'?'service-item-desk':svc.id==='tool-storage'?'service-item-tool':''}`);btn.type='button';
       btn.dataset.serviceId=svc.id;
       btn.setAttribute('aria-pressed',String(svc.id===currentService));
       btn.setAttribute('aria-label',`${svc.name}，位置：${svc.place}，點選查看地圖標記`);
@@ -521,14 +523,14 @@
     elements.serviceDetail.replaceChildren();
     elements.serviceDetail.append(create('h4','',s.id==='desk'?s.name:`${s.id}｜${s.name}`),create('p','',`場地／位置：${s.place}`));
     const status=create('div',`service-status ${s.pending?'is-pending':''}`,
-      s.pending?'⚠ 尚待正式公告；請勿將候選日期或場地視為實際指引':s.id==='desk'?'已新增金黃色「服」圖面定位標記；位於原圖 14 與 16 號之間，非實測入口。':s.locationUnmapped?'尚無地圖定位，請參考文字說明':s.hasPin?'圖上有編號定位（非實測入口／車位）':s.referencePinServiceId?'無固定停車位置點；可參考校門入口':'無固定定位點，請參考文字說明');
+      s.pending?'⚠ 尚待正式公告；請勿將候選日期或場地視為實際指引':s.id==='desk'?'已新增金黃色「服」圖面定位標記；位於原圖 14 與 16 號之間，非實測入口。':s.id==='tool-storage'?'工具存放區位於第三會議室；「具」呼吸標記僅參照既有 01 號圖面位置，不代表室內實測位置。':s.locationUnmapped?'尚無地圖定位，請參考文字說明':s.hasPin?'圖上有編號定位（非實測入口／車位）':s.referencePinServiceId?'無固定停車位置點；可參考校門入口':'無固定定位點，請參考文字說明');
     elements.serviceDetail.append(status);
     if(s.statusNote) elements.serviceDetail.append(create('p','service-clarification',s.statusNote));
-    if(s.id==='desk'){
-      const link=create('a','feature-link','開啟穿堂服務台專屬連結 ↗');
+    if(s.id==='desk'||s.id==='tool-storage'){
+      const link=create('a','feature-link',s.id==='desk'?'開啟穿堂服務台專屬連結 ↗':'開啟工具存放區專屬連結 ↗');
       const url=new URL(location.href);
       url.searchParams.delete('program');url.searchParams.delete('destination');
-      url.searchParams.set('service','desk');url.hash='explorer';
+      url.searchParams.set('service',s.id);url.hash='explorer';
       link.href=url.href;
       elements.serviceDetail.append(link);
     }
@@ -540,7 +542,7 @@
     const hasPoint=DATA.servicePins.some(p=>p.mapId===mapId&&p.serviceId===currentService);
     const hasReference=Boolean(s.referencePinServiceId&&DATA.servicePins.some(p=>p.mapId===mapId&&p.serviceId===s.referencePinServiceId));
     elements.serviceLocateBtn.disabled=!(hasPoint||hasReference);
-    elements.serviceLocateBtn.textContent=s.id==='desk'&&hasPoint?'⌖ 查看地圖中「服」定位點':hasPoint?'⌖ 在圖上定位此服務項目':hasReference?`⌖ 查看${s.referenceLabel||'入口'}`:'⌖ 本項目沒有圖面定位';
+    elements.serviceLocateBtn.textContent=s.id==='desk'&&hasPoint?'⌖ 查看地圖中「服」定位點':s.id==='tool-storage'&&hasReference?'⌖ 查看第三會議室「具」參考標記':hasPoint?'⌖ 在圖上定位此服務項目':hasReference?`⌖ 查看${s.referenceLabel||'入口'}`:'⌖ 本項目沒有圖面定位';
   }
   function clusteringGroups(all){
     const map=getMap(),stageW=elements.mapStage.getBoundingClientRect().width||elements.mapViewport.clientWidth||720;
@@ -661,6 +663,24 @@
         else chooseProgram(id,{focus:false,preserveMap:true});
       });elements.pinLayer.append(btn);
     }
+    // 工具存放區：選取時只在原有第三會議室圖面參考點上做醒目視覺指示。
+    // 沒有新增工具的獨立座標，避免誤認為室內放置點已實測。
+    if(isService&&currentService==='tool-storage'){
+      const reference=serviceById('tool-storage')?.referencePinServiceId;
+      const refPin=all.find(p=>p.serviceId===reference);
+      if(refPin){
+        const toolMarker=create('button','map-pin tool-storage-reference selected-target is-active','具');
+        toolMarker.type='button';
+        toolMarker.dataset.service='tool-storage';
+        toolMarker.style.left=`${refPin.x}%`;
+        toolMarker.style.top=`${refPin.y}%`;
+        toolMarker.title='工具存放區｜第三會議室圖面參照（01 號），非室內實測定位';
+        toolMarker.setAttribute('aria-label','工具存放區位於第三會議室；此標記借用 01 號第三會議室參考位置，非工具實際存放點');
+        toolMarker.append(create('span','tool-storage-reference-label','工具存放區（第三會議室）'));
+        toolMarker.addEventListener('click',event=>{event.stopPropagation();chooseService('tool-storage',{focus:false,fromMap:true});});
+        elements.pinLayer.append(toolMarker);
+      }
+    }
     if(deskPoint){
       const deskInfo=serviceById('desk');
       const marker=create('button',`map-pin service-desk-pin ${currentService==='desk'?'is-active selected-target':''}`,'服');
@@ -679,6 +699,7 @@
       const selected=all.filter(x=>x.serviceId===currentService),svc=serviceById(currentService);
       if(svc?.pending)elements.mapStatus.textContent=`⚠ ${currentService} ${svc.name}：日期／場地尚待公告，請勿依候選資訊前往。`;
       else if(selected.length)elements.mapStatus.textContent=`${currentService==='desk'?'服務台':currentService}｜${svc?.name||''}（${selected.length} 處）。若點位重疊，請點「＋數量」展開；非實測入口。`;
+      else if(svc?.id==='tool-storage')elements.mapStatus.textContent='工具存放區｜第三會議室（以原圖 01 號做位置參照）。金色「具」標記非實測室內位置，請依現場指示。';
       else if(svc?.referencePinServiceId)elements.mapStatus.textContent=`${currentService} 未提供固定點位；可參考 ${svc.referencePinServiceId} 校門入口，但不是停車位。`;
       else elements.mapStatus.textContent='本項目沒有固定地圖定位，請參考服務對照表。';
       return;

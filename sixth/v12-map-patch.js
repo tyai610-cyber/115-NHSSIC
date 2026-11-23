@@ -25,6 +25,23 @@ window.GK_V12_MAP_PATCH = {
     status: "服務台在 14、16 號之間；圖面中點示意，非實測門口",
     source: "承辦單位指定位置；x=(32.176+36.059)/2，y=35.743"
   },
+  // 第三會議室工具存放區：承辦方確認用途，沿用第三會議室原有服務 01 圖面參考點。
+  // 不新增室內精確 pin，僅在被選取時以「具」標記指向同一館舍參考位置。
+  toolStorage: {
+    id: "tool-storage",
+    displayId: "具",
+    markerLabel: "具",
+    name: "工具存放區",
+    place: "第三會議室",
+    category: "大會服務",
+    hasPin: false,
+    pending: false,
+    referencePinServiceId: "01",
+    referenceLabel: "第三會議室圖面參考位置（01）",
+    referenceOnly: true,
+    statusNote: "工具存放區設於第三會議室；地圖沿用既有 01 號第三會議室位置作館舍參照，並非工具實際放置點或室內入口實測座標。",
+    source: "承辦單位新增服務資訊；共用第三會議室原有圖面參考點，非原圖 01–28 正式編號"
+  },
   destinationOverrides: {
     "29": {
       site: "桃竹苗分署",
