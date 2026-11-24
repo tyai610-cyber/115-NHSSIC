@@ -638,6 +638,7 @@
           const skill=byId(selectedId),place=skill?destinationValue(skill,currentDestination):'';
           const label=create('span','selected-pin-label',isService?`${info?.name||''}｜${info?.place||''}`:`${selectedId} ${info?.name||''}｜${place.replace(/\s+/g,' ').trim()}${externalReference?'（館舍示意）':''}`);marker.append(label);
           if(nearDesk)marker.append(create('span','v15-pin-link',''));
+          if(nearGift&&!nearDesk){marker.classList.add('near-gift-selected');marker.append(create('span','gift-neighbor-leader',''));}
           marker.addEventListener('click',e=>{e.stopPropagation();openCluster(group,isService);});
           elements.pinLayer.append(marker);
         }
@@ -799,7 +800,7 @@
     }
     const focus=activeFocus(); updateModeButtons();
     elements.mapViewport.style.setProperty('--map-aspect',String(1/displayedAspect()));
-    elements.mapTitle.textContent=mapId==='map-00'?'北科附工｜大會服務互動圖':site;
+    elements.mapTitle.textContent=mapId==='map-00'?'北科附工｜大會服務互動圖':site==='北科附工'?site+'｜'+map.title:site;
     elements.mapSubtitle.textContent=mapId==='map-00'
       ?'服務台在 14 與 16 號之間｜點選地圖標記可查看服務地點'
       :map.title;
@@ -908,6 +909,8 @@
     globalSelect();renderAll();routeReady=true;
     if(requested && byId(requested) && !IS_EDITOR){
       requestAnimationFrame(()=>setTimeout(scrollToProgramLocation,340));
+    }else if(mapId==='map-00'&&requestedService&&serviceById(requestedService)&&!serviceById(requestedService).pending){
+      requestAnimationFrame(()=>setTimeout(locateSelected,340));
     }
     elements.globalProgram.addEventListener('change',e=>{if(e.target.value)chooseProgram(e.target.value);});
     elements.venueGuideBtn.addEventListener('click',()=>chooseProgram(current,{focus:true,preserveMap:false,updateUrl:false}));
