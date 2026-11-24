@@ -47,20 +47,22 @@ function initHome(){
  const promo=$('.portal-event-box'),hero=$('.portal-hero-layout'),entrances=$('#entrances');
  if(promo&&hero&&entrances){const mq=window.matchMedia('(max-width:620px)');const arrange=()=>{if(mq.matches){entrances.insertAdjacentElement('afterend',promo);promo.classList.add('portal-event-after-entrances');}else{hero.appendChild(promo);promo.classList.remove('portal-event-after-entrances');}};arrange();if(mq.addEventListener)mq.addEventListener('change',arrange);else mq.addListener(arrange);}
 }
+let summaryMode=window.GK_COMPETITION_DATE.mode(qs.get('day'));
 function skillExamSummary(s){
  if(!T)return '<p class="ux-summary-note">尚未取得職種細項日程，請查看職種專頁。</p>';
  const rows=T.programs?.[s.id]||[];
- const dates=['11/24','11/25','11/26'];
+ const C=window.GK_COMPETITION_DATE, selected=C.resolve(summaryMode);
+ const dates=selected==='all'?C.days:[selected];
  const days=dates.map(day=>{
-  const found=rows.filter(r=>r.days?.includes(day)&&['theory','practical'].includes(r.kind));
-  const items=found.length?found.slice(0,3).map(r=>`<li><span class="ux-exam-kind ${r.kind}">${r.kind==='theory'?'學科':'術科'}</span><div><b>${esc(r.time||'時間未載')}</b><small>${esc(shortTimelineTitle(r))}</small></div></li>`).join('')+(found.length>3?`<li class="ux-more-label">另有 ${found.length-3} 項，詳見完整細項</li>`:''):'<li class="ux-no-exam">細項表未列本日學術科測試</li>';
+  const found=rows.filter(r=>r.days?.includes(day)&&['checkin','theory','practical','prep'].includes(r.kind));
+  const items=found.length?found.slice(0,3).map(r=>`<li><span class="ux-exam-kind ${r.kind}">${({theory:'學科',practical:'術科',checkin:'點名／報到',prep:'準備'})[r.kind]}</span><div><b>${esc(r.time||'時間未載')}</b><small>${esc(shortTimelineTitle(r))}</small></div></li>`).join('')+(found.length>3?`<li class="ux-more-label">另有 ${found.length-3} 項，詳見完整細項</li>`:''):'<li class="ux-no-exam">細項表未列本日學術科測試</li>';
   return `<section class="ux-day-card"><h4>${day}（${{'11/24':'二','11/25':'三','11/26':'四'}[day]}）</h4><ul>${items}</ul></section>`;
  }).join('');
  const issues=T.warnings?.[s.id]||[];
  const alerts=issues.length?`<div class="ux-skill-alert"><strong>⚠ 重要時間提醒</strong><ul>${issues.map(x=>'<li>'+esc(x)+'</li>').join('')}</ul></div>`:'';
  const checkins=rows.filter(r=>r.kind==='checkin'&&r.days?.some(d=>d!=='11/24'));
- const extras=checkins.length?`<div class="ux-extra-checkin"><strong>另有分日報到／點名</strong><span>${esc(checkins.slice(0,3).map(x=>x.day+' '+x.time+' '+shortTimelineTitle(x)).join('；'))}${checkins.length>3?' 等':''}</span><a href="individual.html?skill=${s.id}&focus=all">查看完整細項</a></div>`:'';
- return `<section class="ux-skill-summary"><div class="ux-skill-summary-head"><h3>學術科重點時段</h3><span>11/24–11/26</span></div><div class="ux-three-days">${days}</div>${extras}${alerts}<p class="ux-summary-note">未列起訖的項目不推算時間；完整點名、梯次及其他流程可展開查看。</p></section>`;
+ const extras=checkins.length?`<div class="ux-extra-checkin"><strong>另有分日報到／點名</strong><span>${esc(checkins.slice(0,3).map(x=>x.day+' '+x.time+' '+shortTimelineTitle(x)).join('；'))}${checkins.length>3?' 等':''}</span><a href="individual.html?skill=${s.id}&day=all&focus=all">查看完整細項</a></div>`:'';
+ return `<section class="ux-skill-summary"><div class="ux-skill-summary-head"><h3>職種競賽重點</h3><span>${C.label(summaryMode)}｜${selected==='all'?'11/24–11/26':selected}</span></div><label>競賽日期 <select id="skillDateMode">${[['auto','今日行程（自動）'],...C.days.map(d=>[d,d]),['all','三日全部']].map(([v,l])=>`<option value="${v}" ${summaryMode===v?'selected':''}>${l}</option>`).join('')}</select></label>${summaryMode==='auto'&&selected==='all'?'<p><a href="ceremony.html">查看頒獎典禮 ↗</a></p>':''}<div class="ux-three-days">${days}</div>${extras}${alerts}<p class="ux-summary-note">未列起訖的項目不推算時間；完整點名、梯次及其他流程可展開查看。</p></section>`;
 }
 function initSkills(){
  const input=$('#skillQuery'),v=$('#skillVenue'),list=$('#skillList'),detail=$('#skillDetail'),quick=$('#skillQuickPick');
@@ -79,15 +81,18 @@ function initSkills(){
   detail.innerHTML=`<div class="skill-ident"><div><span class="skill-code">職種編號 ${s.id}</span><h2>${esc(s.name)}</h2></div><span class="skill-venue">${esc(s.venue)}</span></div>
   <section class="ux-quick-info" aria-label="本職種報到與試場資訊"><div class="ux-quick-report"><small>11/24 報到時間</small><strong>${esc(s.registrationTime)}</strong><span>${esc(s.registrationPlace)}</span><div class="checkin-id-notice" role="note" aria-label="選手報到證件提醒"><span class="checkin-id-notice__icon" aria-hidden="true">▣</span><div class="checkin-id-notice__content"><strong>選手報到時請出示學生證或身分證</strong></div></div></div><div class="ux-quick-place"><p><b>學科位置</b><span>${esc(s.theory||'依職種公告')}</span></p><p><b>術科位置</b><span>${esc(s.practical||'依職種公告')}</span></p></div></section>
   ${skillExamSummary(s)}
-  <div class="ux-primary-actions"><a href="sixth/index.html?program=${s.id}&destination=registration#explorer" class="ux-primary-action">查看報到位置 →</a><a href="sixth/index.html?program=${s.id}&destination=theory#explorer" class="ux-primary-action secondary">查看學科位置 →</a><a href="sixth/index.html?program=${s.id}&destination=practical#explorer" class="ux-primary-action secondary">查看術科位置 →</a><a href="individual.html?skill=${s.id}&focus=all" class="ux-primary-action secondary">查看三日完整流程 →</a>${s.venueId!=='nkh'?`<a href="${venueLink}" class="ux-primary-action secondary">場域步行路線示意（尚未核定） →</a>`:`<a href="sixth/traffic.html" class="ux-primary-action secondary">校園步行路線示意（尚未核定） →</a>`}</div>
-  <details class="ux-other-skill-info"><summary>指導老師重點：領隊會議及其他場地資訊</summary><p class="ux-teacher-hint">請先確認選手的報到及學術科時間，再查看領隊會議與賽後檢討；教師活動不等同選手考試時段。</p><div class="ux-meeting"><b>領隊會議及賽後檢討</b><p>${esc(s.meeting||'依公告')}</p></div><div class="skill-detail-actions"><a href="agenda.html?day=24" class="secondary">大會活動日程 ↗</a><a href="sixth/index.html?program=${s.id}&destination=practical#explorer">互動校園地圖 ↗</a>${s.venueId==='nkh' && /行政大樓/.test(s.theory)?`<a href="floor.html?skill=${s.id}" class="secondary">北科附工行政大樓教室格位 ↗</a>`:''}</div></details>
+  <div class="ux-primary-actions"><a href="sixth/index.html?program=${s.id}&destination=registration#explorer" class="ux-primary-action">查看報到位置 →</a><a href="sixth/index.html?program=${s.id}&destination=theory#explorer" class="ux-primary-action secondary">查看學科位置 →</a><a href="sixth/index.html?program=${s.id}&destination=practical#explorer" class="ux-primary-action secondary">查看術科位置 →</a><a href="individual.html?skill=${s.id}&day=all&focus=all" class="ux-primary-action secondary">查看三日完整流程 →</a>${s.venueId!=='nkh'?`<a href="${venueLink}" class="ux-primary-action secondary">場域步行路線示意（尚未核定） →</a>`:`<a href="sixth/traffic.html" class="ux-primary-action secondary">校園步行路線示意（尚未核定） →</a>`}</div>
+  <details class="ux-other-skill-info"><summary>指導老師重點：領隊會議及其他場地資訊</summary><p class="ux-teacher-hint">請先確認選手的報到及學術科時間，再查看領隊會議與賽後檢討；教師活動不等同選手考試時段。</p><div class="ux-meeting"><b>領隊會議及賽後檢討</b><p>${esc(s.meeting||'依公告')}</p></div><div class="skill-detail-actions"><a href="agenda.html" class="secondary">大會活動日程 ↗</a><a href="sixth/index.html?program=${s.id}&destination=practical#explorer">互動校園地圖 ↗</a>${s.venueId==='nkh' && /行政大樓/.test(s.theory)?`<a href="floor.html?skill=${s.id}" class="secondary">北科附工行政大樓教室格位 ↗</a>`:''}</div></details>
   <p class="skill-footnote">時間、場地如有待核對提醒，請依主辦單位最新公告與現場指示。</p>`;
   queryUpdate('skill',id);
  };
- list.addEventListener('click',e=>{const b=e.target.closest('[data-skill]');if(!b)return;id=b.dataset.skill;draw();if(window.matchMedia('(max-width:850px)').matches)detail.scrollIntoView({behavior:'smooth',block:'start'});});if(quick)quick.addEventListener('change',()=>{id=quick.value;input.value='';v.value='all';draw();});input.addEventListener('input',draw);v.addEventListener('change',draw);draw();
+ list.addEventListener('click',e=>{const b=e.target.closest('[data-skill]');if(!b)return;id=b.dataset.skill;draw();if(window.matchMedia('(max-width:850px)').matches)detail.scrollIntoView({behavior:'smooth',block:'start'});});if(quick)quick.addEventListener('change',()=>{id=quick.value;input.value='';v.value='all';draw();});input.addEventListener('input',draw);v.addEventListener('change',draw);detail.addEventListener('change',e=>{if(e.target.id!=='skillDateMode')return;summaryMode=e.target.value;const u=new URL(location.href);if(summaryMode==='auto')u.searchParams.delete('day');else u.searchParams.set('day',summaryMode);history.replaceState(null,'',u.href);draw();});window.GK_COMPETITION_DATE.watch(()=>{if(summaryMode==='auto')draw();});window.addEventListener('popstate',()=>{summaryMode=window.GK_COMPETITION_DATE.mode(new URLSearchParams(location.search).get('day'));draw();});draw();
 }
 function initVenues(){
- let id=venues[qs.get('venue')]?qs.get('venue'):'nkh',type=0,zoom=1;
+ let id=venues[qs.get('venue')]?qs.get('venue'):'nkh',zoom=1;
+ const defaultType=v=>v.id==='nkh'?Math.max(0,v.maps.findIndex(m=>m.src.endsWith('nkh-practical.webp'))):0;
+ const explicitType=(v,p)=>v.id==='nkh'?v.maps.findIndex(m=>m.src.endsWith('nkh-'+p+'.webp')):-1;
+ let type=explicitType(venues[id],qs.get('destination'));if(type<0)type=defaultType(venues[id]);
  const tabs=$('#venueTabs'),mapTypes=$('#mapTypes'),image=$('#venueMapImage'),viewport=$('#venueMapViewport');
  image.addEventListener('error',()=>{$('#venueMapError').hidden=false});
  image.addEventListener('load',()=>{$('#venueMapError').hidden=true});
@@ -95,7 +100,7 @@ function initVenues(){
   const v=venues[id];if(!v)return;
   if(type>=v.maps.length)type=0;
   tabs.innerHTML=D.venues.map(x=>`<button type="button" data-venue="${x.id}" aria-pressed="${x.id===id}">${esc(x.name)} · ${x.count}</button>`).join('');
-  mapTypes.innerHTML=v.maps.map((m,i)=>`<button type="button" data-map="${i}" aria-pressed="${i===type}">${esc(m.name)}</button>`).join('');
+  mapTypes.innerHTML=v.maps.map((m,i)=>({m,i})).filter(({m})=>id!=='nkh'||!m.src.endsWith('nkh-service.webp')).sort((a,b)=>id==='nkh'?b.i-a.i:0).map(({m,i})=>`<button type="button" data-map="${i}" aria-pressed="${i===type}">${esc(m.name)}</button>`).join('');
   const variants=$('#venueMapVariants');if(variants)variants.hidden=v.maps.length<2;
   $('#venueTitle').textContent=v.name;$('#venueHint').textContent=`${v.count} 個職種 · ${v.maps.length} 張來源圖 · 會議分流參考：${v.meetingHint}`;
   image.src=v.maps[type].src;image.alt=`${v.name}：${v.maps[type].name}（11/12 來源圖網頁縮圖）`;
@@ -103,10 +108,10 @@ function initVenues(){
   const requested=new URLSearchParams(location.search).get('skill'), selected=programs.some(p=>p.id===requested)?requested:programs[0]?.id;
   $('#venuePrograms').innerHTML=programs.map(s=>`<button type="button" data-skill="${s.id}" aria-pressed="${s.id===selected}" title="定位 ${esc(s.name)}">${s.id}　${esc(s.name)}　⌖</button>`).join('');const deep=$('#venueDeepLink');if(deep){deep.href='sixth/index.html?venue='+encodeURIComponent(id)+'#explorer';deep.textContent='互動校園地圖（'+v.name+'） ↗';}
   setZoom(1);queryUpdate('venue',id);if(selected)queryUpdate('skill',selected);if(window.GK_VENUE_ROUTE){window.GK_VENUE_ROUTE.render(id);if(selected)window.GK_VENUE_ROUTE.selectSkill?.(selected,{updateUrl:false});}
-  const action=$('#venueDeepLink');if(action&&selected)action.href='sixth/index.html?program='+encodeURIComponent(selected)+'&destination=practical#explorer';
+  const action=$('#venueDeepLink');const purpose=id==='nkh'?(['registration','theory','practical'].find(p=>v.maps[type].src.endsWith('nkh-'+p+'.webp'))||'practical'):'practical';if(action){action.href='sixth/index.html?venue='+encodeURIComponent(id)+'&destination='+purpose+'#explorer';action.textContent='開啟'+v.name+'｜'+v.maps[type].name+'互動圖 ↗';}queryUpdate('destination',purpose);
  }
  function setZoom(value){zoom=Math.min(3.5,Math.max(1,Math.round(value*10)/10));const stage=document.getElementById('venueMapStage');if(stage){stage.style.width=zoom*100+'%';image.style.width='100%';}else image.style.width=zoom*100+'%';$('#venueZoomText').textContent=Math.round(zoom*100)+'%';if(zoom===1){viewport.scrollLeft=0;viewport.scrollTop=0}}
- tabs.addEventListener('click',e=>{const b=e.target.closest('[data-venue]');if(!b)return;id=b.dataset.venue;type=0;draw()});
+ tabs.addEventListener('click',e=>{const b=e.target.closest('[data-venue]');if(!b)return;id=b.dataset.venue;type=defaultType(venues[id]);draw()});
  mapTypes.addEventListener('click',e=>{const b=e.target.closest('[data-map]');if(!b)return;type=+b.dataset.map;draw()});
  $('#venuePrograms').addEventListener('click',e=>{const button=e.target.closest('[data-skill]');if(!button)return;
   const skillId=button.dataset.skill;if(!byId[skillId])return;
