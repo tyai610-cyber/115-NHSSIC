@@ -47,7 +47,7 @@ function initHome(){
  const promo=$('.portal-event-box'),hero=$('.portal-hero-layout'),entrances=$('#entrances');
  if(promo&&hero&&entrances){const mq=window.matchMedia('(max-width:620px)');const arrange=()=>{if(mq.matches){entrances.insertAdjacentElement('afterend',promo);promo.classList.add('portal-event-after-entrances');}else{hero.appendChild(promo);promo.classList.remove('portal-event-after-entrances');}};arrange();if(mq.addEventListener)mq.addEventListener('change',arrange);else mq.addListener(arrange);}
 }
-let summaryMode=window.GK_COMPETITION_DATE.mode(qs.get('day'));
+let summaryMode=window.GK_COMPETITION_DATE?.mode(qs.get('day'))||'auto';
 function skillExamSummary(s){
  if(!T)return '<p class="ux-summary-note">尚未取得職種細項日程，請查看職種專頁。</p>';
  const rows=T.programs?.[s.id]||[];
@@ -60,7 +60,7 @@ function skillExamSummary(s){
  }).join('');
  const issues=T.warnings?.[s.id]||[];
  const alerts=issues.length?`<div class="ux-skill-alert"><strong>⚠ 重要時間提醒</strong><ul>${issues.map(x=>'<li>'+esc(x)+'</li>').join('')}</ul></div>`:'';
- const checkins=rows.filter(r=>r.kind==='checkin'&&r.days?.some(d=>d!=='11/24'));
+ const checkins=rows.filter(r=>r.kind==='checkin'&&r.days?.some(d=>dates.includes(d)&&d!=='11/24'));
  const extras=checkins.length?`<div class="ux-extra-checkin"><strong>另有分日報到／點名</strong><span>${esc(checkins.slice(0,3).map(x=>x.day+' '+x.time+' '+shortTimelineTitle(x)).join('；'))}${checkins.length>3?' 等':''}</span><a href="individual.html?skill=${s.id}&day=all&focus=all">查看完整細項</a></div>`:'';
  return `<section class="ux-skill-summary"><div class="ux-skill-summary-head"><h3>職種競賽重點</h3><span>${C.label(summaryMode)}｜${selected==='all'?'11/24–11/26':selected}</span></div><label>競賽日期 <select id="skillDateMode">${[['auto','今日行程（自動）'],...C.days.map(d=>[d,d]),['all','三日全部']].map(([v,l])=>`<option value="${v}" ${summaryMode===v?'selected':''}>${l}</option>`).join('')}</select></label>${summaryMode==='auto'&&selected==='all'?'<p><a href="ceremony.html">查看頒獎典禮 ↗</a></p>':''}<div class="ux-three-days">${days}</div>${extras}${alerts}<p class="ux-summary-note">未列起訖的項目不推算時間；完整點名、梯次及其他流程可展開查看。</p></section>`;
 }
