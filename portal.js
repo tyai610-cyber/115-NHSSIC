@@ -42,7 +42,7 @@ function initHome(){
  const notices=$('#noticeList');
  if(notices && N){
   $('#noticeReviewDate').textContent=N.items.length?`${N.items.length} 項提醒｜資料核對：${N.reviewDate||'未載'}`:'目前無提醒';
-  notices.innerHTML=N.items.map(x=>`<article class="ux-notice ux-notice-${esc(x.kind)}"><span class="ux-status">${esc(x.label)}</span><div><strong>${esc(x.title)}</strong><p>${esc(x.detail)}</p></div><a href="${esc(x.link)}">${esc(x.linkLabel)} →</a></article>`).join('');
+  notices.innerHTML=N.items.map(x=>`<article class="ux-notice ux-notice-${esc(x.kind)}"><span class="ux-status">${esc(x.label)}</span><div><strong>${esc(x.title)}</strong><p>${esc(x.detail)}</p></div><div>${(x.title.includes("11 室內配線")?[["11","室內配線"],["19","鑄造"],["22","測量"]]:x.title.includes("25 家具木工")?[["25","家具木工"],["28","配管"]]:[]).map(([id,label])=>`<a href="individual.html?skill=${id}">${label} →</a> `).join("") || `<a href="${esc(x.link)}">${esc(x.linkLabel)} →</a>`}</div></article>`).join('');
  }
  const promo=$('.portal-event-box'),hero=$('.portal-hero-layout'),entrances=$('#entrances');
  if(promo&&hero&&entrances){const mq=window.matchMedia('(max-width:620px)');const arrange=()=>{if(mq.matches){entrances.insertAdjacentElement('afterend',promo);promo.classList.add('portal-event-after-entrances');}else{hero.appendChild(promo);promo.classList.remove('portal-event-after-entrances');}};arrange();if(mq.addEventListener)mq.addEventListener('change',arrange);else mq.addListener(arrange);}
