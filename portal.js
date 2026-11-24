@@ -55,13 +55,13 @@ function skillExamSummary(s){
  const dates=selected==='all'?C.days:[selected];
  const days=dates.map(day=>{
   const found=rows.filter(r=>r.days?.includes(day)&&['checkin','theory','practical','prep'].includes(r.kind));
-  const items=found.length?found.slice(0,3).map(r=>`<li><span class="ux-exam-kind ${r.kind}">${({theory:'學科',practical:'術科',checkin:'點名／報到',prep:'準備'})[r.kind]}</span><div><b>${esc(r.time||'時間未載')}</b><small>${esc(shortTimelineTitle(r))}</small></div></li>`).join('')+(found.length>3?`<li class="ux-more-label">另有 ${found.length-3} 項，詳見完整細項</li>`:''):'<li class="ux-no-exam">細項表未列本日學術科測試</li>';
+  const items=found.length?found.slice(0,3).map(r=>`<li><span class="ux-exam-kind ${r.kind}">${({theory:'學科',practical:'術科',checkin:'點名／報到',prep:'準備'})[r.kind]}</span><div><b>${esc(r.time||'時間未載')}</b><small>${esc(shortTimelineTitle(r))}</small></div></li>`).join('')+(found.length>3?`<li class="ux-more-label">另有 ${found.length-3} 項，詳見完整細項</li>`:''):'<li class="ux-no-exam">細項表未列本日重點活動，請查完整流程。</li>';
   return `<section class="ux-day-card"><h4>${day}（${{'11/24':'二','11/25':'三','11/26':'四'}[day]}）</h4><ul>${items}</ul></section>`;
  }).join('');
  const issues=T.warnings?.[s.id]||[];
  const alerts=issues.length?`<div class="ux-skill-alert"><strong>⚠ 重要時間提醒</strong><ul>${issues.map(x=>'<li>'+esc(x)+'</li>').join('')}</ul></div>`:'';
  const checkins=rows.filter(r=>r.kind==='checkin'&&r.days?.some(d=>dates.includes(d)&&d!=='11/24'));
- const extras=checkins.length?`<div class="ux-extra-checkin"><strong>另有分日報到／點名</strong><span>${esc(checkins.slice(0,3).map(x=>x.day+' '+x.time+' '+shortTimelineTitle(x)).join('；'))}${checkins.length>3?' 等':''}</span><a href="individual.html?skill=${s.id}&day=all&focus=all">查看完整細項</a></div>`:'';
+ const extras=checkins.length?`<div class="ux-extra-checkin"><strong>另有分日報到／點名</strong><span>${esc(checkins.slice(0,3).map(x=>(x.days||[]).join('、')+' '+x.time+' '+shortTimelineTitle(x)).join('；'))}${checkins.length>3?' 等':''}</span><a href="individual.html?skill=${s.id}&day=all&focus=all">查看完整細項</a></div>`:'';
  return `<section class="ux-skill-summary"><div class="ux-skill-summary-head"><h3>職種競賽重點</h3><span>${C.label(summaryMode)}｜${selected==='all'?'11/24–11/26':selected}</span></div><label>競賽日期 <select id="skillDateMode">${[['auto','今日行程（自動）'],...C.days.map(d=>[d,d]),['all','三日全部']].map(([v,l])=>`<option value="${v}" ${summaryMode===v?'selected':''}>${l}</option>`).join('')}</select></label>${summaryMode==='auto'&&selected==='all'?'<p><a href="ceremony.html">查看頒獎典禮 ↗</a></p>':''}<div class="ux-three-days">${days}</div>${extras}${alerts}<p class="ux-summary-note">未列起訖的項目不推算時間；完整點名、梯次及其他流程可展開查看。</p></section>`;
 }
 function initSkills(){
