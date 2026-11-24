@@ -7,6 +7,7 @@
   var script = document.currentScript;
   var root = new URL(".", script && script.src ? script.src : location.href);
   var entries = [
+    {id:"services", label:"大會服務圖", icon:"⌖", href:"sixth/index.html?view=services#explorer"},
     {id:"skills", label:"職種查詢", icon:"⌕", href:"skills.html"},
     {id:"venues", label:"試場地圖", icon:"▣", href:"venues.html"},
     {id:"agenda", label:"競賽日程", icon:"▤", href:"agenda.html"},
@@ -65,7 +66,7 @@
     var pathname = location.pathname.toLowerCase();
     var file = pathname.substring(pathname.lastIndexOf("/") + 1);
     var nested = pathname.indexOf("/sixth/") !== -1;
-    if (nested) return file === "traffic.html" ? "walk" : "venues";
+    if (nested) {var q=new URLSearchParams(location.search);return file === "traffic.html" ? "walk" : (!q.get("program") && (q.get("view")==="services" || q.get("service")) ? "services" : "venues");}
     if (file === "individual.html" || file === "skills.html") return "skills";
     if (file === "floor.html" || file === "venues.html") return "venues";
     if (file === "agenda.html") return "agenda";
@@ -92,9 +93,9 @@
       else a.removeAttribute("aria-current");
     });
     if (trigger) {
-      var viaAll = current === "ceremony" || current === "transport" || current === "walk";
+      var viaAll = current === "services" || current === "ceremony" || current === "transport" || current === "walk";
       trigger.classList.toggle("is-current", viaAll);
-      trigger.setAttribute("aria-label", viaAll ? "全部功能，目前位於" + (entries.find(function (x) {return x.id === current;}) || {}).label : "展開六個主要功能");
+      trigger.setAttribute("aria-label", viaAll ? "全部功能，目前位於" + (entries.find(function (x) {return x.id === current;}) || {}).label : "展開七個主要功能");
     }
   }
   function closePanel() {
@@ -115,7 +116,7 @@
   }
   function makeBar() {
     bar = node("nav", "six-switch-bar");
-    bar.setAttribute("aria-label", "六項主要功能");
+    bar.setAttribute("aria-label", "七項主要功能");
     var row = node("div", "six-switch-inner");
     entries.forEach(function (x) { row.appendChild(link(x, "six-switch-tab")); });
     bar.appendChild(row);
@@ -145,7 +146,7 @@
     closeButton.addEventListener("click", closePanel);
     header.appendChild(closeButton);
     panel.appendChild(header);
-    panel.appendChild(node("p", "six-switch-intro", "六個主要功能可直接切換，不必返回首頁。"));
+    panel.appendChild(node("p", "six-switch-intro", "七個主要功能可直接切換，不必返回首頁。"));
     var grid = node("div", "six-switch-grid");
     entries.forEach(function (x) { grid.appendChild(link(x, "six-switch-grid-link")); });
     panel.appendChild(grid);
@@ -205,8 +206,9 @@
     updateCurrent();
     window.addEventListener("popstate", updateCurrent);
     window.addEventListener("pageshow", updateCurrent);
+    document.addEventListener("change", function(){setTimeout(updateCurrent,0);});
     document.addEventListener("click", function (e) {
-      if (e.target.closest("#transportNav, [data-quick-route]")) {
+      if (e.target.closest("#transportNav, [data-quick-route], #serviceModeButton, #siteTabs, #serviceList, #pinLayer, #globalProgram, #mapSelect")) {
         setTimeout(updateCurrent, 0);
       }
     });

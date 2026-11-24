@@ -49,6 +49,8 @@ function render(){
  $('#indTheory').textContent=p.theory||'依公告';$('#indPractical').textContent=p.practical||'依公告';$('#indMeeting').textContent=p.meeting||'依公告';
  $('#indVenueLink').href='venues.html?venue='+encodeURIComponent(p.venueId)+'&skill='+encodeURIComponent(p.id);
  $('#indSixthLink').href='sixth/index.html?program='+p.id+'&destination=practical#explorer';
+ $('#indTheoryMap').href='sixth/index.html?program='+p.id+'&destination=theory#explorer';
+ $('#indRegistrationMap').href='sixth/index.html?program='+p.id+'&destination=registration#explorer';
  $('#indFloorLink').hidden=!(p.venueId==='nkh' && /行政大樓/.test(p.theory||''));$('#indFloorLink').href='floor.html?skill='+p.id;
  const issues=T.warnings?.[p.id]||[];
  $('#indWarnings').hidden=!issues.length;

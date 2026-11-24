@@ -30,16 +30,19 @@ function shortTimelineTitle(event){
 }
 function initHome(){
  const search=$('#quickSkillSearch'),res=$('#quickSkillResults');
- const renderResults=()=>{const q=search.value.trim();const found=q?searchMatches(q).slice(0,9):[];
-   res.innerHTML=q?(found.length?found.map(({skill:s,why})=>`<a href="skills.html?skill=${s.id}"><span>${s.id} ${esc(s.name)}${matchBadge(why)}</span><small>${esc(s.venue)}</small></a>`).join(''):'<p class="quick-no-results" role="status">查無符合職種，請嘗試其他關鍵字或簡稱。</p>'):'';
- };
+ const extraServices=[...(window.GK_DATA?.services||[]),window.GK_V12_MAP_PATCH?.serviceDesk,window.GK_V12_MAP_PATCH?.toolStorage].filter(Boolean);
+ const extras=[...extraServices.map(x=>({title:x.name,desc:x.place,href:'sixth/index.html?service='+encodeURIComponent(x.id)+'#explorer',type:'大會服務',pending:x.pending})),...((window.GK_EVENT_DATA?.transport?.items)||[]).map(x=>({title:x.name,desc:x.audience,href:'transport.html?route='+encodeURIComponent(x.id),type:'交通'})),{title:'頒獎典禮',desc:'11/27 08:30 正式開始',href:'ceremony.html',type:'典禮'}];
+ const results=q=>[...searchMatches(q).map(({skill:x})=>({title:x.id+' '+x.name,desc:x.venue,href:'skills.html?skill='+x.id,type:'職種'})),...extras.filter(x=>(x.title+' '+x.desc).toLowerCase().includes(q.toLowerCase()))];
+ const renderResults=()=>{const q=search.value.trim(),found=q?results(q):[];res.innerHTML=q?(found.length?found.slice(0,30).map(x=>'<a href="'+esc(x.href)+'"><span>'+esc(x.title)+'</span><small>'+esc(x.type+(x.pending?'｜待公告':'')+'｜'+x.desc)+'</small></a>').join(''):'<p class="quick-no-results" role="status">查無符合資訊，請嘗試其他關鍵字。</p>'):'';};
  search.addEventListener('input',renderResults);
- search.addEventListener('keydown',e=>{if(e.key==='Escape'){search.value='';renderResults();}else if(e.key==='Enter'){e.preventDefault();const q=search.value.trim(),one=searchMatches(q)[0]?.skill;if(one&&q)location.href=`skills.html?skill=${one.id}`;else if(q)location.href=`skills.html?q=${encodeURIComponent(q)}`}});
+ search.addEventListener('keydown',e=>{if(e.key==='Escape'){search.value='';renderResults();}else if(e.key==='Enter'){e.preventDefault();const found=results(search.value.trim());if(search.value.trim()&&found.length===1)location.href=found[0].href;else res.querySelector('a')?.focus();}});
+ const today=$('#v15Today'),agenda=window.GK_EVENT_DATA?.agenda;
+ if(today&&agenda){const key=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());const day=key<'2026-11-24'?24:key>'2026-11-27'?27:Number(key.slice(-2));const days=[day,...(day<27?[day+1]:[])];today.innerHTML='<h2>競賽日程重點</h2><p>大會概覽；各職種以專屬日程為準。</p><div class="v15-day-grid">'+days.map(d=>'<article><h3>11/'+d+(key==='2026-11-'+d?'｜今日':key==='2026-11-'+(d-1)?'｜次日':'')+'</h3>'+agenda.events.filter(x=>x.date===String(d)&&['contest','checkin','ceremony'].includes(x.kind)).slice(0,4).map(x=>'<p><b>'+esc(x.time)+'</b> '+esc(x.title)+'</p>').join('')+'<a href="agenda.html?day='+d+'">查看完整日程 ↗</a></article>').join('')+'</div>';}
 
  const notices=$('#noticeList');
  if(notices && N){
-  $('#noticeReviewDate').textContent=N.items.length?`${N.items.length} 項提醒`:'目前無提醒';
-  notices.innerHTML=N.items.map(x=>`<article class="ux-notice ux-notice-${esc(x.kind)}"><span class="ux-status">${esc(x.label)}</span><div><strong>${esc(x.title)}</strong><p>${esc(x.detail)}</p></div><a href="${esc(x.link)}">${esc(x.linkLabel)} →</a></article>`).join('');
+  $('#noticeReviewDate').textContent=N.items.length?`${N.items.length} 項提醒｜資料核對：${N.reviewDate||'未載'}`:'目前無提醒';
+  notices.innerHTML=N.items.map(x=>`<article class="ux-notice ux-notice-${esc(x.kind)}"><span class="ux-status">${esc(x.label)}</span><div><strong>${esc(x.title)}</strong><p>${esc(x.detail)}</p></div><div>${(x.title.includes("11 室內配線")?[["11","室內配線"],["19","鑄造"],["22","測量"]]:x.title.includes("25 家具木工")?[["25","家具木工"],["28","配管"]]:[]).map(([id,label])=>`<a href="individual.html?skill=${id}">${label} →</a> `).join("") || `<a href="${esc(x.link)}">${esc(x.linkLabel)} →</a>`}</div></article>`).join('');
  }
  const promo=$('.portal-event-box'),hero=$('.portal-hero-layout'),entrances=$('#entrances');
  if(promo&&hero&&entrances){const mq=window.matchMedia('(max-width:620px)');const arrange=()=>{if(mq.matches){entrances.insertAdjacentElement('afterend',promo);promo.classList.add('portal-event-after-entrances');}else{hero.appendChild(promo);promo.classList.remove('portal-event-after-entrances');}};arrange();if(mq.addEventListener)mq.addEventListener('change',arrange);else mq.addListener(arrange);}

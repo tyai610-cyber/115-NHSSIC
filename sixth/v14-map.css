@@ -268,3 +268,6 @@ body{background:#f3f7f9}
   animation:none!important;opacity:.85!important
  }
 }
+
+/* V15 quick service controls */
+.v15-service-filters,.v15-current-service{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:8px 0}.v15-current-service{padding:9px 14px;background:#eef6f6;border-block:1px solid #c4dce0}.v15-current-service[hidden]{display:none!important}.v15-current-service span{flex:1;min-width:120px;font-size:12px;font-weight:800;color:#183b4b}.v15-service-filters button,.v15-current-service button{min-height:44px;border:1px solid #a4c4cb;background:white;color:#17495a;border-radius:8px;padding:6px 10px;font-weight:750;cursor:pointer}.v15-tool-leader{position:absolute;left:50%;top:100%;height:44px;border-left:2px dashed #a66c22;pointer-events:none}.v15-current-service button:focus-visible,.v15-service-filters button:focus-visible{outline:3px solid #d5a34e}

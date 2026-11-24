@@ -183,3 +183,6 @@
   color:#17384b!important;
  }
 }
+
+/* V15 competition-period priorities */
+.v15-today{margin-top:16px;padding:16px;background:#fff;border:1px solid #cbdfe5;border-radius:12px}.v15-today:empty{display:none}.v15-today h2{margin:0;color:#12394e;font-size:20px}.v15-today>p{font-size:12px;color:#536f80;margin:5px 0 10px}.v15-day-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.v15-day-grid article{padding:12px;background:#f0f7f8;border-radius:8px}.v15-day-grid h3{margin:0 0 6px;color:#12676c}.v15-day-grid p{margin:4px 0;font-size:13px}.v15-day-grid a,.v15-role-links a{display:inline-flex;align-items:center;min-height:44px;font-weight:800;color:#125b6d}.v15-role-links{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.v15-role-links a{padding:6px 12px;border:1px solid #b8d0d7;border-radius:8px;background:#fff;text-decoration:none}.v15-legacy-time small{display:block;font-size:10px;color:#6e7278}.v15-legacy-time .agenda-time,.ceremony-row .v15-legacy-time{color:#677680}.v15-confirmed-time{font-weight:900;color:#0b7776!important}@media(max-width:520px){.v15-day-grid{grid-template-columns:1fr}.v15-today{padding:12px}.v15-day-grid article{padding:10px}}

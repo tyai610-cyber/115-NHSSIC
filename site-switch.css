@@ -1,7 +1,7 @@
 /* 六入口自由切換：桌機完整導覽 + 手機五鍵快捷及六項展開面板 */
 .site-top .top-nav,.site-top .mobile-menu,.site-top .mobile-nav{display:none!important}
 .six-switch-bar{position:sticky;top:0;z-index:85;background:#12374a;border-bottom:1px solid #2d5967;box-shadow:0 5px 18px rgba(13,39,56,.12)}
-.six-switch-inner{max-width:1320px;margin:auto;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;padding:8px 18px}
+.six-switch-inner{max-width:1320px;margin:auto;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;padding:8px 18px}
 .six-switch-tab{display:flex;gap:8px;min-height:44px;align-items:center;justify-content:center;text-align:center;padding:7px 6px;color:#deecf1;text-decoration:none;font-size:13px;font-weight:750;border:1px solid transparent;border-radius:9px;white-space:nowrap}
 .six-switch-tab:hover,.six-switch-tab:focus-visible{background:#24536a;color:#fff}
 .six-switch-tab.is-current{background:#e7f5f2;border-color:#b3dedb;color:#0a535d}
@@ -36,3 +36,4 @@
 @media(max-width:350px){.adaptive-bottom-nav .six-switch-bottom-link,.adaptive-bottom-nav .six-switch-all{font-size:10px}.adaptive-bottom-nav .six-switch-bottom-icon{font-size:19px}.six-switch-grid-link{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.six-switch-bar *,.six-switch-overlay *{animation:none!important;transition:none!important}}
 @media print{.six-switch-bar,.six-switch-overlay,.adaptive-bottom-nav .six-switch-all{display:none!important}.six-switch-open{overflow:visible!important}}
+@media(min-width:768px) and (max-width:1000px){.six-switch-tab{white-space:normal;font-size:12px;gap:4px}.six-switch-inner{padding-inline:8px}}
