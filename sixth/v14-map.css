@@ -282,3 +282,6 @@ body{background:#f3f7f9}
 .map-pin.near-gift-cluster::after,.map-pin.near-gift-single::after{content:"";position:absolute;bottom:100%;left:50%;height:36px;border-left:2px dashed #577a70;pointer-events:none}
 .service-item.service-item-gift{background:#edf9f3;border-color:#85c9b4;color:#075c4b}.service-item.service-item-gift .service-no{background:#d3f0e4;color:#075c4b}.service-item.service-item-gift[aria-pressed=true]{outline:2px solid #0a8667;background:#d7f3e5}
 @media(prefers-reduced-motion:reduce){.map-pin.gift-exhibit-pin::before,.map-pin.gift-exhibit-pin::after{animation:none!important;opacity:.8!important}}
+
+/* Keep an independently selected neighboring marker reachable beside the displaced cluster. */
+.map-pin.near-gift-selected{transform:translate(-50%,-50%) translate(48px,57px);z-index:25!important}.gift-neighbor-leader{position:absolute;bottom:50%;right:50%;width:48px;height:57px;border-left:1px dashed #577a70;border-top:1px dashed #577a70;pointer-events:none}.map-pin.near-gift-cluster:hover,.map-pin.near-gift-cluster:focus-visible,.map-pin.near-gift-single:hover,.map-pin.near-gift-single:focus-visible{transform:translate(-50%,-50%) translateY(57px) scale(1.06)}.map-pin.near-gift-selected:hover,.map-pin.near-gift-selected:focus-visible{transform:translate(-50%,-50%) translate(48px,57px) scale(1.06)}
