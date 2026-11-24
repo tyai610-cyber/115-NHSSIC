@@ -66,11 +66,11 @@
 <div class="service-head"><div><span class="small-label">大會服務對照</span><h3 id="services-title">北科附工大會服務（原圖 01–28＋穿堂服務台＋工具存放區）</h3></div><span class="small-count">原圖 28 項＋2 新增</span></div>
 <p class="service-intro">此區為大會服務項目，與 29 個競賽職種分開。點選原圖紅色編號或服務清單查看詳細資訊。新增穿堂服務台位於原圖 14、16 號之間，以金色「服」呼吸燈標記。工具存放區位於第三會議室，選取時以「具」字呼吸燈參照既有 01 號圖面位置；兩者皆非室內入口實測座標。</p>
 <label class="field"><span>搜尋服務編號、名稱或位置</span><input autocomplete="off" id="serviceSearch" placeholder="搜尋：工具存放區、第三會議室、服務台、接待、停車…" type="search"/></label>
-<div class="v15-service-list-wrap" id="serviceListWrap">
+<div class="v15-service-filters" id="serviceFilters" aria-label="常用服務"><button type="button" data-query="">全部</button><button type="button" data-query="服務台">服務台</button><button type="button" data-query="工具">工具存放</button><button type="button" data-query="會議">會議</button><button type="button" data-query="餐盒">餐盒</button><button type="button" data-query="停車">停車</button><button type="button" data-query="醫療">醫療</button></div><div class="v15-service-list-wrap" id="serviceListWrap">
   <div class="service-list" id="serviceList" aria-label="選擇大會服務定位項目"></div>
 </div>
 <div class="v15-choices-footer">
-  <button class="v15-service-toggle" id="serviceListToggle" type="button" aria-controls="serviceList" aria-expanded="false">展開全部 29 項服務</button>
+  <button class="v15-service-toggle" id="serviceListToggle" type="button" aria-controls="serviceList" aria-expanded="false">展開全部 30 項服務</button>
   <p class="v15-service-choice-hint" id="serviceChoiceHint" role="status" aria-live="polite">選擇上方項目，下方地圖將顯示對應呼吸標記。</p>
 </div>
 </section>
@@ -84,7 +84,7 @@
 <p class="destination-status" id="destinationStatus" role="status"></p>
 <a class="destination-floor-link" id="destinationFloorLink" hidden>查看行政大樓教室位置 ↗</a>
 </section>
-<div aria-label="可捲動及縮放的校園導覽圖" class="map-viewport" id="mapViewport" tabindex="0">
+<div id="serviceCurrentBar" class="v15-current-service" hidden><span id="serviceCurrentText" aria-live="polite"></span><button type="button" id="servicePrev">上一項</button><button type="button" id="serviceNext">下一項</button><button type="button" id="serviceBackList">清單</button></div><div aria-label="可捲動及縮放的校園導覽圖" class="map-viewport" id="mapViewport" tabindex="0">
 <div class="map-stage" id="mapStage">
 <img alt="校園導覽圖載入中" decoding="async" id="mapImage" loading="eager"/><div class="map-loading" hidden="" id="mapLoading">地圖載入中…</div>
 <div class="pin-layer" id="pinLayer"></div>
