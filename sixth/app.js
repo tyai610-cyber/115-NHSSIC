@@ -334,7 +334,7 @@
     if(focus){requestAnimationFrame(scrollToProgramLocation);}
   }
   function renderMapSelect(){
-    const options=availableMaps(site);elements.mapSelect.replaceChildren();
+    const options=availableMaps(site).slice().sort((a,b)=>site==='北科附工'?['map-03','map-02','map-01','map-00'].indexOf(a.id)-['map-03','map-02','map-01','map-00'].indexOf(b.id):0);elements.mapSelect.replaceChildren();
     for(const m of options){const opt=create('option','',m.title);opt.value=m.id;elements.mapSelect.append(opt);}
     elements.mapSelect.value=mapId;
   }
@@ -494,7 +494,7 @@
     const hits=DATA.services.filter(svc=>!q||`${svc.id} ${svc.name} ${svc.place}`.toLocaleLowerCase().includes(q))
       .sort((a,b)=>a.id==='desk'?-1:b.id==='desk'?1:a.id==='tool-storage'?-1:b.id==='tool-storage'?1:a.id.localeCompare(b.id,'zh-Hant',{numeric:true}));
     for(const svc of hits){
-      const btn=create('button',`service-item ${svc.id==='desk'?'service-item-desk':svc.id==='tool-storage'?'service-item-tool':''}`);btn.type='button';
+      const btn=create('button',`service-item ${svc.id==='desk'?'service-item-desk':svc.id==='tool-storage'?'service-item-tool':svc.id==='03'?'service-item-gift':''}`);btn.type='button';
       btn.dataset.serviceId=svc.id;
       btn.setAttribute('aria-pressed',String(svc.id===currentService));
       btn.setAttribute('aria-label',`${svc.name}，位置：${svc.place}，點選查看地圖標記`);
@@ -607,14 +607,16 @@
     const all=isService?shownServicePins():shownPins();
     // 服務台永遠獨立成「服」呼吸燈；鄰近 14/16 交由群組按鈕展開。
     const deskPoint=isService?all.find(p=>p.serviceId==='desk'):null;
-    const clustered=isService?all.filter(p=>p.serviceId!=='desk'):all;
+    const giftPoint=isService?all.find(p=>p.serviceId==='03'):null;
+    const clustered=isService?all.filter(p=>!['desk','03'].includes(p.serviceId)):all;
     const groups=clusteringGroups(clustered);
     elements.pinLayer.replaceChildren();
     for(const group of groups){
       if(group.length>1){
         const x=group.reduce((a,p)=>a+p.x,0)/group.length,y=group.reduce((a,p)=>a+p.y,0)/group.length;
         const nearDesk=isService&&deskPoint&&Math.hypot((x-deskPoint.x)*(elements.mapStage.getBoundingClientRect().width||720)/100,(y-deskPoint.y)*(elements.mapStage.getBoundingClientRect().width||720)*displayedAspect()/100)<80;
-        const btn=create('button',`map-pin pin-cluster ${nearDesk?'near-desk-cluster':''}`,`+${group.length}`);btn.type='button';
+        const nearGift=giftPoint&&Math.hypot((x-giftPoint.x)*(elements.mapStage.getBoundingClientRect().width||720)/100,(y-giftPoint.y)*(elements.mapStage.getBoundingClientRect().width||720)*displayedAspect()/100)<65;
+        const btn=create('button',`map-pin pin-cluster ${nearDesk?'near-desk-cluster':''} ${nearGift?'near-gift-cluster':''}`,`+${group.length}`);btn.type='button';
         btn.style.left=`${x}%`;btn.style.top=`${y}%`;
         btn.title=`${group.length} 處位置重疊，點選展開`;
         btn.setAttribute('aria-label',`此處有 ${group.length} 個定位點，點選展開清單`);
@@ -653,6 +655,7 @@
       const truck=isService&&isTruckService(datum);
       const btn=create('button',`map-pin ${highlight?'is-active selected-target':''} ${externalReference?'venue-illustrative':''} ${p.purposeReference?'destination-reference':''} ${highlight&&!isService?'destination-'+currentDestination:''} ${parking?'parking-marker':''} ${truck?'unloading-marker':''} ${p.edited?'is-edited':''} ${needsReview?'needs-review':''} ${editorTarget?'is-editor-target':''}`,isService?servicePinSymbol(datum):highlight?destinationSymbol():id);
       btn.type='button';btn.style.left=`${p.x}%`;btn.style.top=`${p.y}%`;if(highlight)positionSelectedLabel(btn,p);
+      if(giftPoint&&Math.hypot((p.x-giftPoint.x)*(elements.mapStage.getBoundingClientRect().width||720)/100,(p.y-giftPoint.y)*(elements.mapStage.getBoundingClientRect().width||720)*displayedAspect()/100)<52)btn.classList.add('near-gift-single');
       if(isService)btn.dataset.service=id;else btn.dataset.program=id;
       btn.title=`${id} ${datum.name}${within.length>1?`（第 ${index+1} 處）`:''}｜${locationPinStatus(p)}`;
       btn.setAttribute('aria-label',`${id} ${datum.name}${within.length>1?`第 ${index+1} 處`:''}，${externalReference?'館舍方向示意，':needsReview?'座標待核對／待公告，':''}點選查看`);
@@ -687,6 +690,16 @@
         elements.pinLayer.append(toolMarker);
       }
     }
+    if(giftPoint){
+      const marker=create('button',`map-pin gift-exhibit-pin ${currentService==='03'?'gift-selected is-active selected-target':''}`,'03');
+      marker.type='button';marker.dataset.service='03';
+      marker.style.left=`${giftPoint.x}%`;marker.style.top=`${giftPoint.y}%`;
+      marker.title='03 廠商贈品展示區｜耕讀樓（原圖位置）';
+      marker.setAttribute('aria-label',marker.title);
+      marker.append(create('span','gift-exhibit-label','廠商贈品展示區｜耕讀樓'));
+      marker.addEventListener('click',ev=>{ev.stopPropagation();closeCluster();chooseService('03',{focus:false,fromMap:true});});
+      elements.pinLayer.append(marker);
+    }
     if(deskPoint){
       const deskInfo=serviceById('desk');
       const marker=create('button',`map-pin service-desk-pin ${currentService==='desk'?'is-active selected-target':''}`,'服');
@@ -700,7 +713,7 @@
       marker.addEventListener('click',ev=>{ev.stopPropagation();closeCluster();chooseService('desk',{focus:false,fromMap:true});});
       elements.pinLayer.append(marker);
     }
-    elements.pinCount.textContent=`定位點 ${all.length} 處 · 分為 ${groups.length+(deskPoint?1:0)} 組`;
+    elements.pinCount.textContent=`定位點 ${all.length} 處 · 分為 ${groups.length+(deskPoint?1:0)+(giftPoint?1:0)} 組`;
     if(isService){
       const selected=all.filter(x=>x.serviceId===currentService),svc=serviceById(currentService);
       if(svc?.pending)elements.mapStatus.textContent=`⚠ ${currentService} ${svc.name}：日期／場地尚待公告，請勿依候選資訊前往。`;
@@ -883,7 +896,7 @@
     if(requested && byId(requested)){
       current=requested;site=byId(requested).site;mapId=destinationMap(byId(requested),currentDestination);
     }else if(requestedVenue && sites.some(x=>x.name===requestedVenue)){
-      site=requestedVenue;current=forSite(site)[0]?.id||'01';currentDestination='practical';
+      site=requestedVenue;current=forSite(site)[0]?.id||'01';currentDestination=['registration','theory','practical'].includes(requestedDestination)?requestedDestination:'practical';
       mapId=destinationMap(byId(current),currentDestination)||'map-03';
     }
     // 已知職種參數優先於服務參數；服務模式允許單獨的 ?view=services。
@@ -996,7 +1009,7 @@
       }
       const byVenue={nkh:'北科附工',division:'桃竹苗分署',vanung:'萬能科大',nangang:'南港高工',sanchong:'三重商工',taishan:'泰山高中',xinxing:'新興高中'};
       site=byVenue[params.get('venue')]||'北科附工';current=forSite(site)[0]?.id||'01';
-      currentDestination='practical';mapId=destinationMap(byId(current),currentDestination);zoom=1;
+      currentDestination=['registration','theory','practical'].includes(purpose)?purpose:'practical';mapId=destinationMap(byId(current),currentDestination);zoom=1;
       renderAll();
     });
     if(IS_EDITOR){
