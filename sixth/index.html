@@ -15,7 +15,7 @@
 <script defer="" src="program-diagrams.js"></script>
 <script defer="" defer_="" src="timeline-data.js"></script><script defer="" src="destination-beacons.js"></script>
 <script defer="" src="v12-map-patch.js"></script>
-<script defer="" src="app.js"></script><script defer="" defer_="" src="student-dashboard.js"></script>
+<script defer src="../competition-date.js"></script><script defer="" src="app.js"></script><script defer="" defer_="" src="student-dashboard.js"></script>
 <link href="../adaptive-layout.css" rel="stylesheet"/><link rel="stylesheet" href="../site-switch.css"/>
 <script defer src="../site-switch.js"></script>
 <link rel="stylesheet" href="../design-v12.css">
@@ -66,7 +66,7 @@
 <div class="service-head"><div><span class="small-label">大會服務對照</span><h3 id="services-title">北科附工大會服務（原圖 01–28＋穿堂服務台＋工具存放區）</h3></div><span class="small-count">原圖 28 項＋2 新增</span></div>
 <p class="service-intro">此區為大會服務項目，與 29 個競賽職種分開。點選原圖紅色編號或服務清單查看詳細資訊。新增穿堂服務台位於原圖 14、16 號之間，以金色「服」呼吸燈標記。工具存放區位於第三會議室，選取時以「具」字呼吸燈參照既有 01 號圖面位置；兩者皆非室內入口實測座標。</p>
 <label class="field"><span>搜尋服務編號、名稱或位置</span><input autocomplete="off" id="serviceSearch" placeholder="搜尋：工具存放區、第三會議室、服務台、接待、停車…" type="search"/></label>
-<div class="v15-service-filters" id="serviceFilters" aria-label="常用服務"><button type="button" data-query="">全部</button><button type="button" data-query="服務台">服務台</button><button type="button" data-query="工具">工具存放</button><button type="button" data-query="會議">會議</button><button type="button" data-query="餐盒">餐盒</button><button type="button" data-query="停車">停車</button><button type="button" data-query="醫療">醫療</button></div><div class="v15-service-list-wrap" id="serviceListWrap">
+<div class="v15-service-filters" id="serviceFilters" aria-label="常用服務"><button type="button" data-query="">全部</button><button type="button" data-query="服務台">服務台</button><button type="button" data-query="工具">工具存放</button><button type="button" data-query="贈品">贈品展示</button><button type="button" data-query="會議">會議</button><button type="button" data-query="餐盒">餐盒</button><button type="button" data-query="停車">停車</button><button type="button" data-query="醫療">醫療</button></div><div class="v15-service-list-wrap" id="serviceListWrap">
   <div class="service-list" id="serviceList" aria-label="選擇大會服務定位項目"></div>
 </div>
 <div class="v15-choices-footer">
@@ -131,7 +131,7 @@
 <button class="quick-route-button" data-route="practical" type="button"><span>03 / 術科</span><strong>實作位置</strong><small id="quickPractical">—</small></button>
 </div>
 <p class="quick-route-hint" id="routeHint">點選後將切換至對應的場域導覽圖；尚未核定的教室及出入口不會自行建立精確座標。</p>
-<div class="timebar-head" id="studentTimeline"><div><span class="small-label">11/24 — 11/26</span><h4>三日競賽時間軸</h4></div><label class="audience-toggle"><input id="includeStaffEvents" type="checkbox"/> 查看完整流程（會議、休息及工作事項）</label></div>
+<div class="timebar-head" id="studentTimeline"><div><span class="small-label">11/24 — 11/26</span><h4>競賽時間軸</h4></div><label class="audience-toggle"><input id="includeStaffEvents" type="checkbox"/> 查看完整流程（會議、休息及工作事項）</label></div>
 <div aria-label="切換競賽日期" class="day-tabs" id="studentDayTabs" role="group"></div>
 <div aria-live="polite" class="day-summary" id="daySummary"></div>
 <div class="attendance-notice" hidden="" id="attendanceNotice"></div>
