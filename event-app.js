@@ -15,10 +15,15 @@ function initHeader(){
  const nav=$(`[data-nav="${page}"]`);if(nav)nav.classList.add('active');
  const menu=$('#menuButton'),mn=$('#mobileNav');if(menu){menu.addEventListener('click',()=>{const open=mn.classList.toggle('open');menu.setAttribute('aria-expanded',String(open))})}
 }
+// Competition dates are evaluated in Taiwan, independent of the visitor's device time zone.
+function competitionDay(date=new Date()){
+ const key=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit'}).format(date);
+ return key<'2026-11-24'?'24':key>'2026-11-27'?'27':key.slice(-2);
+}
 function startAgenda(){
  const A=DATA.agenda;
  const params=new URLSearchParams(location.search);
- let day=A.days.includes(params.get('day'))?params.get('day'):'24';
+ let day=A.days.includes(params.get('day'))?params.get('day'):competitionDay();
  let venue=params.get('venue')||'all';
  const venueBox=$('#agendaVenue');
  venueBox.innerHTML='<option value="all">全部場域（查看分流）</option>'+Object.entries(A.venues).map(([key,v])=>`<option value="${key}">${esc(v.name)} (${v.count} 職種)</option>`).join('');
@@ -45,7 +50,7 @@ function startAgenda(){
   $('#agendaList').innerHTML=shown.length?shown.map(ev=>{
    const hasVenue=venue!=='all'&&!ev.venues.length&&ev.who.includes('judge');
    const place=hasVenue?A.venues[venue].name+'（依該場域安排）':ev.place;
-   return `<article class="agenda-item"><time class="agenda-time">${esc(ev.time)}</time><div class="agenda-card"><div class="agenda-main"><span class="kind-chip kind-${esc(ev.kind)}">${esc(labels[ev.kind]||'活動')}</span><h3>${esc(ev.title)}</h3><div class="agenda-place">⌖ ${esc(place)}</div>${ev.detail?`<p style="margin-top:11px">${esc(ev.detail)}</p>`:''}${ev.flag?`<p class="agenda-flags">⚠ ${esc(ev.flag)}</p>`:''}<p class="source-tiny" style="font-size:10px;color:#8ba1a8;margin-top:9px">來源：大會手冊 ${esc(ev.source)}</p></div></div></article>`
+   return `<article class="agenda-item ${day==='27'&&ev.id!=='detail-c05'&&ev.id!=='27-20'?'v15-legacy-time':''}"><time class="agenda-time">${day==='27'&&ev.id!=='detail-c05'&&ev.id!=='27-20'?'<small>舊版待核</small>':''}${esc(ev.time)}</time><div class="agenda-card"><div class="agenda-main"><span class="kind-chip kind-${esc(ev.kind)}">${esc(labels[ev.kind]||'活動')}</span><h3>${esc(ev.title)}</h3><div class="agenda-place">⌖ ${esc(place)}</div>${ev.detail?`<p style="margin-top:11px">${esc(ev.detail)}</p>`:''}${ev.flag?`<p class="agenda-flags">⚠ ${esc(ev.flag)}</p>`:''}<p class="source-tiny" style="font-size:10px;color:#8ba1a8;margin-top:9px">來源：大會手冊 ${esc(ev.source)}</p></div></div></article>`
   }).join(''):'<div class="no-records">此日期與場域條件下，原始大會日程未列出活動；請改選其他場域，或參閱個別職種日程與原始 PDF。</div>';
   $('#venueCards').innerHTML=Object.entries(A.venues).map(([key,v])=>`<div><button type="button" class="venue-button ${venue===key?'active':''}" data-venue="${key}" aria-expanded="${venue===key}"><span class="venue-count">${v.count}</span><span class="venue-copy"><b>${esc(v.name)}</b><small>${esc(v.hint)}</small></span><span class="venue-expand">${venue===key?'−':'＋'}</span></button>${venue===key?`<div class="venue-details">${esc(v.skills.join('、'))}</div>`:''}</div>`).join('');
   setQuery('day',day);
@@ -53,7 +58,7 @@ function startAgenda(){
  $('#dayTabs').addEventListener('click',ev=>{const b=ev.target.closest('button[data-day]');if(!b)return;day=b.dataset.day;if(day==='27'){venue='all';venueBox.value='all';setQuery('venue','all')}dayRender()});
  venueBox.addEventListener('change',()=>{if(day==='27'){venue='all';venueBox.value='all';}else venue=venueBox.value;setQuery('venue',venue);dayRender()});
  $('#venueCards').addEventListener('click',ev=>{if(day==='27')return;const b=ev.target.closest('button[data-venue]');if(!b)return;venue=venue===b.dataset.venue?'all':b.dataset.venue;venueBox.value=venue;setQuery('venue',venue);dayRender()});
- $('#resetAgenda').addEventListener('click',()=>{day='24';venue='all';venueBox.value='all';setQuery('venue','all');dayRender()});
+ $('#resetAgenda').addEventListener('click',()=>{day=competitionDay();venue='all';venueBox.value='all';setQuery('venue','all');dayRender()});
  dayRender();
 }
 function startCeremony(){
@@ -65,7 +70,7 @@ function startCeremony(){
   const shown=filter==='all'?data:data.filter(x=>x.kind===filter || (filter==='ceremony' && x.kind==='milestone'));
   $('#ceremonyList').innerHTML=shown.map((x)=>{
    const kindMap={registration:'報到',ceremony:'典禮',performance:'表演',awarding:'頒獎',milestone:'重要節點',final:'交接'};
-   return `<article class="ceremony-row ${x.kind==='awarding'?'award':''} ${x.kind==='milestone'?'milestone':''}" role="button" tabindex="0" aria-pressed="false" aria-label="選取程序：${esc(x.time)} ${esc(x.title)}" data-ceremony="${x.id}"><time class="time">${esc(x.time)}</time><h3>${esc(x.title)}</h3><span class="kind">${esc(kindMap[x.kind])}${x.id==='c05'?' · 確定時間':' · 舊版待核'}</span></article>`;
+   return `<article class="ceremony-row ${x.kind==='awarding'?'award':''} ${x.kind==='milestone'?'milestone':''}" role="button" tabindex="0" aria-pressed="false" aria-label="選取程序：${esc(x.time)} ${esc(x.title)}" data-ceremony="${x.id}"><time class="time ${x.id==='c05'?'v15-confirmed-time':'v15-legacy-time'}">${x.id==='c05'?'':'<small>舊版待核</small>'}${esc(x.time)}</time><h3>${esc(x.title)}</h3><span class="kind">${esc(kindMap[x.kind])}${x.id==='c05'?' · 確定時間':' · 舊版待核'}</span></article>`;
   }).join('');
  }
  $('#ceremonyFilters').addEventListener('click',e=>{const b=e.target.closest('button[data-filter]');if(!b)return;filter=b.dataset.filter;render()});
