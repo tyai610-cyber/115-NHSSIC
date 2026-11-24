@@ -18,6 +18,9 @@
   <script defer src="skill-search.js"></script>
   <script defer src="individual-timeline-data.js"></script>
   <script defer src="notice-data.js"></script>
+  <script defer src="sixth/data.js"></script>
+  <script defer src="sixth/v12-map-patch.js"></script>
+  <script defer src="event-data.js"></script>
   <script defer src="portal.js"></script>
 <link rel="stylesheet" href="site-switch.css"/>
 <script defer src="site-switch.js"></script>
@@ -46,15 +49,16 @@
       <div class="v12-home-rule" aria-hidden="true"></div>
     </section>
 
+    <section class="wrap v15-today" id="v15Today" aria-label="今日與次日大會日程"></section>
     <section class="wrap portal-search portal-search-first" aria-label="職種搜尋">
       <div class="search-hero">
         <div>
-          <h2>查詢職種</h2>
-          <p>輸入職種名稱、簡稱或編號，選擇後查看報到、日程及場地。</p>
+          <h2>快速搜尋競賽資訊</h2>
+          <p>搜尋職種、服務名稱、場地、交通及典禮資訊。</p>
         </div>
         <div class="search-pane">
           <label for="quickSkillSearch">搜尋職種</label>
-          <input id="quickSkillSearch" type="search" autocomplete="off" placeholder="例如：車床、汽修、機器手臂、14">
+          <input id="quickSkillSearch" type="search" autocomplete="off" placeholder="例如：車床、服務台、工具、第三會議室">
           <div id="quickSkillResults" class="search-result" aria-live="polite"></div>
         </div>
       </div>
