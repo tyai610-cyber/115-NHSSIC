@@ -30,14 +30,16 @@ const indSkill=$('#indSkill'),indDay=$('#indDay'),indFocus=$('#indFocus');
 for(const p of D.skills){const opt=document.createElement('option');opt.value=p.id;opt.textContent=p.id+' · '+p.name+'｜'+p.venue;indSkill.append(opt);}
 const qs=new URLSearchParams(location.search);
 indSkill.value=byId[qs.get('skill')]?qs.get('skill'):'01';
-if(['all','11/24','11/25','11/26'].includes(qs.get('day')))indDay.value=qs.get('day');
+const C=window.GK_COMPETITION_DATE;
+indDay.value=C.mode(qs.get('day'));
 if(['all','important','exam','checkin','other'].includes(qs.get('focus')))indFocus.value=qs.get('focus');else indFocus.value='important';
 function render(){
- const p=byId[indSkill.value],rows=T.programs[p.id]||[],filter=indDay.value,focus=indFocus?.value||'important';
+ const p=byId[indSkill.value],rows=T.programs[p.id]||[],filter=C.resolve(indDay.value),focus=indFocus?.value||'important';
  const isFull=focus==='all';
+ const status=$('#indDateStatus');status.textContent=C.label(indDay.value)+'｜'+(filter==='all'?'11/24–11/26':filter);if(indDay.value==='auto'&&filter==='all'){const a=document.createElement('a');a.href='ceremony.html';a.textContent=' 查看頒獎典禮 ↗';status.append(a);}
  $('#indToggleFull').textContent=isFull?'收合完整流程':'展開完整流程（點名／說明／休息等）';
  $('#indToggleFull').setAttribute('aria-pressed',String(isFull));
- $('#indUnifiedLink').href='skills.html?skill='+p.id;
+ $('#indUnifiedLink').href='skills.html?skill='+p.id+(indDay.value==='auto'?'':'&day='+encodeURIComponent(indDay.value));
  const dateKeys=filter==='all'?['11/24','11/25','11/26']:[filter];
  $('#indKeyDays').innerHTML=dateKeys.map(d=>{
   const exams=rows.filter(r=>r.days.includes(d)&&['theory','practical'].includes(r.kind));
@@ -75,7 +77,7 @@ function render(){
  }
  $('#indEvents').innerHTML=html||'<p class="ind-none">此篩選條件下沒有列出活動，請切換「全部活動」。</p>';
  $('#indStat').textContent=shown+' 項活動｜'+exam+' 項學術科時段'+(unspec?'｜'+unspec+' 項僅載時長':'');
- const u=new URL(location.href);u.searchParams.set('skill',p.id);if(filter==='all')u.searchParams.delete('day');else u.searchParams.set('day',filter);if(focus==='important')u.searchParams.delete('focus');else u.searchParams.set('focus',focus);
+ const u=new URL(location.href);u.searchParams.set('skill',p.id);if(indDay.value==='auto')u.searchParams.delete('day');else u.searchParams.set('day',indDay.value);if(focus==='important')u.searchParams.delete('focus');else u.searchParams.set('focus',focus);
  try{history.replaceState(null,'',u.pathname+u.search+u.hash)}catch(e){}
  $('#indOpenLink').href=u.href;$('#indOpenLink').textContent='開啟 '+p.id+' '+p.name+' 專屬網址 ↗';
 }
@@ -108,5 +110,7 @@ if(fuzzy&&fuzzyInput&&fuzzyResults){
  document.addEventListener('click',e=>{if(!e.target.closest('.ind-search-box'))fuzzyResults.innerHTML='';});
  indSkill.addEventListener('change',()=>{fuzzyInput.value='';fuzzyResults.innerHTML='';});
 }
+window.addEventListener('popstate',()=>{const q=new URLSearchParams(location.search);if(byId[q.get('skill')])indSkill.value=q.get('skill');indDay.value=C.mode(q.get('day'));if(['all','important','exam','checkin','other'].includes(q.get('focus')))indFocus.value=q.get('focus');else indFocus.value='important';render();});
+C.watch(()=>{if(indDay.value==='auto')render();});
 render();
 })();

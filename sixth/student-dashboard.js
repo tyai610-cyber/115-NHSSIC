@@ -32,7 +32,9 @@
     return raw.length>32?raw.slice(0,30).trimEnd()+'…':raw;
   }
   const siteName = '北科附工';
-  let chosen = '01', day='2026-11-24', floor='2F';
+  const C=window.GK_COMPETITION_DATE;
+  let chosen='01', dateMode=C.mode(new URLSearchParams(location.search).get('day')), day=C.resolve(dateMode), floor='2F';
+  const resolveDay=()=>{const d=C.resolve(dateMode);return d==='all'?'all':'2026-'+d.replace('/','-');};day=resolveDay();
   const isoInfo={}; dayList.forEach(d=>isoInfo[d.iso]=d.label);
   const FLOOR_REGIONS=[{"id":"22","floor":"3F","room":"體育一乙","x":4.824,"y":11.698,"w":14.118,"h":6.729},{"id":"22","floor":"3F","room":"體育一甲","x":4.824,"y":18.53,"w":14.118,"h":6.418},{"id":"14","floor":"3F","room":"模具一","x":4.824,"y":24.948,"w":14.118,"h":6.729},{"id":"14","floor":"3F","room":"化工一乙","x":4.824,"y":31.677,"w":14.118,"h":7.143},{"id":"13","floor":"3F","room":"化工一甲","x":4.824,"y":38.923,"w":14.118,"h":6.832},{"id":"13","floor":"3F","room":"汽車一乙","x":4.824,"y":45.859,"w":14.118,"h":7.039},{"id":"11","floor":"3F","room":"汽車一甲","x":4.824,"y":52.795,"w":14.118,"h":7.039},{"id":"11","floor":"3F","room":"電子一甲","x":4.824,"y":59.938,"w":14.118,"h":9.834},{"id":"07","floor":"2F","room":"動力一","x":19.0,"y":24.948,"w":11.588,"h":6.729},{"id":"09","floor":"3F","room":"電子一乙","x":5.294,"y":69.772,"w":10.588,"h":9.731},{"id":"08","floor":"3F","room":"機械一甲","x":15.882,"y":69.772,"w":10.353,"h":9.731},{"id":"10","floor":"3F","room":"電機一甲","x":36.471,"y":69.772,"w":10.706,"h":9.731},{"id":"10","floor":"3F","room":"電機一乙","x":47.176,"y":69.772,"w":11.118,"h":9.731},{"id":"23","floor":"3F","room":"生機一甲","x":58.294,"y":69.772,"w":10.647,"h":9.731},{"id":"23","floor":"3F","room":"生機一乙","x":68.941,"y":69.772,"w":12.471,"h":9.731}];
 
@@ -55,17 +57,17 @@
   }
   function renderDays(){
     const box=$('studentDayTabs');box.replaceChildren();
-    for(const d of dayList){
+    for(const d of [{iso:'auto',label:'今日（自動）'},...dayList,{iso:'all',label:'三日全部'}]){
       const b=create('button','day-tab',d.label);
       b.type='button';b.dataset.day=d.iso;
-      b.setAttribute('aria-pressed',String(day===d.iso));
-      b.addEventListener('click',()=>{day=d.iso;renderDays();renderTimeline();});
+      b.setAttribute('aria-pressed',String(dateMode==='auto'?d.iso==='auto':day===d.iso));
+      b.addEventListener('click',()=>{dateMode=d.iso==='auto'||d.iso==='all'?d.iso:d.iso.slice(5).replace('-','/');day=resolveDay();const u=new URL(location.href);if(dateMode==='auto')u.searchParams.delete('day');else u.searchParams.set('day',dateMode);history.replaceState(history.state,'',u.href);renderDays();renderTimeline();});
       box.append(b);
     }
   }
   function studentEventsForDay(all=false){
     const events=schedule()?.events||[];
-    return events.filter(e=>(e.days||[e.date]).includes(day) && (all || (e.audience==='students'&&primaryKinds.has(e.kind))));
+    return events.filter(e=>(day==='all'||(e.days||[e.date]).includes(day)) && (all || (e.audience==='students'&&primaryKinds.has(e.kind))));
   }
   function eventCard(e){
     const row=create('article',`timeline-event event-${e.kind}`);
@@ -93,7 +95,7 @@
     const hasStaff=allDay.some(e=>e.audience!=='students');
     const types=new Set(selected.map(e=>e.kind));
     const summary=$('daySummary');summary.replaceChildren();
-    summary.append(create('strong','',`${isoInfo[day]}｜${p.id} ${p.name}`));
+    summary.append(create('strong','',`${C.label(dateMode)}｜${day==='all'?'11/24–11/26':isoInfo[day]}｜${p.id} ${p.name}`));
     summary.append(create('span','',`${selected.length} 筆活動・${types.has('theory')?'含學科':'無固定學科時段'}・${types.has('practical')?'含術科':'無固定術科時段'}`));
     const notice=$('attendanceNotice');notice.hidden=!attendance.length;
     notice.replaceChildren();
@@ -103,7 +105,8 @@
     }
     const list=$('studentEvents');list.replaceChildren();
     if(!selected.length)list.append(create('p','timeline-empty',hasStaff?'本日無額外列出的考生時段，可勾選「顯示其他會議／工作事件」查看相關事項。':'本日未列出活動，並非代表沒有其他安排；請依正式日程為準。'));
-    else selected.forEach(e=>list.append(eventCard(e)));
+    else selected.forEach(e=>{const card=eventCard(e);if(day==='all')card.prepend(create('small','event-audience',(e.days||[e.date]).map(d=>isoInfo[d]||d).join('、')));list.append(card);});
+    if(dateMode==='auto'&&day==='all'){const a=create('a','feature-link','查看頒獎典禮 ↗');a.href='../ceremony.html';summary.append(a);}
     const cautions=T.cautions[chosen]||[];
     const warn=$('scheduleCautions');warn.hidden=!cautions.length;warn.replaceChildren();
     if(cautions.length){warn.append(create('strong','','需留意的日程提醒'));const ul=create('ul');cautions.forEach(c=>ul.append(create('li','',c)));warn.append(ul);}
@@ -191,6 +194,8 @@
       render();
     });
     chosen=$('globalProgram')?.value||'01';render();
+    C.watch(()=>{if(dateMode==='auto'){day=resolveDay();renderDays();renderTimeline();}});
+    window.addEventListener('popstate',()=>{dateMode=C.mode(new URLSearchParams(location.search).get('day'));day=resolveDay();render();});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();
 })();
