@@ -150,6 +150,23 @@
     var grid = node("div", "six-switch-grid");
     entries.forEach(function (x) { grid.appendChild(link(x, "six-switch-grid-link")); });
     panel.appendChild(grid);
+    var official = node("section", "v153-switch-official");
+    official.setAttribute("aria-label", "官方相關網站");
+    official.appendChild(node("h3", "", "官方相關網站"));
+    var external = node("a", "v153-switch-link");
+    external.href = "https://sci-me.k12ea.gov.tw/Contest/ContestAnnounList";
+    external.target = "_blank";
+    external.rel = "noopener noreferrer";
+    external.setAttribute("aria-label", "工科技藝競賽平台（另開新分頁）");
+    var externalIcon = node("span", "six-switch-icon", "◎");
+    externalIcon.setAttribute("aria-hidden", "true");
+    external.appendChild(externalIcon);
+    external.appendChild(node("span", "", "工科技藝競賽平台"));
+    var externalArrow = node("span", "v153-switch-arrow", "↗");
+    externalArrow.setAttribute("aria-hidden", "true");
+    external.appendChild(externalArrow);
+    official.appendChild(external);
+    panel.appendChild(official);
     overlay.appendChild(panel);
     overlay.addEventListener("keydown", function (e) {
       if (e.key === "Escape") { e.preventDefault(); closePanel(); return; }
