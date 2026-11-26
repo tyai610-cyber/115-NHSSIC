@@ -11,7 +11,7 @@
     {id:"skills", label:"職種查詢", icon:"⌕", href:"skills.html"},
     {id:"venues", label:"試場地圖", icon:"▣", href:"venues.html"},
     {id:"agenda", label:"競賽日程", icon:"▤", href:"agenda.html"},
-    {id:"ceremony", label:"頒獎典禮", icon:"✦", href:"ceremony.html"},
+    {id:"ceremony", label:"頒獎典禮", icon:"✦", href:"ceremony.html#ceremony-live"},
     {id:"transport", label:"交通與停車", icon:"↗", href:"transport.html?route=overview"},
     {id:"walk", label:"步行與入場", icon:"↝", href:"transport.html?route=coach-walk"}
   ];
@@ -93,7 +93,7 @@
       else a.removeAttribute("aria-current");
     });
     if (trigger) {
-      var viaAll = current === "services" || current === "ceremony" || current === "transport" || current === "walk";
+      var viaAll = (current === "services" || current === "ceremony" || current === "transport" || current === "walk") && !bottom.querySelector("[data-six-short=\""+current+"\"]");
       trigger.classList.toggle("is-current", viaAll);
       trigger.setAttribute("aria-label", viaAll ? "全部功能，目前位於" + (entries.find(function (x) {return x.id === current;}) || {}).label : "展開七個主要功能");
     }
@@ -183,7 +183,7 @@
     bottom.replaceChildren(
       shortLink("home", "首頁", "⌂", "index.html"),
       shortLink("skills", "職種", "⌕", "skills.html"),
-      shortLink("venues", "場域", "▣", "venues.html"),
+      (new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Taipei",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date())==="2026-11-27" ? shortLink("ceremony", "典禮", "✦", "ceremony.html#ceremony-live") : shortLink("venues", "場域", "▣", "venues.html")),
       shortLink("agenda", "日程", "▤", "agenda.html")
     );
     trigger = node("button", "six-switch-all", "");
